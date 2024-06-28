@@ -1,4 +1,10 @@
-## TestDPC as Device Owner
+## DPC Permissions tests
+
+The tool is for checking android's dpc related permission which has 'MANAGE_DEVICE_POLICY_' prefixes.
+These permissions are related to DPC app, so this test apk is working as a Device policy controller.
+
+ - Run automate-install.sh to install an apk file into the connected device.
+ - And then you can execute the test cases in project.
 
 ### Device Owner
 ```console
@@ -22,11 +28,9 @@ adb shell cmd role set-bypassing-role-qualification true
 adb shell cmd role add-role-holder android.app.role.DEVICE_POLICY_MANAGEMENT com.android.certification.niap.permission.dpctester
 ```
 
-
-
 ## TestDPC as DM role holder
 
-TestDPC v9.0.5+ can be setup as Device Management Role Holder.
+Can be setup as Device Management Role Holder.
 
 *   Running the following `adb` commands:
 
