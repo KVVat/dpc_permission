@@ -16,6 +16,7 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_FUN
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCALE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCATION
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK
@@ -38,21 +39,32 @@ import android.content.Context
 import android.os.UserManager
 import androidx.annotation.RequiresApi
 import androidx.core.util.Consumer
+import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
 
 
 @PermissionTestModule("DPC Test Cases")
-class DPCTestModule(ctx: Context):PermissionTestModuleBase(ctx){
+class DPCTestModule(val ctx: Context):PermissionTestModuleBase(ctx){
     override var TAG: String = DPCTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
-
+    val pm  =ctx.packageManager
+    val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
     override fun start(callback: Consumer<PermissionTestRunner.Result>?) {
         PermissionTestRunner.getInstance().start(this) { result ->
+            //If the app priviledge is the active admin level and found no corresponding
+            //permission in the package manager, the behvaiour is intended
+            if(pm.checkPermission(ctx.packageName,result.source.permission)
+                == android.content.pm.PackageManager.PERMISSION_DENIED
+                && result.success==false
+                && dpsLevel == DeviceOwnerLevel.DPS_ACTIVE_ADMIN_APP
+                ){
+                logger.system(
+                    "Package Manager does not recognize the permission `${result.source.permission}`.")
+            }
             //we can evaluate the results here
             callback?.accept(result)
         }
     }
-
 
     @PermissionTest(MANAGE_DEVICE_POLICY_CERTIFICATES,34,35)
     fun testCertificates() {
@@ -67,14 +79,8 @@ class DPCTestModule(ctx: Context):PermissionTestModuleBase(ctx){
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_APPS_CONTROL,34,35)
     fun testAppsControl() {
-        // read below code carfulle
-        //checkCanExecuteOrThrowUnsafe(
-        //                DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES?
-        //depend or DevicePolicySafetyCheker also
         dpm.setUserControlDisabledPackages(listOf("com.package","com.package2"),{},{})
-        //checkUserRestriction("no_apps_control")
     }
-
 
     @PermissionTest(MANAGE_DEVICE_POLICY_CAMERA,34)
     fun testCamera() {
@@ -187,6 +193,7 @@ class DPCTestModule(ctx: Context):PermissionTestModuleBase(ctx){
     fun testWindows(){
         checkUserRestriction(UserManager.DISALLOW_CREATE_WINDOWS);
     }
+
     //For Android 15
     //UserManger + DevicePolicyService related Permissions
     @RequiresApi(35)
@@ -210,33 +217,37 @@ class DPCTestModule(ctx: Context):PermissionTestModuleBase(ctx){
         dpm.setUninstallBlocked(
             "test.package.name",false,{},{e->throw e})
     }
-    /*
-    @PermissionTest(MANAGE_DEVICE_POLICY_AUDIT_LOGGING,35)
-    fun testAuditLogginb(){
-        dpm.setUninstallBlocked(
-            "test.package.name",false,{},{e->throw e})
-    }*/
+
     @PermissionTest(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,35)
     fun testContentProtectionPolicy(){
         val flag = 1 shl 7 //See enterprisepolicy.java
         dpm.setContentProtectionPolicy(flag)
     }
 
+    @PermissionTest(MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,35)
+    fun testManagedSubscriptions(){
+        dpm.getSubscriptionIds()
+    }
+
     @PermissionTest("MANAGE_DEVICE_POLICY_STORAGE_LIMIT",35)
     fun testStorageLimit(){
         dpm.forceSetMaxPolicyStorageLimit(10000000);
-       //dpm.setContentProtectionPolicy(
-       //     "test.package.name",false,{},{e->throw e})
 
     }
-
+    @PermissionTest("QUERY_DEVICE_STOLEN_STATE",35)
+    fun testQueryDeviceStolenState(){
+        dpm.isDevicePotentiallyStolen()
+    }
+    @PermissionTest("MANAGE_DEVICE_POLICY_AUDIT_LOGGING",35)
+    fun testAuditLogEnabled(){
+        dpm.setAuditLogEnabled(false)
+    }
 
     /* ?
     @PermissionTest(MANAGE_DEVICE_POLICY_THREAD_NETWORK,35)
     fun testThreadNetwork(){
         checkUserRestriction(UserManager.DISALLOW_THREAD_NETWORK);
     }*/
-
 
     private fun clearUserRestriction(aRestriction:String){
         //Make sure to always set testing value as false

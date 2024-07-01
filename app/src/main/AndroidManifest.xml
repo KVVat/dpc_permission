@@ -8,6 +8,7 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -162,5 +163,6 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL"/>
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT"/>
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"/>
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS"/>
 
 </manifest>

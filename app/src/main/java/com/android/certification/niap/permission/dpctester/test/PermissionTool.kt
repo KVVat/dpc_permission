@@ -3,9 +3,28 @@ package com.android.certification.niap.permission.dpctester.test
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.util.Log
+import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway
+import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 
 class PermissionTool {
     companion object {
+
+        fun getDeviceOwnerLevel(dpm:DevicePolicyManagerGateway): DeviceOwnerLevel {
+            if(dpm.isDeviceOwnerApp){
+                return DeviceOwnerLevel.DPS_DEVICE_OWNER_APP
+            }
+            if(dpm.isProfileOwnerApp){
+                return DeviceOwnerLevel.DPS_PROFILE_OWNER_APP
+            }
+            if(dpm.isAdminActive){
+                return DeviceOwnerLevel.DPS_ACTIVE_ADMIN_APP
+            } else {
+                return DeviceOwnerLevel.DPS_DISABLED
+            }
+        }
+
+
         fun getGrantedPermissions(ctx: Context, appPackage: String?): List<String>
         {
             val granted: MutableList<String> = ArrayList()

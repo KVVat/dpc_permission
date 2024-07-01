@@ -25,6 +25,7 @@ class ReflectionTool {
                 return method.invoke(targetObject, *parameters)
             } catch (e: ReflectiveOperationException) {
                 Log.e("TAG", "Reflection failed.")
+                e.printStackTrace()
                 val cause = e.cause
                 if (cause is SecurityException) {
                     throw (cause as SecurityException?)!!

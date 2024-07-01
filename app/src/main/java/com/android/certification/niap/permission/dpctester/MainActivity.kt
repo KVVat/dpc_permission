@@ -26,6 +26,7 @@ import com.android.certification.niap.permission.dpctester.test.log.ActivityLogg
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
 
         val modules: List<PermissionTestModuleBase>
             = listOf(DPCTestModule(this), DPCHealthTestModule(this));
-
+        var success = AtomicInteger(0)
         modules.forEach { module->
             val testButton = Button(this)
             testButton.setText("${module.title}")
@@ -77,13 +78,20 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 mStatusData.clear()
                 mStatusListView?.adapter = null
                 setLogAdapter()
-                //notifyUpdate()
+                success.set(0);
                 val testModule = module
                 testModule.start { result ->
                     log.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
-                    if(result.throwable != null){
-                        result.throwable.message?.let { log.system(it) }
+                    if(result.success){
+                        success.incrementAndGet()
                     }
+                    if(result.finished>=result.testSize){
+                        //Finished
+                        log.system("Finished ${success.get()}/${result.testSize} passed the test")
+                    }
+                    /*if(result.throwable != null){
+                        result.throwable.message?.let { log.system(it) }
+                    }*/
                 };
             }
             binding.mainLayout.addView(testButton)

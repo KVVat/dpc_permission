@@ -46,22 +46,19 @@ class PermissionTestRunner {
                     } else {
                         throwable = ex.cause
                     }
-
                     success=false
                 } catch(ex:SecurityException){
                     throwable = ex
                     success= false
-
                 } catch (ex:Exception){
-
                     ex.printStackTrace()
                     throwable = ex
                     success = false
-                    //Log.i(TAG,"Some other exception is happening");
                 }
                 //safe call
-                callback?.accept(Result(success,throwable,testCase))
+
                 finished++
+                callback?.accept(Result(success,throwable,testCase,finished,testSize))
                 if(finished>=testSize){
                     running = false
                 }
@@ -70,12 +67,14 @@ class PermissionTestRunner {
         }
     }
 
-    data class Result(val success:Boolean,val throwable:Throwable? = null,val source:Data)
+    data class Result(var success:Boolean,val throwable:Throwable? = null,val source:Data,val finished: Int,
+                      val testSize: Int)
     data class Data(
         var permission: String,
         val sdkMin: Int,
         val sdkMax: Int,
         val methodName: String,
+
     ){
         init {
             if(!permission.contains(".")){

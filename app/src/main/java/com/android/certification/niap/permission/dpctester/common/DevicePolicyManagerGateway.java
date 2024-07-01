@@ -44,7 +44,29 @@ public interface DevicePolicyManagerGateway {
     /** See {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp(String)}. */
     boolean isProfileOwnerApp();
 
+    Set<Integer> getSubscriptionIds();
+
+    void isDevicePotentiallyStolen();
+
+    void isAuditLogEnabled();
+
+    void setAuditLogEnabled(boolean flag);
+
+    enum DeviceOwnerLevel {
+        DPS_DISABLED(0),
+        DPS_ACTIVE_ADMIN_APP(1),
+        DPS_PROFILE_OWNER_APP(2),
+        DPS_DEVICE_OWNER_APP(3);
+        DeviceOwnerLevel(int value_){
+            this.value = value_;
+        }
+        private final int value;
+    }
+
     // TODO(b/171350084): use in other places
+
+    boolean isAdminActive();
+
     /**
      * See {@link
      * android.app.admin.DevicePolicyManager#isOrganizationOwnedDeviceWithManagedProfile()}.

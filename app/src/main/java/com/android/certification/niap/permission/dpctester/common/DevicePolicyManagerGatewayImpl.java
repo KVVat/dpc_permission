@@ -100,6 +100,7 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         return mDevicePolicyManager.isProfileOwnerApp(mAdminComponentName.getPackageName());
     }
 
+
     @Override
     public boolean isDeviceOwnerApp() {
         if (mAdminComponentName == null) {
@@ -107,6 +108,13 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         }
 
         return mDevicePolicyManager.isDeviceOwnerApp(mAdminComponentName.getPackageName());
+    }
+    @Override
+    public boolean isAdminActive(){
+        if(mAdminComponentName == null){
+            return false;
+        }
+        return mDevicePolicyManager.isAdminActive(mAdminComponentName);
     }
 
     @Override
@@ -1316,17 +1324,58 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         Log.d(TAG, "forceSetMaxPolicyStorageLimit(): " +storageLimit);
         if (Build.VERSION.SDK_INT >= 35) {
 
-            //forceSetMaxPolicyStorageLimit( int)
-            //Log.d(TAG,
-            //ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"force").toString());
             ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
                     "forceSetMaxPolicyStorageLimit",mDevicePolicyManager,
                     new Class[]{int.class},storageLimit);
-            //DevicePolicyManager.sto
-            //        //isDevisetAuditsetContentProtectionPolicy(mAdminComponentName,policy);
+            //mDevicePolicyManager.au
+            //mDevicePolicyManager.isD
         }
     }
 
+
+    @Override
+    public Set<Integer> getSubscriptionIds(){
+        if (Build.VERSION.SDK_INT >= 35) {
+            return mDevicePolicyManager.getSubscriptionIds();
+        } else {
+            return null;
+        }
+    }
+    @Override
+    public void isDevicePotentiallyStolen(){
+        //Flags.devicePolicySizeTrackingInternalBugFixEnabled()
+        Log.d(TAG, "isDevicePotentiallyStolen()");
+        if (Build.VERSION.SDK_INT >= 35) {
+            //Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"is").toString());
+            ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
+                    "isDevicePotentiallyStolen",mDevicePolicyManager,
+                    new Class[]{});
+        }
+    }
+    @Override
+    public void isAuditLogEnabled(){
+        //Flags.devicePolicySizeTrackingInternalBugFixEnabled()
+        Log.d(TAG, "isAuditLogEnabled()");
+        if (Build.VERSION.SDK_INT >= 35) {
+            Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"set").toString());
+            ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
+                    "isAuditLogEnabled",mDevicePolicyManager,
+                    new Class[]{});
+        }
+    }
+
+    @Override
+    public void setAuditLogEnabled(boolean flag){
+        //Flags.devicePolicySizeTrackingInternalBugFixEnabled()
+        Log.d(TAG, "setAuditLogEnabled()");
+        if (Build.VERSION.SDK_INT >= 35) {
+            //Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"is").toString());
+            ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
+                    "setAuditLogEnabled",mDevicePolicyManager,
+                    new Class[]{boolean.class},flag);
+        }
+    }
+    //isAuditLogEnabled()
 
     @Override
     public String toString() {
