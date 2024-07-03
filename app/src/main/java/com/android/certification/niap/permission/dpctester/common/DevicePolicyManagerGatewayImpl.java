@@ -2,8 +2,11 @@ package com.android.certification.niap.permission.dpctester.common;
 import static com.android.certification.niap.permission.dpctester.common.Util.isAtLeastT;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.NetworkEvent;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.SystemUpdateInfo;
+import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +27,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.certification.niap.permission.dpctester.receiver.DeviceAdminReceiver;
-import com.android.certification.niap.permission.dpctester.test.ReflectionTool;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.google.common.base.Joiner; //Guava?
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1375,7 +1378,104 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
                     new Class[]{boolean.class},flag);
         }
     }
-    //isAuditLogEnabled()
+
+    @Override
+    public void setAccountManagementDisabled(boolean flag,String accountType){
+        Log.d(TAG, "setAccountManagementDisabled()");
+        getDevicePolicyManager().setAccountManagementDisabled(getAdmin(),accountType,flag);
+    }
+
+    @Override
+    public void setCommonCriteriaModeEnabled(boolean flag){
+        Log.d(TAG, "setCommonCriteriaModeEnabled()");
+        getDevicePolicyManager().setCommonCriteriaModeEnabled(getAdmin(),false);
+    }
+
+    @Override
+    public void setDefaultSmsApplication(String packageName){
+        Log.d(TAG, "setDefaultSmsApplication()");
+        getDevicePolicyManager().setDefaultSmsApplication(getAdmin(),packageName);
+    }
+
+    @Override
+    public void setFactoryResetProtectionPolicy(FactoryResetProtectionPolicy policy){
+        Log.d(TAG, "setFactoryResetProtectionPolicy()");
+        getDevicePolicyManager().setFactoryResetProtectionPolicy(getAdmin(),policy);
+    }
+
+    @Override
+    public void setMaximumTimeToLock(long timeMs)
+    {
+        Log.d(TAG, "setMaximumTimeToLock()");
+        getDevicePolicyManager().setMaximumTimeToLock(getAdmin(),timeMs);
+    }
+    @Override
+    public void setPasswordExpirationTimeOut(long time)
+    {
+        Log.d(TAG, "setPasswordExpirationTimeOut()");
+        getDevicePolicyManager().setPasswordExpirationTimeout(getAdmin(),time);
+    }
+    @Override
+    public void setMtePolicy(int policy)
+    {
+        Log.d(TAG, "setMtePolicy()");
+        getDevicePolicyManager().setMtePolicy(policy);
+    }
+    @Override
+    public void addCrossProfileWidgetProvider(String packageName)
+    {
+        Log.d(TAG, "addCrossProfileWidgetProvider()");
+        getDevicePolicyManager().addCrossProfileWidgetProvider(getAdmin(),packageName);
+    }
+
+    @Override
+    public void setScreenCaptureDisabled(boolean disabled){
+        Log.d(TAG, "setScreenCaptureDisabled()");
+        getDevicePolicyManager().setScreenCaptureDisabled(getAdmin(),disabled);
+    }
+    @Override
+    public void setShortSupportMessage(String message){
+        Log.d(TAG, "setShortSupportMessage()");
+        getDevicePolicyManager().setShortSupportMessage(getAdmin(),message);
+    }
+    @Override
+    public void setSystemUpdatePolicy(SystemUpdatePolicy policy){
+        Log.d(TAG, "setSystemUpdatePolicy()");
+        getDevicePolicyManager().setSystemUpdatePolicy(getAdmin(),policy);
+    }
+    //hasLockDownAdminConfigureNetworks
+    @Override
+    public boolean hasLockDownAdminConfigureNetworks(){
+        Log.d(TAG, "hasLockDownAdminConfigureNetworks()");
+        return getDevicePolicyManager().hasLockdownAdminConfiguredNetworks(getAdmin());
+    }
+    @Override
+    public SystemUpdateInfo getPendingSystemUpdate(){
+        Log.d(TAG, "getPendingSystemUpdate()");
+        return getDevicePolicyManager().getPendingSystemUpdate(getAdmin());
+    }
+    @Override
+    public void setApplicationExemptions(String packageName, Set<Integer> exemptionSet){
+        Log.d(TAG, "setApplicationExemptions()");
+        ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
+                "setApplicationExemptions",mDevicePolicyManager,
+                new Class[]{String.class,Set.class},"com.android.settings",exemptionSet);
+    }
+    @Override
+    public void setResetPasswordToken(byte[] token){
+        Log.d(TAG, "setResetPasswordToken()");
+        //setResetPasswordToken( android.content.ComponentName byte[])
+        //Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"setRe").toString());
+        //installCaCert( android.content.ComponentName byte[]),
+        //Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"install").toString());
+        ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
+                "setResetPasswordToken",mDevicePolicyManager,
+                new Class[]{ComponentName.class,byte[].class},getAdmin(),token);
+    }
+    @Override
+    public String getEnrollmentSpecifiedId(){
+        return getDevicePolicyManager().getEnrollmentSpecificId();
+    }
 
     @Override
     public String toString() {

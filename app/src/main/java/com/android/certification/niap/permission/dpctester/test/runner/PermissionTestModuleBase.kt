@@ -1,9 +1,11 @@
-package com.android.certification.niap.permission.dpctester.test
+package com.android.certification.niap.permission.dpctester.test.runner
 
 import android.content.Context
 import androidx.core.util.Consumer
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
 
 //Base class for test cases
 open class PermissionTestModuleBase(ctx: Context) {

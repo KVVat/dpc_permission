@@ -1,7 +1,8 @@
-package com.android.certification.niap.permission.dpctester.test
+package com.android.certification.niap.permission.dpctester.test.runner
 
 import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
 import java.lang.reflect.InvocationTargetException
 
 class PermissionTestRunner {
@@ -58,8 +59,8 @@ class PermissionTestRunner {
                 //safe call
 
                 finished++
-                callback?.accept(Result(success,throwable,testCase,finished,testSize))
-                if(finished>=testSize){
+                callback?.accept(Result(success,throwable,testCase, finished,testSize))
+                if(finished >=testSize){
                     running = false
                 }
             }
@@ -67,7 +68,7 @@ class PermissionTestRunner {
         }
     }
 
-    data class Result(var success:Boolean,val throwable:Throwable? = null,val source:Data,val finished: Int,
+    data class Result(var success:Boolean, val throwable:Throwable? = null, val source: Data, val finished: Int,
                       val testSize: Int)
     data class Data(
         var permission: String,

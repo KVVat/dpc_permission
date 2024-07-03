@@ -1,9 +1,8 @@
-package com.android.certification.niap.permission.dpctester.test
+package com.android.certification.niap.permission.dpctester.test.tool
 
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 

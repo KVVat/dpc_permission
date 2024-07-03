@@ -1,4 +1,4 @@
-package com.android.certification.niap.permission.dpctester.test
+package com.android.certification.niap.permission.dpctester.test.tool
 
 annotation class PermissionTestSuite(
     val name:String="title"

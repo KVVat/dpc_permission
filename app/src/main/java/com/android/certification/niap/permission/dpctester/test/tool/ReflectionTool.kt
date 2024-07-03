@@ -1,6 +1,7 @@
-package com.android.certification.niap.permission.dpctester.test
+package com.android.certification.niap.permission.dpctester.test.tool
 
 import android.util.Log
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
 import java.util.stream.Collectors
 
 class ReflectionTool {

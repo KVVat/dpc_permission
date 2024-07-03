@@ -1,6 +1,8 @@
 [versions]
 agp = "8.5.0-alpha08"
+groovyJson = "3.0.17"
 guava = "32.1.2-jre"
+guavaVersion = "24.1-jre"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -18,7 +20,9 @@ preference = "1.2.1"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-preference = { module = "androidx.preference:preference", version.ref = "preference" }
+groovy-json = { module = "org.codehaus.groovy:groovy-json", version.ref = "groovyJson" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
+guava-v241jre = { module = "com.google.guava:guava", version.ref = "guavaVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

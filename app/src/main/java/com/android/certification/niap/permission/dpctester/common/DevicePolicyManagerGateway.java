@@ -2,8 +2,11 @@ package com.android.certification.niap.permission.dpctester.common;
 
 
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.NetworkEvent;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.SystemUpdateInfo;
+import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -48,9 +51,43 @@ public interface DevicePolicyManagerGateway {
 
     void isDevicePotentiallyStolen();
 
+
     void isAuditLogEnabled();
 
     void setAuditLogEnabled(boolean flag);
+
+    void setAccountManagementDisabled(boolean flag,String accountType);
+
+    void setCommonCriteriaModeEnabled(boolean flag);
+
+    void setDefaultSmsApplication(String packageName);
+
+    void setFactoryResetProtectionPolicy(FactoryResetProtectionPolicy policy);
+
+    void setMaximumTimeToLock(long timeMs);
+
+    void setPasswordExpirationTimeOut(long time);
+
+    void setMtePolicy(int policy);
+
+    void addCrossProfileWidgetProvider(String packageName);
+
+    void setScreenCaptureDisabled(boolean disabled);
+
+    void setShortSupportMessage(String message);
+
+    void setSystemUpdatePolicy(SystemUpdatePolicy policy);
+
+    //hasLockDownAdminConfigureNetworks
+    boolean hasLockDownAdminConfigureNetworks();
+
+    SystemUpdateInfo getPendingSystemUpdate();
+
+    void setApplicationExemptions(String packageName, Set<Integer> exemptionSet);
+
+    void setResetPasswordToken(byte[] token);
+
+    String getEnrollmentSpecifiedId();
 
     enum DeviceOwnerLevel {
         DPS_DISABLED(0),

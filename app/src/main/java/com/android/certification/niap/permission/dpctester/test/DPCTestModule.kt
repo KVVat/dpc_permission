@@ -1,54 +1,110 @@
 package com.android.certification.niap.permission.dpctester.test
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCESSIBILITY
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_USER_DATA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_AUTOFILL
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_BACKUP_SERVICE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_BLUETOOTH
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_BUGREPORT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CALLS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA_TOGGLE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_DISPLAY
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_FUN
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_KEYGUARD
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCALE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCATION
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_METERED_DATA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_NETWORK_LOGGING
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_OVERRIDE_APN
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PRINTING
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_PRIVATE_DNS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROXY
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CONTENT
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SETTINGS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SMS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_APPS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_USERS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WINDOWS
+import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA
+import android.app.admin.DevicePolicyManager
+import android.app.admin.FactoryResetProtectionPolicy
+import android.app.admin.SystemUpdatePolicy
 import android.content.Context
+import android.os.Bundle
 import android.os.UserManager
-import androidx.annotation.RequiresApi
 import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
 
 
 @PermissionTestModule("DPC Test Cases")
-class DPCTestModule(val ctx: Context):PermissionTestModuleBase(ctx){
+class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     override var TAG: String = DPCTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
     val pm  =ctx.packageManager
     val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
+
+    /**
+     * Override and describe the routine which dependent on the module after each test
+     */
     override fun start(callback: Consumer<PermissionTestRunner.Result>?) {
         PermissionTestRunner.getInstance().start(this) { result ->
             //If the app priviledge is the active admin level and found no corresponding
@@ -65,7 +121,240 @@ class DPCTestModule(val ctx: Context):PermissionTestModuleBase(ctx){
             callback?.accept(result)
         }
     }
+    //Permission Test Cases for SDK34
 
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_ACCESSIBILITY,34,35)
+    fun testAccessibility(){
+        println("The test for MANAGE_DEVICE_POLICY_ACCESSIBILITY is not implemented yet")
+
+        //val permission = PermissionTool.getCurrentPermission(javaClass.enclosingMethod!!.name)
+        //throw YetImplementedException();
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,34,35)
+    fun testAccountManagement(){
+        dpm.setAccountManagementDisabled(false,"accountName")
+    }
+    /* ACROSS_USERS Permissions
+    @PermissionTest(MANAGE_DEVICE_POLICY_ACROSS_USERS,34,35)
+    fun testAcrossUsers(){
+        println("The test for MANAGE_DEVICE_POLICY_ACROSS_USERS is not implemented yet")
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL,34,35)
+    fun testAcrossUsersFull(){
+        println("The test for MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL is not implemented yet")
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,34,35)
+    fun testAcrossUsersSecurityCritical(){
+        println("The test for MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL is not implemented yet")
+    }
+     */
+    @PermissionTest(MANAGE_DEVICE_POLICY_AIRPLANE_MODE,34,35)
+    fun testAirplaneMode(){
+        //println("The test for MANAGE_DEVICE_POLICY_AIRPLANE_MODE is not implemented yet")
+        checkUserRestriction(UserManager.DISALLOW_AIRPLANE_MODE)
+    }
+    @PermissionTest("MANAGE_DEVICE_POLICY_APP_EXEMPTIONS",34,35)
+    fun testAppExemptions(){
+        //println("The test for MANAGE_DEVICE_POLICY_APP_EXEMPTIONS is not implemented yet")
+        dpm.setApplicationExemptions(ctx.packageName, setOf(0))
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,34,35)
+    fun testAppRestrictions(){
+        dpm.setApplicationRestrictions(ctx.packageName, Bundle.EMPTY,{},{e->throw e})
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_APP_USER_DATA,34,35)
+    fun testAppUserData(){
+        println("The test for MANAGE_DEVICE_POLICY_APP_USER_DATA is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_AUTOFILL,34,35)
+    fun testAutofill(){
+        checkUserRestriction(UserManager.DISALLOW_AUTOFILL)
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_BACKUP_SERVICE,34,35)
+    fun testBackupService(){
+        println("The test for MANAGE_DEVICE_POLICY_BACKUP_SERVICE is not implemented yet")
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_BUGREPORT,34,35)
+    fun testBugreport(){
+        println("The test for MANAGE_DEVICE_POLICY_BUGREPORT is not implemented yet")
+    }*/
+
+    @PermissionTest(MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,34,35)
+    fun testCommonCriteriaMode(){
+        dpm.setCommonCriteriaModeEnabled(true)
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_DEFAULT_SMS,34,35)
+    fun testDefaultSms(){
+        dpm.setDefaultSmsApplication("sms.packagename")
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS,34,35)
+    fun testDeviceIdentifiers(){
+        println("The test for MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS is not implemented yet")
+    }*/
+
+    @PermissionTest(MANAGE_DEVICE_POLICY_FACTORY_RESET,34,35)
+    fun testFactoryReset(){
+        dpm.setFactoryResetProtectionPolicy(
+            FactoryResetProtectionPolicy.Builder().setFactoryResetProtectionEnabled(false).build())
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_INPUT_METHODS,34,35)
+    fun testInputMethods(){
+        dpm.setPermittedInputMethods(mutableListOf("com.package","com.package2"),{},{ e->throw e})
+        //println("The test for MANAGE_DEVICE_POLICY_INPUT_METHODS is not implemented yet")
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES,34,35)
+    fun testKeepUninstalledPackages(){
+        println("The test for MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_KEYGUARD,34,35)
+    fun testKeyguard(){
+        println("The test for MANAGE_DEVICE_POLICY_KEYGUARD is not implemented yet")
+        /*
+        Object CONFIG = stubHiddenObject("android.os.PersistableBundle");
+        if(CONFIG != null) {
+            ComponentName TRUST_AGENT_COMPONENT =
+                    new ComponentName("com.trustagent", "com.trustagent.xxx");
+            mTransacts.invokeTransact(
+                    Transacts.DEVICE_POLICY_SERVICE,
+                    Transacts.DEVICE_POLICY_DESCRIPTOR,
+                    Transacts.setTrustAgentConfiguration,
+                    ADMIN_COMPONENT, PACKAGE_NAME, TRUST_AGENT_COMPONENT,
+                    CONFIG, true
+            );
+        } else {
+            throw new IllegalArgumentException("failed to create a PersistableBundle");
+        }*/
+
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
+    fun testLock(){
+        dpm.setMaximumTimeToLock(1000*30)
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,34,35)
+    fun testLockCredentials(){
+        dpm.setPasswordExpirationTimeOut(30)
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_LOCK_TASK,34,35)
+    fun testLockTask(){
+        dpm.setLockTaskPackages(arrayOf("com.package","com.package2"),{},{e->throw e});
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_METERED_DATA,34,35)
+    fun testMeteredData(){
+        println("The test for MANAGE_DEVICE_POLICY_METERED_DATA is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_MTE,34,35)
+    fun testMte(){
+        dpm.setMtePolicy(DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY)
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_NETWORK_LOGGING,34,35)
+    fun testNetworkLogging(){
+        println("The test for MANAGE_DEVICE_POLICY_NETWORK_LOGGING is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,34,35)
+    fun testOrganizationIdentity(){
+        dpm.setOrganizationName("Tesetrs' Organization Name",{},{ e-> throw e})
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_OVERRIDE_APN,34,35)
+    fun testOverrideApn(){
+        println("The test for MANAGE_DEVICE_POLICY_OVERRIDE_APN is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_PACKAGE_STATE,34,35)
+    fun testPackageState(){
+        dpm.isPackageSuspended("com.google.android.youtube")
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_PRIVATE_DNS,34,35)
+    fun testPrivateDns(){
+        println("The test for MANAGE_DEVICE_POLICY_PRIVATE_DNS is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_PROFILE_INTERACTION,34,35)
+    fun testProfileInteraction(){
+        dpm.addCrossProfileWidgetProvider("com.packagename")
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_PROXY,34,35)
+    fun testProxy(){
+        println("The test for MANAGE_DEVICE_POLICY_PROXY is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES,34,35)
+    fun testQuerySystemUpdates(){
+        //Check Flags.permissionMigrationForZeroTrustImplEnabled())
+        dpm.getPendingSystemUpdate()
+
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_RESET_PASSWORD,34,35)
+    fun testResetPassword(){
+        //byte array describes 'password'x4.
+        dpm.setResetPasswordToken(byteArrayOf(
+            0x70,0x61,0x73,0x73,0x77,0x6f,0x72,0x64,
+            0x70,0x61,0x73,0x73,0x77,0x6f,0x72,0x64,
+            0x70,0x61,0x73,0x73,0x77,0x6f,0x72,0x64,
+            0x70,0x61,0x73,0x73,0x77,0x6f,0x72,0x64));
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,34,35)
+    fun testRuntimePermissions(){
+        dpm.setPermissionGrantState("com.package",ACCESS_FINE_LOCATION,
+            DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,{},{e->throw e})
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_SCREEN_CAPTURE,34,35)
+    fun testScreenCapture(){
+        dpm.setScreenCaptureDisabled(false)
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_SECURITY_LOGGING,34,35)
+    fun testSecurityLogging(){
+        dpm.setSecurityLoggingEnabled(false,{},{e->throw e})
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_SETTINGS,34,35)
+    fun testSettings(){
+        println("The test for MANAGE_DEVICE_POLICY_SETTINGS is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_SMS,34,35)
+    fun testSms(){
+        checkUserRestriction(UserManager.DISALLOW_SMS);
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_STATUS_BAR,34,35)
+    fun testStatusBar(){
+        dpm.setStatusBarDisabled(false,{},{throw it})
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,34,35)
+    fun testSupportMessage(){
+        dpm.setShortSupportMessage("Hello Short Support Message!")
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS,34,35)
+    fun testSuspendPersonalApps(){
+        println("The test for MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS is not implemented yet")
+    }*/
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_SYSTEM_APPS,34,35)
+    fun testSystemApps(){
+        println("The test for MANAGE_DEVICE_POLICY_SYSTEM_APPS is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_SYSTEM_UPDATES,34,35)
+    fun testSystemUpdates(){
+        dpm.setSystemUpdatePolicy(SystemUpdatePolicy.createAutomaticInstallPolicy())
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,34,35)
+    fun testUsbDataSignalling(){
+        dpm.setUsbDataSignalingEnabled(true,{},{throw it})
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER,34,35)
+    fun testUsbFileTransfer(){
+        //println("The test for MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER is not implemented yet")
+        checkUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER);
+    }
+    /*@PermissionTest(MANAGE_DEVICE_POLICY_USERS,34,35)
+    fun testUsers(){
+        println("The test for MANAGE_DEVICE_POLICY_USERS is not implemented yet")
+    }*/
+    @PermissionTest(MANAGE_DEVICE_POLICY_VPN,34,35)
+    fun testVpn(){
+        checkUserRestriction(UserManager.DISALLOW_CONFIG_VPN);
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_WIFI,34,35)
+    fun testWifi(){
+        dpm.hasLockDownAdminConfigureNetworks()
+    }
+    @PermissionTest(MANAGE_DEVICE_POLICY_WIPE_DATA,34,35)
+    fun testWipeData(){
+        dpm.setMaximumFailedPasswordsForWipe(3000,{},{e->throw e})
+    }
     @PermissionTest(MANAGE_DEVICE_POLICY_CERTIFICATES,34,35)
     fun testCertificates() {
         //it is require to call from transaction and flag should be enabled
@@ -74,9 +363,11 @@ class DPCTestModule(val ctx: Context):PermissionTestModuleBase(ctx){
         //                PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG,
         //                DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);
 
-        //dpm.installCertificate(null)
-
+        //Flags.permissionMigrationForZeroTrustImplEnabled<=prerequist
+        dpm.getEnrollmentSpecifiedId()
+        //dpm.installKeyValuePair(null)?
     }
+    //
     @PermissionTest(MANAGE_DEVICE_POLICY_APPS_CONTROL,34,35)
     fun testAppsControl() {
         dpm.setUserControlDisabledPackages(listOf("com.package","com.package2"),{},{})
@@ -194,41 +485,37 @@ class DPCTestModule(val ctx: Context):PermissionTestModuleBase(ctx){
         checkUserRestriction(UserManager.DISALLOW_CREATE_WINDOWS);
     }
 
-    //For Android 15
+    //The test cases For Android 15
+
     //UserManger + DevicePolicyService related Permissions
-    @RequiresApi(35)
     @PermissionTest(MANAGE_DEVICE_POLICY_CAMERA_TOGGLE,35)
     fun testCameraToggle(){
         checkUserRestriction(UserManager.DISALLOW_CAMERA_TOGGLE);
     }
-    @RequiresApi(35)
     @PermissionTest(MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE,35)
     fun testMicrophoneToggle(){
         checkUserRestriction(UserManager.DISALLOW_MICROPHONE_TOGGLE);
     }
-    @RequiresApi(35)
     @PermissionTest(MANAGE_DEVICE_POLICY_ASSIST_CONTENT,35)
     fun testAssistContent(){
         //Also blocked by system flag?
         checkUserRestriction(UserManager.DISALLOW_ASSIST_CONTENT);
     }
+    //Normal Test Cases
     @PermissionTest(MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL,35)
     fun testUninstallBlocked(){
         dpm.setUninstallBlocked(
             "test.package.name",false,{},{e->throw e})
     }
-
     @PermissionTest(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,35)
     fun testContentProtectionPolicy(){
         val flag = 1 shl 7 //See enterprisepolicy.java
         dpm.setContentProtectionPolicy(flag)
     }
-
     @PermissionTest(MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,35)
     fun testManagedSubscriptions(){
         dpm.getSubscriptionIds()
     }
-
     @PermissionTest("MANAGE_DEVICE_POLICY_STORAGE_LIMIT",35)
     fun testStorageLimit(){
         dpm.forceSetMaxPolicyStorageLimit(10000000);

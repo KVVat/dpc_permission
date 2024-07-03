@@ -3,10 +3,15 @@ package com.android.certification.niap.permission.dpctester.test
 import android.content.Context
 import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
+import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
 
 
 @PermissionTestModule("DPC Health Test Cases")
-class DPCHealthTestModule(ctx: Context):PermissionTestModuleBase(ctx){
+class DPCHealthTestModule(ctx: Context): PermissionTestModuleBase(ctx){
     override var TAG: String = DPCHealthTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
 
@@ -19,7 +24,7 @@ class DPCHealthTestModule(ctx: Context):PermissionTestModuleBase(ctx){
     @PermissionTest(".Owner Level",34,35)
     fun checkDeviceOwnerLevel() {
         //logger.system(">"+dpm.admin)
-        logger.system(">"+PermissionTool.getDeviceOwnerLevel(dpm))
+        logger.system(">"+ PermissionTool.getDeviceOwnerLevel(dpm))
         //checkUserRestriction("no_camera")
     }
     @PermissionTest(".Assigned Permissons",34,35)

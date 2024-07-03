@@ -21,7 +21,7 @@ import androidx.navigation.ui.navigateUp
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
 import com.android.certification.niap.permission.dpctester.test.DPCHealthTestModule
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
-import com.android.certification.niap.permission.dpctester.test.PermissionTestModuleBase
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
