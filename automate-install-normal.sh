@@ -6,12 +6,15 @@ adb shell cmd role remove-role-holder android.app.role.DEVICE_POLICY_MANAGEMENT 
 adb uninstall com.android.certification.niap.permission.dpctester
 
 #assemble and install
-./gradlew assembleDebug
-./gradlew installDebug
+#./gradlew assembleNopermDebug
+#./gradlew installNopermDebug
+./gradlew assembleNormalmDebug
+./gradlew installNormalDebug
+
 #enable priviledges
-#adb shell dpm set-active-admin com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
+adb shell dpm set-active-admin com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 #adb shell dpm set-profile-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
-adb shell dpm set-device-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
+#adb shell dpm set-device-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 adb shell cmd role set-bypassing-role-qualification true
 adb shell cmd role add-role-holder android.app.role.DEVICE_POLICY_MANAGEMENT com.android.certification.niap.permission.dpctester
 #launch

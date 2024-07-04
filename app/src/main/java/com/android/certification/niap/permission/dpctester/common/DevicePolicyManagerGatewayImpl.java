@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 
 import com.android.certification.niap.permission.dpctester.receiver.DeviceAdminReceiver;
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionToolJava;
 import com.google.common.base.Joiner; //Guava?
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
     private final ComponentName mAdminComponentName;
     private final PackageManager mPackageManager;
     private final LocationManager mLocationManager;
-
+    private Context mContext;
     public DevicePolicyManagerGatewayImpl(@NonNull Context context) {
         this(
                 context.getSystemService(DevicePolicyManager.class),
@@ -56,7 +57,7 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
                 context.getPackageManager(),
                 context.getSystemService(LocationManager.class),
                 DeviceAdminReceiver.getComponentName(context));
-
+        mContext = context;
         //Log.d(TAG, "context:"+context+"/"+context.getPackageName());
     }
 
@@ -1360,10 +1361,12 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         //Flags.devicePolicySizeTrackingInternalBugFixEnabled()
         Log.d(TAG, "isAuditLogEnabled()");
         if (Build.VERSION.SDK_INT >= 35) {
-            Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"set").toString());
-            ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
-                    "isAuditLogEnabled",mDevicePolicyManager,
-                    new Class[]{});
+            try {
+                ReflectionUtil.invoke(mDevicePolicyManager, "isAuditLogEnabled");
+            } catch (ReflectionUtil.ReflectionIsTemporaryException e){
+                e.printStackTrace();
+                throw new RuntimeException(e.getCause());
+            }
         }
     }
 
@@ -1372,10 +1375,12 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         //Flags.devicePolicySizeTrackingInternalBugFixEnabled()
         Log.d(TAG, "setAuditLogEnabled()");
         if (Build.VERSION.SDK_INT >= 35) {
-            //Log.d(TAG, ">"+ReflectionTool.Companion.checkDeclaredMethod(mDevicePolicyManager,"is").toString());
-            ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
-                    "setAuditLogEnabled",mDevicePolicyManager,
-                    new Class[]{boolean.class},flag);
+            try {
+                ReflectionUtil.invoke(mDevicePolicyManager,
+                        "setAuditLogEnabled",new Class<?>[]{boolean.class},flag);
+            } catch (ReflectionUtil.ReflectionIsTemporaryException e){
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -1427,6 +1432,11 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
         Log.d(TAG, "addCrossProfileWidgetProvider()");
         getDevicePolicyManager().addCrossProfileWidgetProvider(getAdmin(),packageName);
     }
+    @Override
+    public void clearCrossProfileIntentFilters()
+    {
+        getDevicePolicyManager().clearCrossProfileIntentFilters(getAdmin());
+    }
 
     @Override
     public void setScreenCaptureDisabled(boolean disabled){
@@ -1457,9 +1467,12 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
     @Override
     public void setApplicationExemptions(String packageName, Set<Integer> exemptionSet){
         Log.d(TAG, "setApplicationExemptions()");
-        ReflectionTool.Companion.invoke(mDevicePolicyManager.getClass(),
-                "setApplicationExemptions",mDevicePolicyManager,
-                new Class[]{String.class,Set.class},"com.android.settings",exemptionSet);
+        try {
+            ReflectionUtil.invoke(mDevicePolicyManager, "setApplicationExemptions",
+                    new Class[]{String.class, Set.class}, "com.android.settings", exemptionSet);
+        } catch (ReflectionUtil.ReflectionIsTemporaryException e){
+            throw new RuntimeException(e.getCause());
+        }
     }
     @Override
     public void setResetPasswordToken(byte[] token){
@@ -1475,6 +1488,26 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
     @Override
     public String getEnrollmentSpecifiedId(){
         return getDevicePolicyManager().getEnrollmentSpecificId();
+    }
+
+    @Override
+    public int getPolicySizeForAdmin(){
+        try {
+            Object authority = ReflectionToolJava.stubHiddenObject("android.app.admin.DeviceAdminAuthority");
+            assert authority != null;
+            Object admin = ReflectionToolJava.stubHiddenObject("android.app.admin.EnforcingAdmin",
+                    new Class<?>[]{String.class,Class.forName("android.app.admin.Authority"),UserHandle.class},
+                    mAdminComponentName.getPackageName(),authority,Process.myUserHandle()
+                    );
+            return ReflectionUtil.invoke(mDevicePolicyManager,
+                    "getPolicySizeForAdmin",
+                    new Class[]{Class.forName("android.app.admin.EnforcingAdmin")}
+                    ,admin);
+        } catch (ReflectionUtil.ReflectionIsTemporaryException e){
+            throw new RuntimeException(e.getCause());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

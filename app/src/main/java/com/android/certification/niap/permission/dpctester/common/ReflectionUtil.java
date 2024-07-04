@@ -81,18 +81,14 @@ public final class ReflectionUtil {
             Class<?> clazz, Object obj, String methodName, Class<?>[] parameterTypes, Object... args)
             throws ReflectionIsTemporaryException {
         try {
-
-            //Log.e(TAG, "Here?");
-            @SuppressWarnings("unchecked")
             T result = (T) clazz.getMethod(methodName, parameterTypes).invoke(obj, args);
-            //Log.e(TAG, "Success?");
             return result;
         } catch (SecurityException
                  | NoSuchMethodException
                  | IllegalArgumentException
                  | IllegalAccessException
                  | InvocationTargetException e) {
-            //Log.e(TAG, "Reflection failed.", e);
+            Log.e(TAG, "Reflection failed.", e);
             throw new ReflectionIsTemporaryException("Failed to invoke " + methodName, e);
             //ReflectionIsTemporaryException.rethrow(e, clazz, methodName, args);
             //return null;

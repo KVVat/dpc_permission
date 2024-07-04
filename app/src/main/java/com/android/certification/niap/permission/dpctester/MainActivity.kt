@@ -84,6 +84,8 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     log.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
                     if(result.success){
                         success.incrementAndGet()
+                    } else {
+                        log.system(">"+result.throwable.toString());
                     }
                     if(result.finished>=result.testSize){
                         //Finished

@@ -10,7 +10,7 @@ android {
         // assigned path. It helps to build the application variants automatically.
         // For details see the instructions on the SIGNING.md
         create("norm"){
-            storeFile = File("../security/normal/normal.jks")
+            storeFile = File(rootProject.projectDir,"./security/normal/normal.jks")
             storePassword = "android"
             keyPassword = "android"
             keyAlias = "normal"
@@ -22,24 +22,62 @@ android {
             keyAlias = "platform"
         }
         create("debugkeystore") {
-            storeFile = File(homePath+"/.android/debug.keystore")
+            storeFile = File(homePath,"./.android/debug.keystore")
             storePassword = "android"
             keyPassword = "androiddebugkey"
             keyAlias = "android"
         }
     }
+    val applicationName = "DPCTester"
+    val publish = project.tasks.create("publishAll")
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val flavor = variant.productFlavors[0].name
+                val outputFileName = "${applicationName}-${flavor}-${variant.buildType.name}.apk"
+                println("OutputFileName: $outputFileName")
+                output.outputFileName = outputFileName
+            }
+
+        if(variant.buildType.name.equals("debug")){
+            val task = project.tasks.create("publish${variant.name.capitalize()}Apk", Copy::class)
+            mkdir("$rootDir/package")
+
+            task.into("$rootDir/package")
+            task.dependsOn(variant.assembleProvider)
+            publish.dependsOn(task)
+            // variant.assemble
+            //        publish.dependsOn task
+        }
+    }
+
+
     buildTypes {
         release {
             //set null and later set it with productFlavors
-            signingConfig = signingConfigs.getByName("platform")
+            signingConfig = null
             isDebuggable = false
             isMinifyEnabled = false
             //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig = signingConfigs.getByName("platform")
+            signingConfig = null
             isDebuggable = true
         }
+    }
+    flavorDimensions.add("settings")
+    productFlavors {
+        create("normal"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("norm")
+        }
+        create("noperm"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("norm")
+        }
+
     }
     //flavorDimensions "settings"
     /*

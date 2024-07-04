@@ -72,6 +72,8 @@ public interface DevicePolicyManagerGateway {
 
     void addCrossProfileWidgetProvider(String packageName);
 
+    void clearCrossProfileIntentFilters();
+
     void setScreenCaptureDisabled(boolean disabled);
 
     void setShortSupportMessage(String message);
@@ -88,6 +90,8 @@ public interface DevicePolicyManagerGateway {
     void setResetPasswordToken(byte[] token);
 
     String getEnrollmentSpecifiedId();
+
+    int getPolicySizeForAdmin();
 
     enum DeviceOwnerLevel {
         DPS_DISABLED(0),

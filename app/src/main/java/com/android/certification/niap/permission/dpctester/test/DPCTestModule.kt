@@ -93,6 +93,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Permissio
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
+import java.lang.UnsupportedOperationException
 
 
 @PermissionTestModule("DPC Test Cases")
@@ -102,6 +103,13 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     val pm  =ctx.packageManager
     val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
 
+    init {
+        //Enable Permission Check Flag
+        /*DeviceConfig.getBoolean(
+            NAMESPACE_DEVICE_POLICY_MANAGER,
+            PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG,
+            DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);*/
+    }
     /**
      * Override and describe the routine which dependent on the module after each test
      */
@@ -156,7 +164,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     @PermissionTest("MANAGE_DEVICE_POLICY_APP_EXEMPTIONS",34,35)
     fun testAppExemptions(){
         //println("The test for MANAGE_DEVICE_POLICY_APP_EXEMPTIONS is not implemented yet")
-        dpm.setApplicationExemptions(ctx.packageName, setOf(0))
+        dpm.setApplicationExemptions(ctx.packageName, hashSetOf(0,1))
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,34,35)
     fun testAppRestrictions(){
@@ -195,7 +203,9 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     @PermissionTest(MANAGE_DEVICE_POLICY_FACTORY_RESET,34,35)
     fun testFactoryReset(){
         dpm.setFactoryResetProtectionPolicy(
-            FactoryResetProtectionPolicy.Builder().setFactoryResetProtectionEnabled(false).build())
+            FactoryResetProtectionPolicy.Builder()
+                .setFactoryResetProtectionAccounts(listOf("account1","account2"))
+                .setFactoryResetProtectionEnabled(false).build())
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_INPUT_METHODS,34,35)
     fun testInputMethods(){
@@ -206,6 +216,8 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     fun testKeepUninstalledPackages(){
         println("The test for MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES is not implemented yet")
     }*/
+
+    /*
     @PermissionTest(MANAGE_DEVICE_POLICY_KEYGUARD,34,35)
     fun testKeyguard(){
         println("The test for MANAGE_DEVICE_POLICY_KEYGUARD is not implemented yet")
@@ -226,6 +238,8 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
         }*/
 
     }
+    */
+
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
     fun testLock(){
         dpm.setMaximumTimeToLock(1000*30)
@@ -244,7 +258,11 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }*/
     @PermissionTest(MANAGE_DEVICE_POLICY_MTE,34,35)
     fun testMte(){
-        dpm.setMtePolicy(DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY)
+        try {
+            dpm.setMtePolicy(DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY)
+        } catch (ex:UnsupportedOperationException){
+            logger.info("The test for MANAGE_DEVICE_POLICY_MTE is failed because mte is not supported on this device")
+        }
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_NETWORK_LOGGING,34,35)
     fun testNetworkLogging(){
@@ -252,7 +270,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }*/
     @PermissionTest(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,34,35)
     fun testOrganizationIdentity(){
-        dpm.setOrganizationName("Tesetrs' Organization Name",{},{ e-> throw e})
+        dpm.setOrganizationName("Testers' Organization Name",{},{ e-> throw e})
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_OVERRIDE_APN,34,35)
     fun testOverrideApn(){
@@ -268,7 +286,8 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }*/
     @PermissionTest(MANAGE_DEVICE_POLICY_PROFILE_INTERACTION,34,35)
     fun testProfileInteraction(){
-        dpm.addCrossProfileWidgetProvider("com.packagename")
+        //dpm.addCrossProfileWidgetProvider(ctx.packageName)
+        dpm.clearCrossProfileIntentFilters()
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_PROXY,34,35)
     fun testProxy(){
@@ -291,7 +310,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,34,35)
     fun testRuntimePermissions(){
-        dpm.setPermissionGrantState("com.package",ACCESS_FINE_LOCATION,
+        dpm.setPermissionGrantState(ctx.packageName,ACCESS_FINE_LOCATION,
             DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,{},{e->throw e})
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_SCREEN_CAPTURE,34,35)
@@ -518,8 +537,10 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }
     @PermissionTest("MANAGE_DEVICE_POLICY_STORAGE_LIMIT",35)
     fun testStorageLimit(){
-        dpm.forceSetMaxPolicyStorageLimit(10000000);
-
+       //dpm.forceSetMaxPolicyStorageLimit(10000000);
+        dpm.policySizeForAdmin
+        //val n = dpm.policySizeForAdmin
+        //logger.system(">"+n)
     }
     @PermissionTest("QUERY_DEVICE_STOLEN_STATE",35)
     fun testQueryDeviceStolenState(){
@@ -529,13 +550,14 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     fun testAuditLogEnabled(){
         dpm.setAuditLogEnabled(false)
     }
-
     /* ?
     @PermissionTest(MANAGE_DEVICE_POLICY_THREAD_NETWORK,35)
     fun testThreadNetwork(){
         checkUserRestriction(UserManager.DISALLOW_THREAD_NETWORK);
     }*/
 
+    ////////////////////////////////////////////////////////////
+    // Local Scope Tools Section
     private fun clearUserRestriction(aRestriction:String){
         //Make sure to always set testing value as false
         dpm.setUserRestriction(aRestriction, false,{},{e->throw e})

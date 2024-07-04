@@ -6,19 +6,46 @@ import java.util.stream.Collectors
 
 class ReflectionTool {
     companion object {
+
+
         /**
-         * Invokes the specified `methodName` defined in the `targetClass` against the
-         * `targetObject` (or `null` for a static method) that accepts the provided `parameterClasses` with values `parameters`.
+         * Dynamically invoke a method.
          *
+         * @param obj
+         *     The object or class to get the method from.
+         * @param name
+         *     The name of the method to invoke.
+         * @param types
+         *     the parameter types of the requested method.
+         * @param args
+         *     the arguments to the method
+         * @param <T>
+         *     the method's return type
+         * @return the result of dynamically invoking this method.
+         */
+        inline fun <reified T> invoke2(
+            obj: Any?,
+            name: String,
+            types: Array<Class<*>> = emptyArray(),
+            vararg args: Any
+        ): T? =
+            try {
+                //obj!!.javaClass.get
+                obj!!.javaClass.getMethod(name, *types).run {
+                    invoke(obj, *args) as? T
+                }
+            } catch (e: Exception) {
+                null
+            }
+
+        /**
+         * ******** This method has a compatibility problem when run it on the kotlin ************
          *
-         * To support running reflective calls for permission tests if the reflective method fails
-         * due to a SecurityException then the SecurityException is rethrown as is; any other exception
-         * results in a [BasePermissionTester.UnexpectedPermissionTestFailureException].
          *
          * @return the result of invoking the specified method
          */
         fun invoke(
-            targetClass: Class<*>, methodName: String?,
+            targetClass: Class<*>, methodName: String,
             targetObject: Any?, parameterClasses: Array<Class<*>?>, vararg parameters: Any?
         ): Any {
             try {
