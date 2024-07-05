@@ -86,8 +86,11 @@ import android.content.Context
 import android.os.Bundle
 import android.os.UserManager
 import androidx.core.util.Consumer
+import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
+import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
+import com.android.certification.niap.permission.dpctester.test.exception.TestIsBypassedException
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
@@ -102,7 +105,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
     val pm  =ctx.packageManager
     val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
-
+    val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
     init {
         //Enable Permission Check Flag
         /*DeviceConfig.getBoolean(
@@ -120,9 +123,11 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
             if(pm.checkPermission(ctx.packageName,result.source.permission)
                 == android.content.pm.PackageManager.PERMISSION_DENIED
                 && result.success==false
+                && nopermMode==false
                 && dpsLevel == DeviceOwnerLevel.DPS_ACTIVE_ADMIN_APP
                 ){
-                logger.system(
+                result.bypassed = true
+                logger.debug(
                     "Package Manager does not recognize the permission `${result.source.permission}`.")
             }
             //we can evaluate the results here
@@ -242,6 +247,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
 
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
     fun testLock(){
+        //And Should isPermissionCheckFlagEnabled() be true?
         dpm.setMaximumTimeToLock(1000*30)
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,34,35)
@@ -261,7 +267,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
         try {
             dpm.setMtePolicy(DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY)
         } catch (ex:UnsupportedOperationException){
-            logger.info("The test for MANAGE_DEVICE_POLICY_MTE is failed because mte is not supported on this device")
+            throw TestIsBypassedException("The test for MANAGE_DEVICE_POLICY_MTE is failed because mte is not supported on this device")
         }
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_NETWORK_LOGGING,34,35)
@@ -335,6 +341,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,34,35)
     fun testSupportMessage(){
+        //And Should isPermissionCheckFlagEnabled() be true?
         dpm.setShortSupportMessage("Hello Short Support Message!")
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS,34,35)
@@ -372,6 +379,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_WIPE_DATA,34,35)
     fun testWipeData(){
+        //And Should isPermissionCheckFlagEnabled() be true
         dpm.setMaximumFailedPasswordsForWipe(3000,{},{e->throw e})
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_CERTIFICATES,34,35)
@@ -389,7 +397,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     //
     @PermissionTest(MANAGE_DEVICE_POLICY_APPS_CONTROL,34,35)
     fun testAppsControl() {
-        dpm.setUserControlDisabledPackages(listOf("com.package","com.package2"),{},{})
+        dpm.getUserControlDisabledPackages()//listOf("com.package","com.package2"),{},{})
     }
 
     @PermissionTest(MANAGE_DEVICE_POLICY_CAMERA,34)
@@ -537,13 +545,14 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }
     @PermissionTest("MANAGE_DEVICE_POLICY_STORAGE_LIMIT",35)
     fun testStorageLimit(){
-       //dpm.forceSetMaxPolicyStorageLimit(10000000);
         dpm.policySizeForAdmin
-        //val n = dpm.policySizeForAdmin
-        //logger.system(">"+n)
     }
     @PermissionTest("QUERY_DEVICE_STOLEN_STATE",35)
     fun testQueryDeviceStolenState(){
+        //Check Admin Flag and if not supported, throw bypass exception
+        if(!PermissionTool.getAdminFlag("deviceTheftImplEnabled")){
+            throw TestIsBypassedException("The test for QUERY_DEVICE_STOLEN_STATE is failed because device theft feature is not enabled on this device")
+        }
         dpm.isDevicePotentiallyStolen()
     }
     @PermissionTest("MANAGE_DEVICE_POLICY_AUDIT_LOGGING",35)

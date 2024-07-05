@@ -25,6 +25,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Permissio
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -71,6 +72,12 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         val modules: List<PermissionTestModuleBase>
             = listOf(DPCTestModule(this), DPCHealthTestModule(this));
         var success = AtomicInteger(0)
+
+        // let the tester know the test result should be inverse or not
+        resources.getBoolean(R.bool.inverse_test_result).let {
+            PermissionTestRunner.inverse_test_result = it
+        }
+
         modules.forEach { module->
             val testButton = Button(this)
             testButton.setText("${module.title}")
@@ -80,8 +87,13 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 setLogAdapter()
                 success.set(0);
                 val testModule = module
+
                 testModule.start { result ->
-                    log.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
+                    if(!result.bypassed){
+                        log.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
+                    } else {
+                        log.system(""+result.source.permission.replace("android.permission.","")+"=>bypassed")
+                    }
                     if(result.success){
                         success.incrementAndGet()
                     } else {
@@ -149,6 +161,9 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 textView.setTextColor(Color.BLACK)
                 textView.setBackgroundColor(Color.GREEN)
                 textView.setTextSize(18f);
+            } else if (textView.text.endsWith(">bypassed")){
+                textView.setTextColor(Color.BLACK)
+                textView.setBackgroundColor(Color.LTGRAY);
             } else {
                 textView.setTextSize(12f);
                 textView.setBackgroundColor(Color.TRANSPARENT)

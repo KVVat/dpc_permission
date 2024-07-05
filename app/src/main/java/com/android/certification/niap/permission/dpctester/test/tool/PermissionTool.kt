@@ -5,10 +5,14 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
+import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
 
 class PermissionTool {
     companion object {
-
+        fun getAdminFlag(method: String): Boolean {
+            return ReflectionUtil.invoke<Boolean>(Class.forName("android.app.admin.flags.Flags"),
+                method)
+        }
         fun getDeviceOwnerLevel(dpm:DevicePolicyManagerGateway): DeviceOwnerLevel {
             if(dpm.isDeviceOwnerApp){
                 return DeviceOwnerLevel.DPS_DEVICE_OWNER_APP
@@ -21,8 +25,8 @@ class PermissionTool {
             } else {
                 return DeviceOwnerLevel.DPS_DISABLED
             }
-        }
 
+        }
 
         fun getGrantedPermissions(ctx: Context, appPackage: String?): List<String>
         {
