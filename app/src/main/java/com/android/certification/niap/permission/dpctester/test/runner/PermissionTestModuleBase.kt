@@ -25,4 +25,9 @@ open class PermissionTestModuleBase(ctx: Context) {
         PermissionTestRunner.getInstance().start(this,callback);
 
     }
+    open fun finalize()
+    {
+        //PermissionTestRunner.getInstance().finalize(this)
+    }
+
 }

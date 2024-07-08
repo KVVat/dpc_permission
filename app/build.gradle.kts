@@ -71,11 +71,11 @@ android {
     productFlavors {
         create("normal"){
             dimension = "settings"
-            signingConfig = signingConfigs.getByName("norm")
+            signingConfig = signingConfigs.getByName("platform")
         }
         create("noperm"){
             dimension = "settings"
-            signingConfig = signingConfigs.getByName("norm")
+            signingConfig = signingConfigs.getByName("platform")
         }
 
     }

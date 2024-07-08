@@ -1509,6 +1509,11 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public void setTrustAgentConfiguration(ComponentName target, PersistableBundle configuration)
+    {
+        getDevicePolicyManager().setTrustAgentConfiguration(getAdmin(),target,configuration);
+    }
 
     @Override
     public String toString() {

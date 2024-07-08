@@ -93,6 +93,8 @@ public interface DevicePolicyManagerGateway {
 
     int getPolicySizeForAdmin();
 
+    void setTrustAgentConfiguration(ComponentName target, PersistableBundle configuration);
+
     enum DeviceOwnerLevel {
         DPS_DISABLED(0),
         DPS_ACTIVE_ADMIN_APP(1),

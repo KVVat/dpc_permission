@@ -82,8 +82,10 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA
 import android.app.admin.DevicePolicyManager
 import android.app.admin.FactoryResetProtectionPolicy
 import android.app.admin.SystemUpdatePolicy
+import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.os.UserManager
 import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.R
@@ -93,6 +95,7 @@ import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
 import com.android.certification.niap.permission.dpctester.test.exception.TestIsBypassedException
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
+import com.android.certification.niap.permission.dpctester.test.tool.DeviceConfigTool
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
@@ -108,10 +111,15 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
     init {
         //Enable Permission Check Flag
-        /*DeviceConfig.getBoolean(
-            NAMESPACE_DEVICE_POLICY_MANAGER,
-            PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG,
-            DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);*/
+        //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","true",false)
+        //logger.system("enable_permission_based_access"+DeviceConfigTool.getProperty("device_policy_manager", "enable_permission_based_access")!!)
+    }
+
+    override fun finalize() {
+        super.finalize()
+        logger.system("Module finalized")
+        //Disable Permission Check Flag
+        //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","false",false)
     }
     /**
      * Override and describe the routine which dependent on the module after each test
@@ -222,28 +230,16 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
         println("The test for MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES is not implemented yet")
     }*/
 
-    /*
+
     @PermissionTest(MANAGE_DEVICE_POLICY_KEYGUARD,34,35)
     fun testKeyguard(){
-        println("The test for MANAGE_DEVICE_POLICY_KEYGUARD is not implemented yet")
-        /*
-        Object CONFIG = stubHiddenObject("android.os.PersistableBundle");
-        if(CONFIG != null) {
-            ComponentName TRUST_AGENT_COMPONENT =
-                    new ComponentName("com.trustagent", "com.trustagent.xxx");
-            mTransacts.invokeTransact(
-                    Transacts.DEVICE_POLICY_SERVICE,
-                    Transacts.DEVICE_POLICY_DESCRIPTOR,
-                    Transacts.setTrustAgentConfiguration,
-                    ADMIN_COMPONENT, PACKAGE_NAME, TRUST_AGENT_COMPONENT,
-                    CONFIG, true
-            );
-        } else {
-            throw new IllegalArgumentException("failed to create a PersistableBundle");
-        }*/
+
+        val configuration = PersistableBundle.EMPTY
+        dpm.setTrustAgentConfiguration(
+            ComponentName("com.trustagent","com.trustagent.xxx"),configuration)
 
     }
-    */
+
 
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
     fun testLock(){

@@ -26,6 +26,7 @@ import com.android.certification.niap.permission.dpctester.test.log.ActivityLogg
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
+import com.android.certification.niap.permission.dpctester.test.tool.DeviceConfigTool
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -102,6 +103,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     if(result.finished>=result.testSize){
                         //Finished
                         log.system("Finished ${success.get()}/${result.testSize} passed the test")
+                        testModule.finalize()
                     }
                     /*if(result.throwable != null){
                         result.throwable.message?.let { log.system(it) }
@@ -164,9 +166,10 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             } else if (textView.text.endsWith(">bypassed")){
                 textView.setTextColor(Color.BLACK)
                 textView.setBackgroundColor(Color.LTGRAY);
+                textView.setTextSize(18f);
             } else {
-                textView.setTextSize(12f);
                 textView.setBackgroundColor(Color.TRANSPARENT)
+                textView.setTextSize(12f);
             }
             return textView
         }
