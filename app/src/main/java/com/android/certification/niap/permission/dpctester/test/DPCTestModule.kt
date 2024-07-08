@@ -111,6 +111,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
     init {
         //Enable Permission Check Flag
+        //"enable_permission_based_access"
         //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","true",false)
         //logger.system("enable_permission_based_access"+DeviceConfigTool.getProperty("device_policy_manager", "enable_permission_based_access")!!)
     }
@@ -118,8 +119,8 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     override fun finalize() {
         super.finalize()
         logger.system("Module finalized")
-        //Disable Permission Check Flag
-        //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","false",false)
+        //Reset Permission Check Flag
+        //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","false",true)
     }
     /**
      * Override and describe the routine which dependent on the module after each test
@@ -233,18 +234,18 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
 
     @PermissionTest(MANAGE_DEVICE_POLICY_KEYGUARD,34,35)
     fun testKeyguard(){
-
         val configuration = PersistableBundle.EMPTY
         dpm.setTrustAgentConfiguration(
             ComponentName("com.trustagent","com.trustagent.xxx"),configuration)
-
     }
 
 
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
     fun testLock(){
-        //And Should isPermissionCheckFlagEnabled() be true?
-        dpm.setMaximumTimeToLock(1000*30)
+        throw TestIsBypassedException(
+            "The test for MANAGE_DEVICE_POLICY_LOCK is currently infeasible to test. API is not restricted.")
+        //isPermissionCheckFlagEnabled() = true? dpm.setMaximumTimeToLock(1000*30)
+        //!isUnicornFlagEnabled dpm.lockNow({},{e->throw e})
     }
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,34,35)
     fun testLockCredentials(){
@@ -288,7 +289,6 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     }*/
     @PermissionTest(MANAGE_DEVICE_POLICY_PROFILE_INTERACTION,34,35)
     fun testProfileInteraction(){
-        //dpm.addCrossProfileWidgetProvider(ctx.packageName)
         dpm.clearCrossProfileIntentFilters()
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_PROXY,34,35)
@@ -393,7 +393,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     //
     @PermissionTest(MANAGE_DEVICE_POLICY_APPS_CONTROL,34,35)
     fun testAppsControl() {
-        dpm.getUserControlDisabledPackages()//listOf("com.package","com.package2"),{},{})
+        dpm.getUserControlDisabledPackages()
     }
 
     @PermissionTest(MANAGE_DEVICE_POLICY_CAMERA,34)
