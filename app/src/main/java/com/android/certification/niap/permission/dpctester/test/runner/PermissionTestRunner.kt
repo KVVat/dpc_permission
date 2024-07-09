@@ -2,7 +2,7 @@ package com.android.certification.niap.permission.dpctester.test.runner
 
 import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
-import com.android.certification.niap.permission.dpctester.test.exception.TestIsBypassedException
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
 import java.lang.reflect.InvocationTargetException
 
@@ -64,7 +64,7 @@ class PermissionTestRunner {
                     } catch(ex:SecurityException){
                         throwable = ex
                         success=!success
-                    } catch(ex: TestIsBypassedException){
+                    } catch(ex: BypassTestException){
                         throwable = ex
                         success=true //bypassed test always returns true
                         bypassed=true
@@ -94,6 +94,7 @@ class PermissionTestRunner {
 
     data class Result(var success:Boolean, val throwable:Throwable? = null, val source: Data, val finished: Int,
                       val testSize: Int, var bypassed: Boolean = false)
+
     data class Data(
         var permission: String,
         val sdkMin: Int,

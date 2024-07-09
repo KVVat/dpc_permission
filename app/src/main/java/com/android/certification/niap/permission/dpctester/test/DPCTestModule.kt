@@ -1,19 +1,15 @@
 package com.android.certification.niap.permission.dpctester.test
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCESSIBILITY
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_USER_DATA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_AUTOFILL
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_BACKUP_SERVICE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_BLUETOOTH
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_BUGREPORT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CALLS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA_TOGGLE
@@ -22,13 +18,11 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_DISPLAY
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_FUN
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_KEYGUARD
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCALE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCATION
@@ -36,23 +30,18 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_METERED_DATA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_NETWORK_LOGGING
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_OVERRIDE_APN
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PRINTING
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_PRIVATE_DNS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_PROXY
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS
@@ -62,18 +51,14 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CONTENT
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_SETTINGS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SMS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_APPS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER
-import android.Manifest.permission.MANAGE_DEVICE_POLICY_USERS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI
@@ -91,11 +76,9 @@ import androidx.core.util.Consumer
 import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
-import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
-import com.android.certification.niap.permission.dpctester.test.exception.TestIsBypassedException
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
-import com.android.certification.niap.permission.dpctester.test.tool.DeviceConfigTool
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
@@ -242,7 +225,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
 
     @PermissionTest(MANAGE_DEVICE_POLICY_LOCK,34,35)
     fun testLock(){
-        throw TestIsBypassedException(
+        throw BypassTestException(
             "The test for MANAGE_DEVICE_POLICY_LOCK is currently infeasible to test. API is not restricted.")
         //isPermissionCheckFlagEnabled() = true? dpm.setMaximumTimeToLock(1000*30)
         //!isUnicornFlagEnabled dpm.lockNow({},{e->throw e})
@@ -264,7 +247,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
         try {
             dpm.setMtePolicy(DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY)
         } catch (ex:UnsupportedOperationException){
-            throw TestIsBypassedException("The test for MANAGE_DEVICE_POLICY_MTE is failed because mte is not supported on this device")
+            throw BypassTestException("The test for MANAGE_DEVICE_POLICY_MTE is failed because mte is not supported on this device")
         }
     }
     /*@PermissionTest(MANAGE_DEVICE_POLICY_NETWORK_LOGGING,34,35)
@@ -547,7 +530,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
     fun testQueryDeviceStolenState(){
         //Check Admin Flag and if not supported, throw bypass exception
         if(!PermissionTool.getAdminFlag("deviceTheftImplEnabled")){
-            throw TestIsBypassedException("The test for QUERY_DEVICE_STOLEN_STATE is failed because device theft feature is not enabled on this device")
+            throw BypassTestException("The test for QUERY_DEVICE_STOLEN_STATE is failed because device theft feature is not enabled on this device")
         }
         dpm.isDevicePotentiallyStolen()
     }

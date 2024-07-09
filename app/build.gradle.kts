@@ -44,7 +44,9 @@ android {
         if(variant.buildType.name.equals("debug")){
             val task = project.tasks.create("publish${variant.name.capitalize()}Apk", Copy::class)
             mkdir("$rootDir/package")
-
+            variant.outputs.forEach { it->
+                task.from(it.outputFile.absolutePath)
+            }
             task.into("$rootDir/package")
             task.dependsOn(variant.assembleProvider)
             publish.dependsOn(task)
