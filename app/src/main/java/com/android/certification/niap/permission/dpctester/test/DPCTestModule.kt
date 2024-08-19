@@ -64,15 +64,18 @@ import android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WINDOWS
 import android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.app.admin.FactoryResetProtectionPolicy
 import android.app.admin.SystemUpdatePolicy
 import android.content.ComponentName
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.os.UserManager
-import androidx.core.util.Consumer
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGatewayImpl
@@ -83,10 +86,11 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTool
 import java.lang.UnsupportedOperationException
+import java.util.function.Consumer
 
 
 @PermissionTestModule("DPC Test Cases")
-class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
+class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
     override var TAG: String = DPCTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
     val pm  =ctx.packageManager
@@ -197,6 +201,7 @@ class DPCTestModule(val ctx: Context): PermissionTestModuleBase(ctx){
         println("The test for MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS is not implemented yet")
     }*/
 
+    @RequiresApi(Build.VERSION_CODES.R)
     @PermissionTest(MANAGE_DEVICE_POLICY_FACTORY_RESET,34,35)
     fun testFactoryReset(){
         dpm.setFactoryResetProtectionPolicy(

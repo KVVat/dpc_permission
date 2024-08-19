@@ -2,4 +2,5 @@
 <resources>
     <bool name="inverse_test_result">true</bool>
     <bool name="debug_mode">false</bool>
+    <bool name="dpc_mode">false</bool>
 </resources>

@@ -1,0 +1,184 @@
+package com.android.certification.niap.permission.dpctester.test.tool;
+
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accounts.Account;
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.net.NetworkCapabilities;
+import android.net.Uri;
+import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.ParcelUuid;
+import android.os.Parcelable;
+import android.os.RemoteException;
+import android.text.TextUtils;
+
+import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
+import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
+import java.util.Map;
+
+
+public class BinderTransaction  {
+
+    static Map<String, Map<String,Integer>> dictTransacts;
+
+    Context mContext;
+
+    private static BinderTransaction instance = null;// = new BinderTransaction();
+    private BinderTransaction(){}
+    public static BinderTransaction getInstance(){
+        if(instance == null){
+            // block the multiple access from multiple thread
+            synchronized (BinderTransaction.class) {
+                 if(instance == null){
+                    instance = new BinderTransaction();
+                }
+            }
+        }
+        return instance;
+    }
+    private void build(Builder builder) {
+        this.mContext = builder.mContext;
+    }
+
+    public static class Builder {
+        private final Context mContext; // Mandatory
+        //private Builder(){}
+        public Builder(Context context) {
+            this.mContext = context;
+        }
+        public void build(){
+            BinderTransaction.getInstance().build(this);
+        }
+    }
+
+
+    private static void handleBinderInput(Parcel data,Object parameter,Boolean useCharSequence,Class<?> clazzRemoteCallback) throws ReflectionUtil.ReflectionIsTemporaryException {
+
+        if(parameter == null) {
+            data.writeInt(0);
+        } else if (parameter instanceof CharSequence && useCharSequence) {
+
+            data.writeInt(1);
+            TextUtils.writeToParcel((CharSequence) parameter, data, 0);
+
+        } else if (parameter instanceof String) {
+            data.writeString((String) parameter);
+        } else if (parameter instanceof Long) {
+            data.writeLong((Long) parameter);
+        } else if (parameter instanceof Integer) {
+            data.writeInt((Integer) parameter);
+        } else if (parameter instanceof Boolean) {
+            data.writeInt((Boolean) parameter ? 1 : 0);
+        } else if (parameter instanceof int[]) {
+            data.writeIntArray((int[]) parameter);
+        } else if (parameter instanceof byte[]) {
+            data.writeByteArray((byte[]) parameter);
+        } else if (parameter instanceof Proxy) {
+            //ReflectionUtils.checkDeclaredMethod(parameter,"");
+        } else if (parameter instanceof IInterface) {
+            data.writeStrongBinder(
+                    parameter != null ? ((IInterface) parameter).asBinder() : null);
+        } else if (parameter instanceof IBinder) {
+            data.writeStrongBinder((IBinder) parameter);
+        } else if (parameter instanceof ComponentName) {
+            data.writeInt(1);
+            ((ComponentName) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof Uri) {
+            data.writeInt(1);
+            ((Uri) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof String[]) {
+            data.writeStringArray((String[]) parameter);
+        } else if (parameter instanceof Account) {
+            data.writeInt(1);
+            ((Account) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof AccessibilityServiceInfo) {
+            data.writeInt(1);
+            ((AccessibilityServiceInfo) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof ParcelUuid) {
+            data.writeInt(1);
+            ((ParcelUuid) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof PendingIntent) {
+            data.writeInt(1);
+            ((PendingIntent) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof NetworkCapabilities) {
+            data.writeInt(1);
+            ((NetworkCapabilities) parameter).writeToParcel(data, 0);
+        } else if (parameter instanceof ParcelFileDescriptor) {
+            //mLogger.logSystem("here");
+            data.writeInt(1);
+            ((ParcelFileDescriptor) parameter).writeToParcel(data, 0);
+        } else if (clazzRemoteCallback.isInstance(parameter)) {
+            data.writeInt(0);
+            ReflectionUtil.invoke(parameter, "writeToParcel",data,0);
+
+        } else if (parameter instanceof Parcelable) {
+            data.writeInt(1);
+            ((Parcelable) parameter).writeToParcel(data, 0);
+        }
+    }
+
+
+    //
+    public Parcel invoke(String serviceName, String descriptor, String methodName, Object ... parameters)
+    {
+        return invoke(serviceName,descriptor,methodName,false,parameters);
+    }
+    @SuppressLint("PrivateApi")
+    public Parcel invoke(String serviceName, String descriptor, String methodName,boolean useCharSequence, Object ... parameters)
+    {
+        IBinder binder;
+        try {
+            binder = (IBinder) Class.forName("android.os.ServiceManager")
+                    .getMethod("getService",String.class).invoke(null,serviceName);
+            if(binder == null){
+                throw new BypassTestException("The " + serviceName
+                        + " service guarded by this permission is not available on this device");
+            }
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException |
+                 ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return invoke(binder,descriptor,methodName,useCharSequence,parameters);
+    }
+
+    @SuppressLint("PrivateApi")
+    private Parcel invoke(IBinder binder, String descriptor, String methodName, Boolean useCharSequence, Object ... parameters){
+        try {
+            int tId = BinderTransactsDict.getInstance().getTransactId(descriptor,methodName);
+            Class<?> clazzRemoteCallback =  Class.forName("android.os.RemoteCallback");
+            Parcel reply = Parcel.obtain();
+            Parcel data  = Parcel.obtain();
+            data.writeInterfaceToken(descriptor);
+
+            for(Object parameter : parameters)
+                handleBinderInput(data,parameter,useCharSequence,clazzRemoteCallback);
+
+            //Log.d("tag",">"+tId+":"+methodName);
+            binder.transact(tId, data, reply, 0);
+            //Log.d("tag",">"+tId+":"+reply.toString());
+            reply.readException();
+            return reply;
+        } catch (RemoteException e) {
+            if (e.getCause() != null && e.getCause() instanceof SecurityException) {
+                throw (SecurityException)e.getCause();
+            } else {
+                throw new UnexpectedTestFailureException(e);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new UnexpectedTestFailureException(e);
+
+        } catch (ReflectionUtil.ReflectionIsTemporaryException e) {
+            throw new UnexpectedTestFailureException(e);
+        }
+    }
+}

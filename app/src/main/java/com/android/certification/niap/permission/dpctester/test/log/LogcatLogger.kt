@@ -1,36 +1,38 @@
 package com.android.certification.niap.permission.dpctester.test.log
 
+import android.util.Log
+
 class LogcatLogger(override val tag: String):Logger{
 
     override fun debug(message: String) {
-        TODO("Not yet implemented")
+        Log.d(tag,message)
     }
 
     override fun debug(message: String, throwable: Throwable) {
-        TODO("Not yet implemented")
+        Log.d(tag,message,throwable)
     }
 
     override fun info(message: String) {
-        TODO("Not yet implemented")
+        Log.d(tag,message)
     }
 
     override fun info(message: String, throwable: Throwable) {
-        TODO("Not yet implemented")
+        Log.i(tag,message,throwable)
     }
 
     override fun error(message: String) {
-        TODO("Not yet implemented")
+        Log.e(tag,message)
     }
 
     override fun error(message: String, throwable: Throwable) {
-        TODO("Not yet implemented")
+        Log.e(tag,message,throwable)
     }
 
     override fun system(message: String) {
-        TODO("Not yet implemented")
+        Log.e(tag,message)
     }
 
     override fun warn(message: String) {
-        TODO("Not yet implemented")
+        Log.w(tag,message)
     }
 }

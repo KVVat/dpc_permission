@@ -1,5 +1,7 @@
 package com.android.certification.niap.permission.dpctester.test.tool
 
+import kotlin.reflect.KClass
+
 annotation class PermissionTestSuite(
     val name:String="title"
 )
@@ -13,4 +15,9 @@ annotation class PermissionTest(
     val sdkMin:Int=0,
     val sdkMax:Int=100000,
     val priority:Int=-1,
-    val block:Boolean=false)
+    val sync:Boolean=false,
+    val customCase:Boolean=false,
+    val requiredServices:Array<KClass<out Any>> =[],
+    val requiredPermissions:Array<String> =[],
+
+    )

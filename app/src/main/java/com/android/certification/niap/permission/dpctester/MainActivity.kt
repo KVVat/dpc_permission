@@ -21,6 +21,9 @@ import androidx.navigation.ui.navigateUp
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
 import com.android.certification.niap.permission.dpctester.test.DPCHealthTestModule
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
+import com.android.certification.niap.permission.dpctester.test.InstallPermissionTestModule
+import com.android.certification.niap.permission.dpctester.test.JavaTestModule
+import com.android.certification.niap.permission.dpctester.test.RuntimePermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
@@ -38,7 +41,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
     private lateinit var binding: ActivityMainBinding
     var mBottomSheet: BottomSheetBehavior<LinearLayout>? = null
     private val mTestButtons: MutableList<Button> = mutableListOf()
-    private val log: Logger =
+    private val logger: Logger =
         LoggerFactory.createActivityLogger(TAG, this);
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +59,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 }
             }
         } else {
-            log.system("Welcome!")
+            logger.system("Welcome!")
         }
         //val layout = findViewById<LinearLayout>(R.id.mainLayout)
         val mStatusTextView = findViewById<TextView>(R.id.bsArrow)
@@ -69,9 +72,21 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 mBottomSheet!!.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
+        //Change the test modules here by resource settings
+        val modules: MutableList<PermissionTestModuleBase> = if(resources.getBoolean(R.bool.dpc_mode)){
+            mutableListOf(DPCTestModule(this))
+        } else {
+            mutableListOf(InstallPermissionTestModule(this),
+                RuntimePermissionTestModule(this))
+        }
+        if(resources.getBoolean(R.bool.debug_mode)){
+            modules.add(JavaTestModule(this))
+            if(resources.getBoolean(R.bool.dpc_mode))
+                modules.add(DPCHealthTestModule(this))
+        }
 
-        val modules: List<PermissionTestModuleBase>
-            = listOf(DPCTestModule(this), DPCHealthTestModule(this));
+
+
         var success = AtomicInteger(0)
 
         // let the tester know the test result should be inverse or not
@@ -91,22 +106,24 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
 
                 testModule.start { result ->
                     if(!result.bypassed){
-                        log.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
+                        logger.system(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
+
                     } else {
-                        log.system(""+result.source.permission.replace("android.permission.","")+"=>bypassed")
+                        logger.system(""+result.source.permission.replace("android.permission.","")+"=>Bypassed")
+                        logger.debug(""+result.message)
                     }
                     if(result.success){
                         success.incrementAndGet()
                     } else {
-                        log.system(">"+result.throwable.toString());
+                        logger.system(">"+result.throwable.toString());
                     }
                     if(result.finished>=result.testSize){
                         //Finished
-                        log.system("Finished ${success.get()}/${result.testSize} passed the test")
+                        logger.system("Finished ${success.get()}/${result.testSize} passed the test")
                         testModule.finalize()
                     }
                     /*if(result.throwable != null){
-                        result.throwable.message?.let { log.system(it) }
+                        result.throwable.message?.let { logger.system(it) }
                     }*/
                 };
             }
@@ -163,7 +180,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 textView.setTextColor(Color.BLACK)
                 textView.setBackgroundColor(Color.GREEN)
                 textView.setTextSize(18f);
-            } else if (textView.text.endsWith(">bypassed")){
+            } else if (textView.text.endsWith(">Bypassed")){
                 textView.setTextColor(Color.BLACK)
                 textView.setBackgroundColor(Color.LTGRAY);
                 textView.setTextSize(18f);

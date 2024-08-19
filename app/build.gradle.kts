@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.config.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -73,30 +75,26 @@ android {
     productFlavors {
         create("normal"){
             dimension = "settings"
-            signingConfig = signingConfigs.getByName("platform")
+            signingConfig = signingConfigs.getByName("norm")
         }
         create("noperm"){
             dimension = "settings"
+            signingConfig = signingConfigs.getByName("norm")
+        }
+        create("platform"){
+            dimension = "settings"
             signingConfig = signingConfigs.getByName("platform")
         }
-
+        create("dpc-normal"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("platform")
+        }
+        create("dpc-noperm"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("platform")
+        }
     }
-    //flavorDimensions "settings"
-    /*
-    productFlavors {
-        normal {
-            dimension "settings"
-            signingConfig signingConfigs.norm
-        }
-        noperm {
-            dimension "settings"
-            signingConfig signingConfigs.norm
-        }
-        platform {
-            dimension "settings"
-            signingConfig signingConfigs.platform
-        }
-    }*/
+
 
     namespace = "com.android.certification.niap.permission.dpctester"
     buildFeatures {
@@ -106,7 +104,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.certification.niap.permission.dpctester"
-        minSdk = 34
+        minSdk = 28
         targetSdk = 35
         //targetSdkPreview = "VanillaIceCream"
         versionCode = 1
@@ -125,11 +123,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         viewBinding = true
@@ -139,6 +137,9 @@ android {
             aidl {
                 srcDirs("src/main/aidl")
             }
+            assets {
+                srcDirs("src/main/assets")
+            }
         }
     }
 }
@@ -146,15 +147,22 @@ android {
 dependencies {
     // Java language implementation
     implementation(libs.androidx.preference)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.runner)
+    implementation(libs.androidx.credentials)
+
     implementation(libs.guava)
     implementation(libs.material)
 
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.work.runtime)
+
+    implementation(libs.jackson.core)
+    implementation(libs.jackson.databind)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

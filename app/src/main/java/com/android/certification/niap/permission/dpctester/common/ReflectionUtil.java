@@ -2,7 +2,11 @@ package com.android.certification.niap.permission.dpctester.common;
 
 
 import android.util.Log;
+
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
+
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
@@ -81,14 +85,18 @@ public final class ReflectionUtil {
             Class<?> clazz, Object obj, String methodName, Class<?>[] parameterTypes, Object... args)
             throws ReflectionIsTemporaryException {
         try {
-            T result = (T) clazz.getMethod(methodName, parameterTypes).invoke(obj, args);
+            Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
+            method.setAccessible(true);
+            T result = (T) method.invoke(obj, args);
             return result;
         } catch (SecurityException
+                 | BypassTestException
                  | NoSuchMethodException
                  | IllegalArgumentException
                  | IllegalAccessException
                  | InvocationTargetException e) {
             //Log.e(TAG, "Reflection failed.", e);
+            //e.printStackTrace();
             throw new ReflectionIsTemporaryException("Failed to invoke " + methodName, e);
             //ReflectionIsTemporaryException.rethrow(e, clazz, methodName, args);
             //return null;
