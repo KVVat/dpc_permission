@@ -21,15 +21,23 @@ import androidx.navigation.ui.navigateUp
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
 import com.android.certification.niap.permission.dpctester.test.DPCHealthTestModule
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
-import com.android.certification.niap.permission.dpctester.test.InstallPermissionTestModule
+import com.android.certification.niap.permission.dpctester.test.InstallTestModule
+import com.android.certification.niap.permission.dpctester.test.InternalTestModule
 import com.android.certification.niap.permission.dpctester.test.JavaTestModule
-import com.android.certification.niap.permission.dpctester.test.RuntimePermissionTestModule
+import com.android.certification.niap.permission.dpctester.test.RuntimeTestModule
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModule
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleP
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleQ
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleR
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleS
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleT
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleU
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleV
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
-import com.android.certification.niap.permission.dpctester.test.tool.DeviceConfigTool
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -76,8 +84,24 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         val modules: MutableList<PermissionTestModuleBase> = if(resources.getBoolean(R.bool.dpc_mode)){
             mutableListOf(DPCTestModule(this))
         } else {
-            mutableListOf(InstallPermissionTestModule(this),
-                RuntimePermissionTestModule(this))
+            mutableListOf(
+                InstallTestModule(
+                    this
+                ),
+                RuntimeTestModule(this),
+                SignatureTestModule(this),
+                SignatureTestModuleP(this),
+                SignatureTestModuleQ(this),
+                SignatureTestModuleR(this),
+                SignatureTestModuleS(this),
+                SignatureTestModuleT(this),
+                SignatureTestModuleU(this),
+                SignatureTestModuleV(this),
+
+                InternalTestModule(
+                    this
+                )
+            )
         }
         if(resources.getBoolean(R.bool.debug_mode)){
             modules.add(JavaTestModule(this))

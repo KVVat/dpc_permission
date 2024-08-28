@@ -129,15 +129,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @PermissionTestModule(name="Install Test Cases")
-public class InstallPermissionTestModule extends PermissionTestModuleBase {
-	public InstallPermissionTestModule(@NonNull Activity activity){ super(activity);}
-
-	//new SystemService<ConnectivityManager>(mContext).
-	//Generics System service implementation plan,accept below syntaxes
-	//getSystemService<ConnectivityManager>().getActiveNetwork();
-	//kotlin ->
-	//systemService<ConnectivityManager>().getActiveNetwork();
-	//systemService(Context.CONNECTIVITY_SERVICE).getActiveNetwork();
+public class InstallTestModule extends PermissionTestModuleBase {
+	public InstallTestModule(@NonNull Activity activity){ super(activity);}
 
 	//PermissionTest parameters for bypassing testcases
 	//required managers : requiredManagers
@@ -149,12 +142,10 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 	@Override
 	public void start(Consumer<PermissionTestRunner.Result> callback){
 		super.start(callback);
-		//logger.system("setting up");
 		try {
 			mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
 		} catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
 
-		//getLogger.debug("Hello Install test case!");
 	}
 
 	private <T> T systemService(Class<T> clazz){
@@ -427,7 +418,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		PowerManager.WakeLock wakeLock =
 				systemService(PowerManager.class).newWakeLock(
 				PowerManager.PARTIAL_WAKE_LOCK,
-				InstallPermissionTestModule.class.getSimpleName());
+				InstallTestModule.class.getSimpleName());
 		wakeLock.acquire(10*60*1000L );///*10 minutes
 		wakeLock.release();
 	}
@@ -453,7 +444,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		Resources resources = mContext.getResources();
 		CharSequence channelName = resources.getString(R.string.tester_channel_name);
 		NotificationChannel channel =
-				new NotificationChannel(InstallPermissionTestModule.class.getSimpleName(),
+				new NotificationChannel(InstallTestModule.class.getSimpleName(),
 				channelName,
 				NotificationManager.IMPORTANCE_DEFAULT);
 		NotificationManager notificationManager =
@@ -462,7 +453,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		notificationManager.createNotificationChannel(channel);
 
 		Notification notification =
-				new Notification.Builder(mContext, InstallPermissionTestModule.class.getSimpleName())
+				new Notification.Builder(mContext, InstallTestModule.class.getSimpleName())
 						.setContentTitle(resources.getText(
 								R.string.full_screen_intent_notification_title))
 						.setContentText(resources.getText(
@@ -538,6 +529,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		// run the API here where the SecurityException can be handled, and if the
 		// permission is granted then run it on the UI thread since an exception should
 		// not be thrown in that case.
+
 		if (mContext.checkSelfPermission(HIDE_OVERLAY_WINDOWS) != PackageManager.PERMISSION_GRANTED) {
 			mActivity.getWindow().setHideOverlayWindows(true);
 		} else {
@@ -616,7 +608,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 
 		BinderTransaction.getInstance().invoke(
 				Context.DEVICE_POLICY_SERVICE,
-				"android.app.admin.IDevicePolicyManager",
+				Transacts.DEVICE_POLICY_DESCRIPTOR,
 				"getNearbyNotificationStreamingPolicy",0
 		);
 //      Original Call
@@ -760,7 +752,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		IScreenRecordingCallback callback = new IScreenRecordingCallback() {
 			@Override
 			public IBinder asBinder() {
-				return null;
+				return getActivityToken();
 			}
 			@Override
 			public void onScreenRecordingStateChanged(boolean visibleInScreenRecording) throws RemoteException {
@@ -775,25 +767,19 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 		 */
 		BinderTransaction.getInstance().invoke(
 				Context.WINDOW_SERVICE,
-				"WINDOW_DESCRIPTOR",
+				Transacts.WINDOW_DESCRIPTOR,
 				"registerScreenRecordingCallback",callback
 		);
 	}
 
-	@PermissionTest(permission=ACCESS_HIDDEN_PROFILES, sdkMin=34,sdkMax = 35)
+	@PermissionTest(permission=ACCESS_HIDDEN_PROFILES, sdkMin=34,sdkMax = 34)
 	public void testAccessHiddenProfiles(){
-		if(Build.VERSION.SDK_INT>=35){
-			throw new BypassTestException(
-					"We can't access space setting intent by normal signature as of sdk35. " +
-							"So we exec same test on siganature permission tester. Ignore this result.");
-		}
-
+		//We can't access space setting intent by normal signature as of sdk35.
+		//So we exec same test on signature permission tester. Ignore this result.
 		LauncherApps launcherApps = systemService(LauncherApps.class);
-		//		(LauncherApps)
-		//		mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-		//If the caller cannot access hidden profiles the method returns null
+		// If the caller cannot access hidden profiles the method returns null
 		// see also. areHiddenApisChecksEnabled() in LauncherAppService
-		//ReflectionTool.invokeRefl
+
         Object intent = null;
         try {
             intent = ReflectionUtil.invoke(launcherApps,"getPrivateSpaceSettingsIntent");
@@ -998,9 +984,7 @@ public class InstallPermissionTestModule extends PermissionTestModuleBase {
 				if(!serviceConnection.binderSuccess.get()){
 					throw new SecurityException("Test for "+serviceConnection.mComponentName+" has been failed.");
 				}
-				//mLogger.logSystem("binder success"+serviceConnection.mComponentName);
 			} catch (Exception ex){
-				//mLogger.logSystem("binder !exception"+serviceConnection.mComponentName);
 				throw new UnexpectedTestFailureException(ex);
 			} finally {
 				mContext.unbindService(serviceConnection);

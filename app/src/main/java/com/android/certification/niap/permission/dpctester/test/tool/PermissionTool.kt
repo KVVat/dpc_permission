@@ -27,7 +27,7 @@ class PermissionTool {
             }
 
         }
-
+        /*
         fun getGrantedPermissions(ctx: Context, appPackage: String?): List<String>
         {
             val granted: MutableList<String> = ArrayList()
@@ -41,6 +41,6 @@ class PermissionTool {
             } catch (e: Exception) {
             }
             return granted
-        }
+        }*/
     }
 }

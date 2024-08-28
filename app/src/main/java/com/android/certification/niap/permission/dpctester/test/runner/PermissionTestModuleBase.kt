@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.IBinder
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.android.certification.niap.permission.dpctester.DpcApplication
 import com.android.certification.niap.permission.dpctester.common.Constants
@@ -38,6 +39,8 @@ open class PermissionTestModuleBase(activity: Activity) {
     protected val mPackageManager = mContext.packageManager
     @JvmField
     protected val mExecutor = (mContext.applicationContext as DpcApplication).executorService
+    @JvmField
+    val appUid = mContext.applicationInfo.uid
 
     protected val mAppSignature : Signature =
         SignatureUtils.getTestAppSigningCertificate(mContext);
@@ -59,7 +62,9 @@ open class PermissionTestModuleBase(activity: Activity) {
     }
 
 
-
+    fun checkPermissionGranted(permission: String): Boolean {
+        return ActivityCompat.checkSelfPermission(mContext,permission)==PackageManager.PERMISSION_GRANTED
+    }
     fun <T> getService(serviceClass: Class<T>): T? {
         val service = ContextCompat.getSystemService(mContext, serviceClass)
         return service

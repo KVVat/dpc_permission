@@ -162,7 +162,7 @@ public final class ReflectionUtil {
      *
      * <p>To handle this, gracefully fail the operation in progress.
      */
-    public static final class ReflectionIsTemporaryException extends Exception {
+    public static final class ReflectionIsTemporaryException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
 

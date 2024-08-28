@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,7 +55,13 @@ public class BinderTransactsDict {
 
             serviceNameSynonyms = mapper.readValue(services_.toString(),serviceNameSynonyms.getClass());
             indexDb = mapper.readValue(methods_.toString(),indexDb.getClass());
+            /*for(String key : serviceNameSynonyms.keySet()){
+                String actual = serviceNameSynonyms.get(key);
+                if(!actual.equals(key)){
+                    StaticLogger.info("public static final String "+key+" = \""+actual+"\";");
+                }
 
+            }*/
             //Log.d("tag",indexDb.toString());
             //Log.d("tag",serviceNameSynonyms.toString());
 

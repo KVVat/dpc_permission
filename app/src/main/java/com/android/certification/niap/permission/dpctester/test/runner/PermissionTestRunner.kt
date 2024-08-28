@@ -87,13 +87,13 @@ class PermissionTestRunner {
                         } else {
                             throwable = ex.cause
                         }
-                        Log.e("TAG", "ex!!");
                         throw throwable!! //rethrow
                     }
                 }catch(ex:NullPointerException){
                     //Is intended null pointer exception? (missing system service=>bypass)
                     throwable = ex
                     success=!success
+                    //@TODO cause fatal error?
                     message = ex.message!!
                 } catch(ex:SecurityException){
                     throwable = ex
@@ -115,7 +115,7 @@ class PermissionTestRunner {
                     ex.printStackTrace()
                     throwable = ex
                     success = !success
-                    message = ex.message!!
+                    message = if(ex.message != null) ex.message!! else ex.toString()
                 }
                 //safe call
 

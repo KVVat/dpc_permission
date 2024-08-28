@@ -1,4 +1,4 @@
-//Auto generated file RuntimePermissionTestModule.java by CoderPorterPlugin
+//Auto generated file RuntimeTestModule.java by CoderPorterPlugin
 /*
  * Copyright 2024 The Android Open Source Project
  *
@@ -69,7 +69,6 @@ import android.provider.OpenableColumns;
 import android.provider.VoicemailContract.Voicemails;
 
 import android.provider.Telephony;
-import android.provider.VoicemailContract;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.telephony.SmsManager;
@@ -105,8 +104,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
      
 @PermissionTestModule(name="Runtime Test Cases")    
-public class RuntimePermissionTestModule extends PermissionTestModuleBase {
-    public RuntimePermissionTestModule(@NonNull Activity activity){ super(activity);}
+public class RuntimeTestModule extends PermissionTestModuleBase {
+    public RuntimeTestModule(@NonNull Activity activity){ super(activity);}
     @Override
     public void start(Consumer<PermissionTestRunner.Result> callback){
         super.start(callback);
@@ -535,14 +534,9 @@ public class RuntimePermissionTestModule extends PermissionTestModuleBase {
 
 			}
 		};
-		/*
-		mTransacts.invokeTransact(Transacts.UWB_SERVICE, Transacts.UWB_DESCRIPTOR,
-				Transacts.openRanging, attributionSource, sessionHandle,
-				(IBinder) null,
-				new PersistableBundle(), "");
-		*/
-		BinderTransaction.getInstance().invoke("uwb",
-				"UWB_DESCRIPTOR","openRanging",
+
+		BinderTransaction.getInstance().invoke(Transacts.UWB_SERVICE,
+				Transacts.UWB_DESCRIPTOR,"openRanging",
 				attributionSource, sessionHandle,
 				(IBinder) null,
 				new PersistableBundle(), ""
@@ -551,12 +545,10 @@ public class RuntimePermissionTestModule extends PermissionTestModuleBase {
 
 	@PermissionTest(permission=UWB_RANGING, sdkMax=30)
 	public void testUwbRangingLegacy(){
-		BinderTransaction.getInstance().invoke("uwb",
-				"UWB_DESCRIPTOR",
+		BinderTransaction.getInstance().invoke(Transacts.UWB_SERVICE,
+				Transacts.UWB_DESCRIPTOR,
 				"getSpecificationInfo"
 				);
-		//mTransacts.invokeTransact(Transacts.UWB_SERVICE, Transacts.UWB_DESCRIPTOR,
-		//		Transacts.getSpecificationInfo"");
 	}
     @PermissionTest(permission=READ_MEDIA_AUDIO, sdkMin=33)
     public void testReadMediaAudio(){

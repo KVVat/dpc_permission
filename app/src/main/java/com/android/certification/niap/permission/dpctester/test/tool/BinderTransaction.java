@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.IBinder;
@@ -20,10 +22,13 @@ import android.text.TextUtils;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 public class BinderTransaction  {
@@ -132,8 +137,18 @@ public class BinderTransaction  {
     {
         return invoke(serviceName,descriptor,methodName,false,parameters);
     }
+    //Parameter has Charsequence? instead of String
+    public Parcel invokeCS(String serviceName, String descriptor, String methodName, Object ... parameters)
+    {
+        return invoke(serviceName,descriptor,methodName,true,parameters);
+    }
+    public Parcel invokeIBinder(IBinder ibinder, String descriptor, String methodName, Boolean useCharSequence, Object ... parameters)
+    {
+        return invoke(ibinder,descriptor,methodName,useCharSequence,parameters);
+    }
+
     @SuppressLint("PrivateApi")
-    public Parcel invoke(String serviceName, String descriptor, String methodName,boolean useCharSequence, Object ... parameters)
+    private Parcel invoke(String serviceName, String descriptor, String methodName,boolean useCharSequence, Object ... parameters)
     {
         IBinder binder;
         try {
@@ -180,5 +195,51 @@ public class BinderTransaction  {
         } catch (ReflectionUtil.ReflectionIsTemporaryException e) {
             throw new UnexpectedTestFailureException(e);
         }
+    }
+
+    /**
+     * Invokes a direct binder transact using the specified {@code intent} to bind to the service
+     * within the provided {@code context}; the service's {@code transactName} method is invoked
+     * with the provided {@code parameters} using the {@code descriptor} to look up the transact ID.
+     *
+     * <p>To facilitate invoking direct transacts for permission tests this method will check if
+     * the {@link RemoteException} caught as a result of running the transact is a {@link
+     * SecurityException}; if so the {@code SecurityException} is rethrown as is, otherwise an
+     * {@link UnexpectedTestFailureException} is thrown.
+     *
+     * @return the {@link Parcel} received as a result of invoking the transact
+     */
+    public Parcel invokeViaServiceFromIntent(Context context, Intent intent,
+                                                      String descriptor, String transactName, Object... parameters) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        IBinder[] connectedBinder = new IBinder[1];
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder binder) {
+                StaticLogger.debug("onServiceConnected: className = " + className);
+                connectedBinder[0] = binder;
+                latch.countDown();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                StaticLogger.debug("onServiceDisconnected: componentName = " + componentName);
+            }
+        };
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        boolean connectionSuccessful = false;
+        try {
+            connectionSuccessful = latch.await(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            StaticLogger.error("Caught an InterruptedException waiting for the service from " + intent
+                    + " to connect: ", e);
+        }
+        if (!connectionSuccessful) {
+            throw new UnexpectedTestFailureException(
+                    "Failed to connect to the service for descriptor " + descriptor);
+        }
+        return invoke(connectedBinder[0], descriptor, transactName, false,
+                parameters);
+
     }
 }

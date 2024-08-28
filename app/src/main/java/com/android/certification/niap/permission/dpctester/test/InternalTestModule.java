@@ -72,8 +72,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @PermissionTestModule(name="Internal Test Cases")    
-public class InternalPermissionTestModule extends PermissionTestModuleBase {
-    public InternalPermissionTestModule(@NonNull Activity activity){ super(activity);}
+public class InternalTestModule extends PermissionTestModuleBase {
+    public InternalTestModule(@NonNull Activity activity){ super(activity);}
     @Override
     public void start(Consumer<PermissionTestRunner.Result> callback){
         super.start(callback);
@@ -83,7 +83,8 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
     public void testManageHotwordDetection(){
 		try {
 		    BinderTransaction.getInstance().invoke(Transacts.VOICE_INTERACTION_SERVICE,
-		            "VOICE_INTERACTION_DESCRIPTOR", "updateState", null,
+		            Transacts.VOICE_INTERACTION_DESCRIPTOR,
+					"updateState", null,
 		            null, null);
 		} catch (SecurityException e) {
 		    // Note, there are two places where this transact can throw a
@@ -106,20 +107,20 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
     @PermissionTest(permission="OBSERVE_SENSOR_PRIVACY", sdkMin=31)
     public void testObserveSensorPrivacy(){
 		BinderTransaction.getInstance().invoke(Transacts.SENSOR_PRIVACY_SERVICE,
-		        "SENSOR_PRIVACY_DESCRIPTOR", "isSensorPrivacyEnabled");
+				Transacts.SENSOR_PRIVACY_DESCRIPTOR, "isSensorPrivacyEnabled");
     }
  
     @PermissionTest(permission="DOMAIN_VERIFICATION_AGENT", sdkMin=31)
     public void testDomainVerificationAgent(){
 		BinderTransaction.getInstance().invoke(Transacts.DOMAIN_VERIFICATION_SERVICE,
-		        "DOMAIN_VERIFICATION_DESCRIPTOR",
+		        Transacts.DOMAIN_VERIFICATION_DESCRIPTOR,
 		        "queryValidVerificationPackageNames");
     }
  
     @PermissionTest(permission="ACCESS_RCS_USER_CAPABILITY_EXCHANGE", sdkMin=31)
     public void testAccessRcsUserCapabilityExchange(){
 		BinderTransaction.getInstance().invoke(Transacts.TELEPHONY_IMS_SERVICE,
-		        "TELEPHONY_IMS_DESCRIPTOR", "requestAvailability", 0,
+		        Transacts.TELEPHONY_IMS_DESCRIPTOR, "requestAvailability", 0,
 		        mContext.getPackageName(), null,
 		        null, null);
     }
@@ -142,20 +143,20 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 		                    + "signing certificate");
 		}
 		BinderTransaction.getInstance().invoke(Transacts.COMPANION_DEVICE_SERVICE,
-		        "COMPANION_DEVICE_DESCRIPTOR", "createAssociation",
+		        Transacts.COMPANION_DEVICE_DESCRIPTOR, "createAssociation",
 		        mPackageName, "11:22:33:44:55:66", 0, certDigest);
     }
  
     @PermissionTest(permission="BYPASS_ROLE_QUALIFICATION", sdkMin=31)
     public void testBypassRoleQualification(){
-		BinderTransaction.getInstance().invoke(Transacts.ROLE_SERVICE, "ROLE_DESCRIPTOR",
+		BinderTransaction.getInstance().invoke(Transacts.ROLE_SERVICE, Transacts.ROLE_DESCRIPTOR,
 		        "setBypassingRoleQualification", false);
     }
  
     @PermissionTest(permission="PERFORM_IMS_SINGLE_REGISTRATION", sdkMin=31)
     public void testPerformImsSingleRegistration(){
 		BinderTransaction.getInstance().invoke(Transacts.TELEPHONY_IMS_SERVICE,
-		        "TELEPHONY_IMS_DESCRIPTOR",
+		        Transacts.TELEPHONY_IMS_DESCRIPTOR,
 		        "triggerNetworkRegistration", 0,
 		        getActivityToken(), 0, "test-sip-reason");
     }
@@ -177,7 +178,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 			public void onKeyguardLockedStateChanged(boolean b) {
 			}
 		};
-		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE,"WINDOW_DESCRIPTOR",
+		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE,Transacts.WINDOW_DESCRIPTOR,
 				"addKeyguardLockedStateListener", listener);
 
     }
@@ -191,12 +192,12 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 		    Constructor constructor = clazzVDPBuilder.getConstructor();
 		    Object builderObj = constructor.newInstance();
 		
-		    Object vdpParams = ReflectionUtil.invoke(builderObj, "build", new Class[]{});
+		    Object vdpParams = ReflectionUtil.invoke(builderObj, "build");
 
 		    IBinder binder = getActivityToken();
 		
 			BinderTransaction.getInstance().invoke(Transacts.VIRTUAL_DEVICE_MANAGER_SERVICE,
-					"VIRTUAL_DEVICE_MANAGER_DESCRIPTOR",
+					Transacts.VIRTUAL_DEVICE_MANAGER_DESCRIPTOR,
 					"createVirtualDevice",
 					binder,mContext.getPackageName(), 0,
 					vdpParams,null);
@@ -218,7 +219,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 			clazzVDPBuilder = Class.forName("android.companion.virtual.VirtualDeviceParams$Builder");
 			Constructor constructor = clazzVDPBuilder.getConstructor();
 			Object builderObj = constructor.newInstance();
-			Object vdpParams = ReflectionUtil.invoke(builderObj, "build", new Class[]{});
+			Object vdpParams = ReflectionUtil.invoke(builderObj, "build");
 
 			IBinder binder = getActivityToken();
 			/* Parameters from SDK35
@@ -228,7 +229,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 			*/
 			AttributionSource ats = new AttributionSource.Builder(0).build();
 			BinderTransaction.getInstance().invoke(Transacts.VIRTUAL_DEVICE_MANAGER_SERVICE,
-					"VIRTUAL_DEVICE_MANAGER_DESCRIPTOR",
+					Transacts.VIRTUAL_DEVICE_MANAGER_DESCRIPTOR,
 					"createVirtualDevice",
 					binder,ats, 0,
 					vdpParams,null,null);
@@ -316,23 +317,13 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
         } catch (ReflectionUtil.ReflectionIsTemporaryException e) {
             throw new UnexpectedTestFailureException(e);
         }
-
-//		invokeReflectionCall(ambientContextManager.getClass(),
-//		        "queryAmbientContextServiceStatus",
-//		        ambientContextManager, new Class[]{Set.class, Executor.class,
-//		                Consumer.class}, eventTypes, new Executor() {
-//		            @Override
-//		            public void execute(Runnable runnable) {
-//
-//		            }
-//		        }, null);
 		
     }
  
     @PermissionTest(permission="MANAGE_SAFETY_CENTER", sdkMin=33)
     public void testManageSafetyCenter(){
 		BinderTransaction.getInstance().invoke(Transacts.SAFETY_CENTER_MANAGER_SERVICE,
-		        "SAFETY_CENTER_MANAGER_MANAGER_DESCRIPTOR",
+		        Transacts.SAFETY_CENTER_MANAGER_MANAGER_DESCRIPTOR,
 		        "getSafetyCenterConfig");
     }
  
@@ -340,14 +331,14 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
     public void testManageSensorPrivacy(){
 		// ISensorPrivacyManager#setSensorPrivacy
 		BinderTransaction.getInstance().invoke(Transacts.SENSOR_PRIVACY_SERVICE,
-		        "SENSOR_PRIVACY_DESCRIPTOR",
+		        Transacts.SENSOR_PRIVACY_DESCRIPTOR,
 		        "setSensorPrivacy", false);
     }
  
     @PermissionTest(permission="TOGGLE_AUTOMOTIVE_PROJECTION", sdkMin=33)
     public void testToggleAutomotiveProjection(){
 		BinderTransaction.getInstance().invoke(Transacts.UI_MODE_SERVICE,
-		        "UI_MODE_DESCRIPTOR", "requestProjection",
+		        Transacts.UI_MODE_DESCRIPTOR, "requestProjection",
 		        getActivityToken(), 1, mContext.getPackageName());
 		
 		/*mActivity.sendBroadcast(
@@ -363,7 +354,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 
 		BinderTransaction.getInstance().invoke(
 				STATS_MANAGER,
-				"STATS_DESCRIPTOR",
+				Transacts.STATS_DESCRIPTOR,
 				"setRestrictedMetricsChangedOperation",
 				pendingIntent,1L ,mContext.getPackageName()
 		);
@@ -443,7 +434,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 		        //MANAGE_DEVICE_LOCK_STATE
 		        BinderTransaction.getInstance().invoke(
 		                Context.DEVICE_LOCK_SERVICE,
-		                "DEVICELOCK_DESCRIPTOR",
+		                Transacts.DEVICELOCK_DESCRIPTOR,
 		                "isDeviceLocked",callback);
 		
 		        latch.await(2000, TimeUnit.MILLISECONDS);
@@ -494,7 +485,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 		        //MANAGE_DEVICE_LOCK_STATE
 		        BinderTransaction.getInstance().invoke(
 		            Context.DEVICE_LOCK_SERVICE,
-		            "DEVICELOCK_DESCRIPTOR",
+		            Transacts.DEVICELOCK_DESCRIPTOR,
 		            "isDeviceLocked",callback);
 		
 		        latch.await(2000, TimeUnit.MILLISECONDS);
@@ -516,7 +507,7 @@ public class InternalPermissionTestModule extends PermissionTestModuleBase {
 		}
 		BinderTransaction.getInstance().invoke(
 		        Transacts.DEVICE_POLICY_SERVICE,
-		        "DEVICE_POLICY_DESCRIPTOR",
+		        Transacts.DEVICE_POLICY_DESCRIPTOR,
 		        "isDevicePotentiallyStolen",mContext.getPackageName());
 		
     }

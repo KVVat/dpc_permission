@@ -100,7 +100,7 @@ android {
     buildFeatures {
         aidl = true
     }
-    compileSdkPreview = "VanillaIceCream"
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.android.certification.niap.permission.dpctester"
