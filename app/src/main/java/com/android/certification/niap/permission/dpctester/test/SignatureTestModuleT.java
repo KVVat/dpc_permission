@@ -27,13 +27,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.LocaleManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManager;
+import android.app.wallpapereffectsgeneration.CinematicEffectRequest;
+import android.app.wallpapereffectsgeneration.CinematicEffectResponse;
+import android.app.wallpapereffectsgeneration.ICinematicEffectListener;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
@@ -41,42 +40,31 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.IpConfiguration;
 import android.net.NetworkCapabilities;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.IInterface;
 import android.os.OutcomeReceiver;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.KeyChain;
 import android.security.keystore.KeyGenParameterSpec;
-import android.telecom.TelecomManager;
-import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.accessibility.CaptioningManager;
+import android.window.ITaskFpsCallback;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresExtension;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.activity.TestActivity;
 import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
@@ -89,13 +77,9 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -104,7 +88,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -131,10 +114,6 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		super(activity);
 	}
 
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
-	}
 
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
@@ -184,7 +163,8 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 			ReflectionUtil.invoke(systemService(DevicePolicyManager.class),
 					"sendLostModeLocationUpdate",
-					new Class<?>[]{Executor.class, Consumer.class}, new Executor() {
+					new Class<?>[]{Executor.class, Consumer.class},
+					new Executor() {
 						@Override
 						public void execute(Runnable runnable) {
 						}
@@ -380,14 +360,25 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		}
 	}
 
+
+	@SuppressLint("PrivateApi")
 	@PermissionTest(permission="USE_ATTESTATION_VERIFICATION_SERVICE", sdkMin=33)
 	public void testUseAttestationVerificationService(){
 		// in VerificationToken token,in ParcelDuration maximumTokenAge,in AndroidFuture resultCallback
 		// Intended NPE will be raised
-		BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
-				Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
-				"verifyToken", null,null,null);
-	}
+		try {
+			Class<?> clazz = Class.forName("com.android.internal.infra.AndroidFuture");
+			Object future = clazz.getConstructor().newInstance();
+			BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
+					Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
+					"verifyToken", null,null,future);
+
+		} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new UnexpectedTestFailureException(e);
+        }
+
+    }
 
 	@PermissionTest(permission="REQUEST_UNIQUE_ID_ATTESTATION", sdkMin=33)
 	public void testRequestUniqueIdAttestation(){
@@ -397,9 +388,10 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 						.setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"))
 						.setDigests(DIGEST_NONE, DIGEST_SHA256, DIGEST_SHA512)
 						.setAttestationChallenge(new byte[128]);
-		//setUniqueIeIncluded is a hidden api
-		builder = (KeyGenParameterSpec.Builder)ReflectionUtil.invoke(builder.getClass(),
-				"setUniqueIdIncluded",builder,
+		//setUniqueIeIncluded is a hidden api so need to cast a spell to execute this method
+		//
+		builder = (KeyGenParameterSpec.Builder)ReflectionUtil.invoke(builder,
+				"setUniqueIdIncluded",
 				new Class<?>[]{boolean.class}, true);
 
 		KeyGenParameterSpec spec = builder.build();
@@ -432,8 +424,8 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	public void testRevokePostNotificationsWithoutKill(){
 		@SuppressLint("WrongConstant") Object permissionManager = mContext.getSystemService("permission");
 		//revokePostNotificationPermissionWithoutKillForTest( java.lang.String int);
-		ReflectionUtil.invoke(permissionManager.getClass(),
-				"revokePostNotificationPermissionWithoutKillForTest",permissionManager,
+		ReflectionUtil.invoke(permissionManager,
+				"revokePostNotificationPermissionWithoutKillForTest",
 				new Class<?>[]{String.class,int.class}, mContext.getPackageName(),0);
 	}
 
@@ -498,11 +490,8 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="SET_WALLPAPER_DIM_AMOUNT", sdkMin=33)
 	public void testSetWallpaperDimAmount(){
-		WallpaperManager wallpaperManager = systemService(WallpaperManager.class);
-
-		ReflectionUtil.invoke(wallpaperManager.getClass(),
-				"getWallpaperDimAmount", wallpaperManager,
-				new Class[]{});
+		ReflectionUtil.invoke(systemService(WallpaperManager.class),
+				"getWallpaperDimAmount");
 	}
 
 	@PermissionTest(permission="START_REVIEW_PERMISSION_DECISIONS", sdkMin=33)
@@ -528,12 +517,11 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		Class<?> clazzSearchBuilder = null;
 		Object searchRequest = null;
 		try {
-			clazzSearchBuilder = Class.forName("android.app.cloudsearch.SearchRequest$Builder");
+			clazzSearchBuilder =
+					Class.forName("android.app.cloudsearch.SearchRequest$Builder");
 			Constructor constructor = clazzSearchBuilder.getConstructor(String.class);
 			Object builderObj = constructor.newInstance("test");
-			searchRequest = ReflectionUtil.invoke(clazzSearchBuilder,
-					"build", builderObj,
-					new Class[]{});
+			searchRequest = ReflectionUtil.invoke(builderObj, "build");
 
 			BinderTransaction.getInstance().invoke(Transacts.CLOUDSEARCH_SERVICE, Transacts.CLOUDSEARCH_DESCRIPTOR,
 					"search",searchRequest,null);
@@ -544,10 +532,20 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="MANAGE_WALLPAPER_EFFECTS_GENERATION", sdkMin=33)
 	public void testManageWallpaperEffectsGeneration(){
+		Bitmap.Config conf = Bitmap.Config.ARGB_4444; // see other conf types
+		Bitmap bmp = Bitmap.createBitmap(4, 4, conf); // this creates a MUTABLE bitmap
+		CinematicEffectRequest request =
+				new CinematicEffectRequest("test-wallpaper-effects-generation",
+						bmp);
 		BinderTransaction.getInstance().invoke(Transacts.WALLPAPER_EFFECTS_GENERATION_SERVICE,
 				Transacts.WALLPAPER_EFFECTS_GENERATION_DESCRIPTOR,
 				"generateCinematicEffect",
-				null,null);
+				request,new ICinematicEffectListener.Stub() {
+					@Override
+					public void onCinematicEffectGenerated(CinematicEffectResponse response) throws RemoteException {
+
+					}
+				});
 	}
 
 	@PermissionTest(permission="SET_GAME_SERVICE", sdkMin=33)
@@ -558,8 +556,13 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="ACCESS_FPS_COUNTER", sdkMin=33)
 	public void testAccessFpsCounter(){
-		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
-				"registerTaskFpsCallback", 0,null);
+		BinderTransaction.getInstance().invoke(
+				Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
+				"registerTaskFpsCallback", 1, new ITaskFpsCallback.Stub() {
+					@Override
+					public void onFpsReported(float fps) throws RemoteException {
+					}
+				});
 	}
 
 	@PermissionTest(permission="MANAGE_GAME_ACTIVITY", sdkMin=33)
@@ -693,45 +696,11 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission="BIND_ATTESTATION_VERIFICATION_SERVICE", sdkMin=33)
-	public void testBindAttestationVerificationService(){
-		getBindRunnable("BIND_ATTESTATION_VERIFICATION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_TRACE_REPORT_SERVICE", sdkMin=33)
-	public void testBindTraceReportService(){
-		getBindRunnable("BIND_TRACE_REPORT_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_GAME_SERVICE", sdkMin=33)
-	public void testBindGameService(){
-		getBindRunnable("BIND_GAME_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_SELECTION_TOOLBAR_RENDER_SERVICE", sdkMin=33)
-	public void testBindSelectionToolbarRenderService(){
-		getBindRunnable("BIND_SELECTION_TOOLBAR_RENDER_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE", sdkMin=33)
-	public void testBindWallpaperEffectsGenerationService(){
-		getBindRunnable("BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_TV_INTERACTIVE_APP", sdkMin=33)
-	public void testBindTvInteractiveApp(){
-		getBindRunnable("BIND_TV_INTERACTIVE_APP");
-	}
-
-	@PermissionTest(permission="BIND_AMBIENT_CONTEXT_DETECTION_SERVICE", sdkMin=33)
-	public void testBindAmbientContextDetectionService(){
-		getBindRunnable("BIND_AMBIENT_CONTEXT_DETECTION_SERVICE");
-	}
 	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 	@PermissionTest(permission="LOCATION_HARDWARE")
 	public void testLocationHardware(){
 
-		ReflectionUtil.invoke(systemService(LocaleManager.class), "flushGnssBatch");
+		ReflectionUtil.invoke(systemService(LocationManager.class), "flushGnssBatch");
 	}
 }
 

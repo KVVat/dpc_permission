@@ -64,6 +64,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -92,10 +93,6 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		super(activity);
 	}
 
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
-	}
 
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
@@ -210,8 +207,8 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 
 			}
 		};
-		ReflectionUtil.invoke(NsdManager.class,
-				"registerOffloadEngine", manager,
+		ReflectionUtil.invoke(manager,
+				"registerOffloadEngine",
 				new Class<?>[]{String.class,long.class,long.class, Executor.class,OffloadEngine.class},
 				"iface1",
 				OFFLOAD_TYPE_REPLY,
@@ -219,27 +216,26 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				mContext.getMainExecutor(),
 				mock);
 		//If succeed unregister it for in the case.
-		ReflectionUtil.invoke(NsdManager.class,
-				"unregisterOffloadEngine", manager,
+		ReflectionUtil.invoke(manager,
+				"unregisterOffloadEngine",
 				new Class<?>[]{OffloadEngine.class},
 				mock);
 	}
 
 	@PermissionTest(permission="QUARANTINE_APPS", sdkMin=35)
 	public void testQuarantineApps(){
-		//final boolean quarantined = ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0)
+		//final boolean quarantined = ((flags & PackafgeManager.FLAG_SUSPEND_QUARANTINED) != 0)
 		//        && Flags.quarantinedEnabled();
 		// Flags.quarantinedEnabled();
 		try {
 
 			Class<?> clazzDialogBuilder = null;
 			clazzDialogBuilder = Class.forName("android.content.pm.SuspendDialogInfo$Builder");
-			Constructor constructor = clazzDialogBuilder.getConstructor();
+			Constructor<?> constructor = clazzDialogBuilder.getConstructor();
 			Object builderObj = constructor.newInstance();
 
 			Object dialogInfo =
-					ReflectionUtil.invoke(clazzDialogBuilder, "build", builderObj, new Class[]{});
-
+					ReflectionUtil.invoke(builderObj, "build");
 
 			int FLAG_SUSPEND_QUARANTINED = 0x00000001;
 			BinderTransaction.getInstance().invoke(
@@ -250,16 +246,12 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 					new PersistableBundle(),new PersistableBundle(),dialogInfo,
 					FLAG_SUSPEND_QUARANTINED,"dummy.package.suspending",appUid,appUid);
 
-		} catch (ClassNotFoundException | NoSuchMethodException ex){
-			logger.error("class not found exception",ex);
-		} catch (InvocationTargetException | IllegalAccessException |
-				 InstantiationException ex) {
-			logger.error("instance/invocation error",ex);
+		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException | InstantiationException ex){
+			throw new UnexpectedTestFailureException(ex);
 		}
 
-
-
-	}
+    }
 
 	@PermissionTest(permission="CONFIGURE_FACTORY_RESET_PROTECTION", sdkMin=35)
 	public void testConfigureFactoryResetProtection(){
@@ -285,9 +277,7 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
 		//If the caller cannot access hidden profiles the method returns null
 		Object intent = ReflectionUtil.invoke
-				(launcherApps.getClass(),
-						"getPrivateSpaceSettingsIntent",
-						launcherApps,new Class[]{});
+				(launcherApps, "getPrivateSpaceSettingsIntent");
 		if(intent == null){
 			throw new SecurityException("Caller cannot access hidden profiles");
 		}
@@ -453,28 +443,27 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		//Conflict to USE_BIOMETRIC permission
 		//You should put below in noperm/AndroidManifest.xml to test
 		//<uses-permission android:name="android.permission.USE_BIOMETRIC" />
-		if(Build.VERSION.SDK_INT>28) {
-			BiometricPrompt.Builder bmBuilder = new BiometricPrompt.Builder(mContext)
-					.setTitle("a").setNegativeButton("text", mContext.getMainExecutor(), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialogInterface, int i) {
+		BiometricPrompt.Builder bmBuilder = new BiometricPrompt.Builder(mContext)
+				.setTitle("a").setNegativeButton("text", mContext.getMainExecutor(), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
 
-						}
-					});//.setLo
-			ReflectionUtil.invoke(BiometricPrompt.Builder.class,
-					"setLogoDescription", bmBuilder, new Class<?>[]{String.class},
-					"dummy-logo-desription");
-			BiometricPrompt bmPrompt = bmBuilder.build();
-			bmPrompt.authenticate(new CancellationSignal(),
-					mContext.getMainExecutor()
-					, new BiometricPrompt.AuthenticationCallback() {
-						@Override
-						public void onAuthenticationError(int errorCode, CharSequence errString) {
-							super.onAuthenticationError(errorCode, errString);
-						}
 					}
-			);
-		}
+				});//.setLo
+		ReflectionUtil.invoke(bmBuilder,
+				"setLogoDescription",  new Class<?>[]{String.class},
+				"dummy-logo-desription");
+		BiometricPrompt bmPrompt = bmBuilder.build();
+		bmPrompt.authenticate(new CancellationSignal(),
+				mContext.getMainExecutor()
+				, new BiometricPrompt.AuthenticationCallback() {
+					@Override
+					public void onAuthenticationError(int errorCode, CharSequence errString) {
+						super.onAuthenticationError(errorCode, errString);
+					}
+				}
+		);
+
 	}
 
 	@PermissionTest(permission="RECORD_SENSITIVE_CONTENT", sdkMin=35)
@@ -574,41 +563,40 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="USE_ON_DEVICE_INTELLIGENCE", sdkMin=35)
 	public void testUseOnDeviceIntelligence(){
 		@SuppressLint("WrongConstant") Object ond = mContext.getSystemService("on_device_intelligence");
-		//logger.logSystem(">"+ond.toString());
-		//logger.logSystem(">"+ReflectionUtils.checkDeclaredMethod(ond,"getVersion").toString());
+		//logger.system(">"+ond.toString());
+		//logger.system(">"+ ReflectionTool.Companion.checkDeclaredMethod(ond,"getVersion").toString());
 
 		//public void getFeature(
 		//            int featureId,
 		//            @NonNull @CallbackExecutor Executor callbackExecutor,
 		//            @NonNull OutcomeReceiver<Feature, OnDeviceIntelligenceException> featureReceiver) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			try {
-				ReflectionUtil.invoke(ond.getClass(),
-						"getVersion", ond,
-						new Class<?>[]{Executor.class, LongConsumer.class},
-						mContext.getMainExecutor(), (LongConsumer) result -> {
-						});
-			} catch (UnexpectedTestFailureException ex){
-				if(ex.getCause() != null  &&  ex.getCause() instanceof InvocationTargetException){
-					if(ex.getCause().getCause() != null && ex.getCause() instanceof IllegalStateException){
-						//ok? : remote service is not configured
-					}
+		try {
+			ReflectionUtil.invoke(ond,
+					"getVersion",
+					new Class<?>[]{Executor.class, LongConsumer.class},
+					mContext.getMainExecutor(), (LongConsumer) result -> {
+					});
+		} catch (UnexpectedTestFailureException ex){
+			if(ex.getCause() != null  &&  ex.getCause() instanceof InvocationTargetException){
+				if(ex.getCause().getCause() != null && ex.getCause() instanceof IllegalStateException){
+					//ok? : remote service is not configured
 				}
 			}
-		                        /*
-		                        ReflectionUtil.invoke(ond.getClass(),
-		                                "getFeature",ond,
-		                                new Class<?>[]{int.class,Executor.class, OutcomeReceiver.class},
-		                                1,mContext.getMainExecutor(),(OutcomeReceiver) result->{});
-
-		                         */
 		}
-		//                    BinderTransaction.getInstance().invoke(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
-		//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
-		//                            Transacts.getFeature,ii_callback);
-		//                            invokeTransactWithCharSequence(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
-		//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
-		//                            Transacts.getFeature,false,ii_callback);
+		/*
+		ReflectionUtil.invoke(ond.getClass(),
+				"getFeature",ond,
+				new Class<?>[]{int.class,Executor.class, OutcomeReceiver.class},
+				1,mContext.getMainExecutor(),(OutcomeReceiver) result->{});
+
+		 */
+
+//                    BinderTransaction.getInstance().invoke(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
+//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
+//                            Transacts.getFeature,ii_callback);
+//                            invokeTransactWithCharSequence(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
+//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
+//                            Transacts.getFeature,false,ii_callback);
 	}
 
 	@PermissionTest(permission="SYNC_FLAGS", sdkMin=35)
@@ -617,13 +605,11 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 			Object featureFlags = ReflectionUtil.invoke(
 					"android.flags.FeatureFlags","getInstance");
 			ReflectionUtil.invoke(Class.forName("android.flags.FeatureFlags"),
-					"booleanFlag",null,
+					"booleanFlag",
 					new Class<?>[]{String.class,String.class,boolean.class},"dummy","dummy-boolean",true);
-			ReflectionUtil.invoke(Class.forName("android.flags.FeatureFlags"),
-					"sync",featureFlags,
-					new Class<?>[]{});
+			ReflectionUtil.invoke(featureFlags, "sync");
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new UnexpectedTestFailureException(e);
 		}
 	}
 
@@ -719,25 +705,34 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission="BIND_ON_DEVICE_INTELLIGENCE_SERVICE", sdkMin=35)
-	public void testBindOnDeviceIntelligenceService(){
-		getBindRunnable("BIND_ON_DEVICE_INTELLIGENCE_SERVICE");
+	@PermissionTest(permission="SOUNDTRIGGER_DELEGATE_IDENTITY", sdkMin=35)
+	public void testSoundtriggerDelegateIdentity(){
+		Parcelable identity = new Parcelable() {
+			@Override
+			public int describeContents() {
+				return 0;
+			}
+
+			@Override
+			public void writeToParcel(Parcel parcel, int i) {
+				int start_pos = parcel.dataPosition();
+				parcel.writeInt(0);
+				parcel.writeInt(appUid); // uid
+				parcel.writeInt(Binder.getCallingPid()); // pid
+				parcel.writeString(mContext.getPackageName()); // packageName
+				parcel.writeString("test-attribution"); // attributionTag
+				int end_pos = parcel.dataPosition();
+				parcel.setDataPosition(start_pos);
+				parcel.writeInt(end_pos - start_pos);
+				parcel.setDataPosition(end_pos);
+			}
+		};
+		//From SDK35, a parameter has been added
+		BinderTransaction.getInstance().invoke(Transacts.SOUND_TRIGGER_SERVICE,
+				Transacts.SOUND_TRIGGER_DESCRIPTOR, "attachAsMiddleman",
+				identity, identity, null, new Binder());
 	}
 
-	@PermissionTest(permission="BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE", sdkMin=35)
-	public void testBindOnDeviceSandboxedInferenceService(){
-		getBindRunnable("BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_TV_AD_SERVICE", sdkMin=35)
-	public void testBindTvAdService(){
-		getBindRunnable("BIND_TV_AD_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_DOMAIN_SELECTION_SERVICE", sdkMin=35)
-	public void testBindDomainSelectionService(){
-		getBindRunnable("BIND_DOMAIN_SELECTION_SERVICE");
-	}
 }
 
 

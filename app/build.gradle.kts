@@ -152,6 +152,11 @@ dependencies {
     implementation(libs.androidx.runner)
     implementation(libs.androidx.credentials)
 
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.vision)
+    implementation(libs.play.services.base)
+
     implementation(libs.guava)
     implementation(libs.material)
 

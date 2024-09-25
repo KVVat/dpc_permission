@@ -1,11 +1,13 @@
 package com.android.certification.niap.permission.dpctester.test.tool
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PermissionGroupInfo
+import android.content.pm.PermissionInfo
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway
 import com.android.certification.niap.permission.dpctester.common.DevicePolicyManagerGateway.DeviceOwnerLevel
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger
 
 class PermissionTool {
     companion object {
@@ -26,6 +28,33 @@ class PermissionTool {
                 return DeviceOwnerLevel.DPS_DISABLED
             }
 
+        }
+
+        /**
+         * Returns a [List] of [PermissionInfo] instances representing all permissions
+         * declared on the device; this result includes permissions declared by the platform as well as
+         * permissions declared by other packages installed on the device.
+         */
+        fun getAllDeclaredPermissions(context: Context): List<PermissionInfo> {
+            val declaredPermissions: MutableList<PermissionInfo> =
+                ArrayList() //getAllDeclaredPermissions(mContext);
+            val packageManager = context.packageManager
+            val groups: MutableList<PermissionGroupInfo?> =
+                packageManager.getAllPermissionGroups(0)
+            groups.add(null)
+            for (group in groups) {
+                val groupName = group?.name
+                try {
+                    val permissions: List<PermissionInfo> = packageManager.queryPermissionsByGroup(
+                        groupName, 0
+                    )
+
+                    declaredPermissions.addAll(permissions)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    StaticLogger.error("Caught a NameNotFoundException for group $groupName", e)
+                }
+            }
+            return declaredPermissions
         }
         /*
         fun getGrantedPermissions(ctx: Context, appPackage: String?): List<String>

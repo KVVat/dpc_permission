@@ -18,17 +18,17 @@ class DPCHealthTestModule(ctx: Activity): PermissionTestModuleBase(ctx){
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
 
     //val pm  =ctx.packageManager
-    override fun start(callback: Consumer<PermissionTestRunner.Result>?) {
+    /*override fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo {
         PermissionTestRunner.getInstance().start(this) { result ->
             callback?.accept(result)
         }
 
 
-    }
+    }*/
     @PermissionTest(".Owner Level",34,35)
     fun checkDeviceOwnerLevel() {
         //logger.system(">"+dpm.admin)
-        logger.system(">"+ PermissionTool.getDeviceOwnerLevel(dpm))
+        //logger.system(">"+ PermissionTool.getDeviceOwnerLevel(dpm))
         //checkUserRestriction("no_camera")
     }
     @PermissionTest(".Assigned Permissons",34,35)

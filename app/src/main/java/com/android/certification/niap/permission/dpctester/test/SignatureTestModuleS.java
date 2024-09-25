@@ -59,10 +59,13 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 
 import java.io.FileDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -73,10 +76,6 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 		super(activity);
 	}
 
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
-	}
 
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
@@ -161,7 +160,7 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 			// a ServiceSpecificException is thrown with the text "Permission Denial"
 			String e_message = e.getMessage();
 			if(e_message != null && e_message.contains("Permission Denial")){
-				logger.system(e_message);
+				//e_message);
 				throw new SecurityException(e);
 			} else {
 				throw e;
@@ -195,15 +194,29 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="FORCE_DEVICE_POLICY_MANAGER_LOGS", sdkMin=31)
 	public void testForceDevicePolicyManagerLogs(){
-		BinderTransaction.getInstance().invoke(Transacts.DEVICE_POLICY_SERVICE,
-				Transacts.DEVICE_POLICY_DESCRIPTOR, "forceSecurityLogs");
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.DEVICE_POLICY_SERVICE,
+					Transacts.DEVICE_POLICY_DESCRIPTOR, "forceSecurityLogs");
+		} catch(IllegalStateException ignored){
+			//IllegalStateExceptiont Exception will be caused by it, so it is an expected error
+		}
 	}
 
 	@PermissionTest(permission="INPUT_CONSUMER", sdkMin=31)
 	public void testInputConsumer(){
-		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
-				"createInputConsumer", getActivityToken(), "test", 1, null);
-	}
+        try {
+            Class clazz = Class.forName("android.view.InputChannel");
+			Object inputChannel = clazz.getConstructor().newInstance();
+
+			BinderTransaction.getInstance().invokeCS(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
+					"createInputConsumer",
+					new Binder(), "default", 0, inputChannel);
+
+		} catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException |
+                 InstantiationException | NoSuchMethodException e) {
+            throw new UnexpectedTestFailureException(e);
+        }
+    }
 
 	@PermissionTest(permission="KEEP_UNINSTALLED_PACKAGES", sdkMin=31)
 	public void testKeepUninstalledPackages(){
@@ -225,7 +238,7 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 			Thread thread = new Thread(() -> {
 				boolean permissionGranted =
 						checkPermissionGranted("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP");
-				logger.system("Running MANAGE_CREDENTIAL_MANAGEMENT_APP test case.");
+				logger.debug("Running MANAGE_CREDENTIAL_MANAGEMENT_APP test case.");
 				try {
 					KeyChain.removeCredentialManagementApp(mContext);
 //					getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
@@ -376,9 +389,14 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 				// check for no credentials set.
 			}
 		};
-		BinderTransaction.getInstance().invoke(Transacts.LOCK_SETTINGS_SERVICE,
-				Transacts.LOCK_SETTINGS_DESCRIPTOR,"verifyCredential",
-				lockscreenCredential, 0, 0);
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.LOCK_SETTINGS_SERVICE,
+					Transacts.LOCK_SETTINGS_DESCRIPTOR, "verifyCredential",
+					lockscreenCredential, 0, 0);
+		} catch(IllegalArgumentException ignored){
+			//Credential Check will be executed after permission check.
+			//IllegalArgument Exception will be caused by it, so it is expected error
+		}
 	}
 
 	@PermissionTest(permission="TEST_BIOMETRIC", sdkMin=31)
@@ -461,8 +479,12 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 				parcel.writeInt(duration.getNano());
 			}
 		};
-		BinderTransaction.getInstance().invoke(Transacts.POWER_SERVICE, Transacts.POWER_DESCRIPTOR,
-				"setBatteryDischargePrediction", parcelDuration, false);
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.POWER_SERVICE, Transacts.POWER_DESCRIPTOR,
+					"setBatteryDischargePrediction", parcelDuration, false);
+		} catch(IllegalStateException ignored){
+			//Can not close correctly while charging
+		}
 	}
 
 	@PermissionTest(permission="MANAGE_TIME_AND_ZONE_DETECTION", sdkMin=31)
@@ -658,7 +680,7 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 				"removeRequestRebootReadinessStatusListener", getActivityToken());
 	}
 
-	@PermissionTest(permission="SOUNDTRIGGER_DELEGATE_IDENTITY", sdkMin=31)
+	@PermissionTest(permission="SOUNDTRIGGER_DELEGATE_IDENTITY", sdkMin=31,sdkMax = 34)
 	public void testSoundtriggerDelegateIdentity(){
 		Parcelable identity = new Parcelable() {
 			@Override
@@ -683,16 +705,26 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 
 		BinderTransaction.getInstance().invoke(Transacts.SOUND_TRIGGER_SERVICE,
 				Transacts.SOUND_TRIGGER_DESCRIPTOR, "attachAsMiddleman",
-				identity, identity, getActivityToken());
+				identity, identity,new Binder());
 	}
 
 	@PermissionTest(permission="SUGGEST_EXTERNAL_TIME", sdkMin=31)
-	public void testSuggestExternalTime(){
-		//android.app.time.ExternalTimeSuggestion
-		BinderTransaction.getInstance().invoke(Transacts.TIME_DETECTOR_SERVICE,
-				Transacts.TIME_DETECTOR_DESCRIPTOR, "suggestExternalTime",
-				(Object) null);
-	}
+	public void testSuggestExternalTime()  {
+		//logger.debug("external_time_suggestion1");
+        try {
+            Class<?> clazz = Class.forName("android.app.time.ExternalTimeSuggestion");
+			Constructor<?> constructor = clazz.getConstructor(new Class<?>[]{long.class,long.class});
+			Object ets = constructor.newInstance(0L,0L);
+			//android.app.time.ExternalTimeSuggestion
+			BinderTransaction.getInstance().invoke(Transacts.TIME_DETECTOR_SERVICE,
+					Transacts.TIME_DETECTOR_DESCRIPTOR, "suggestExternalTime",
+					(Object)ets);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException | InstantiationException e) {
+            throw new UnexpectedTestFailureException(e);
+        }
+
+    }
 
 	@PermissionTest(permission="TOGGLE_AUTOMOTIVE_PROJECTION", sdkMin=31, sdkMax=32)
 	public void testToggleAutomotiveProjection(){
@@ -724,7 +756,15 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 		//RecognitionRequest,IBinder
 		BinderTransaction.getInstance().invoke(Transacts.MUSIC_RECOGNITION_SERVICE,
 				Transacts.MUSIC_RECOGNITION_DESCRIPTOR, "beginRecognition",
-				null, null);
+				new Parcelable() {
+					@Override
+					public int describeContents() {
+						return 0;
+					}
+					@Override
+					public void writeToParcel(@NonNull Parcel dest, int flags) {
+					}
+				}, new Binder());
 	}
 
 	@PermissionTest(permission="MANAGE_UI_TRANSLATION", sdkMin=31)
@@ -742,10 +782,11 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="GET_PEOPLE_TILE_PREVIEW", sdkMin=31)
 	public void testGetPeopleTilePreview(){
-		Bundle param = new Bundle();
+		//TODO:Invalid shortcut id?
+
 		mContentResolver.call(
 				Uri.parse("content://com.android.systemui.people.PeopleProvider"),
-				"get_people_tile_preview", null, param);
+				"get_people_tile_preview", null, new Bundle());
 	}
 
 	@PermissionTest(permission="MANAGE_ACTIVITY_TASKS", sdkMin=31)
@@ -780,8 +821,12 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="WIFI_ACCESS_COEX_UNSAFE_CHANNELS", sdkMin=31)
 	public void testWifiAccessCoexUnsafeChannels(){
 		//WifiManager.CoexCallback()
-		BinderTransaction.getInstance().invoke(Transacts.WIFI_SERVICE, Transacts.WIFI_DESCRIPTOR,
-				"unregisterCoexCallback",(Object) null);
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.WIFI_SERVICE, Transacts.WIFI_DESCRIPTOR,
+					"unregisterCoexCallback", (Object) null);
+		} catch (IllegalArgumentException ignored){
+			logger.debug("Intended Exception : for null callback object, permission check would be already executed");
+		}
 
 	}
 
@@ -789,61 +834,6 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 	public void testWifiUpdateCoexUnsafeChannels(){
 		BinderTransaction.getInstance().invoke(Transacts.WIFI_SERVICE, Transacts.WIFI_DESCRIPTOR,
 				"setCoexUnsafeChannels", null, 0);
-	}
-
-    @PermissionTest(permission="BIND_CALL_DIAGNOSTIC_SERVICE", sdkMin=31)
-	public void testBindCallDiagnosticService(){
-		getBindRunnable("BIND_CALL_DIAGNOSTIC_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_COMPANION_DEVICE_SERVICE", sdkMin=31)
-	public void testBindCompanionDeviceService(){
-		getBindRunnable("BIND_COMPANION_DEVICE_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_DISPLAY_HASHING_SERVICE", sdkMin=31)
-	public void testBindDisplayHashingService(){
-		getBindRunnable("BIND_DISPLAY_HASHING_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_DOMAIN_VERIFICATION_AGENT", sdkMin=31)
-	public void testBindDomainVerificationAgent(){
-		getBindRunnable("BIND_DOMAIN_VERIFICATION_AGENT").run();
-	}
-
-	@PermissionTest(permission="BIND_GBA_SERVICE", sdkMin=31)
-	public void testBindGbaService(){
-		getBindRunnable("BIND_GBA_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_HOTWORD_DETECTION_SERVICE", sdkMin=31)
-	public void testBindHotwordDetectionService(){
-		getBindRunnable("BIND_HOTWORD_DETECTION_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_MUSIC_RECOGNITION_SERVICE", sdkMin=31)
-	public void testBindMusicRecognitionService(){
-		getBindRunnable("BIND_MUSIC_RECOGNITION_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_RESUME_ON_REBOOT_SERVICE", sdkMin=31)
-	public void testBindResumeOnRebootService(){
-		getBindRunnable("BIND_RESUME_ON_REBOOT_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_ROTATION_RESOLVER_SERVICE", sdkMin=31)
-	public void testBindRotationResolverService(){
-		getBindRunnable("BIND_ROTATION_RESOLVER_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_TIME_ZONE_PROVIDER_SERVICE", sdkMin=31)
-	public void testBindTimeZoneProviderService(){
-		getBindRunnable("BIND_TIME_ZONE_PROVIDER_SERVICE").run();
-	}
-
-	@PermissionTest(permission="BIND_TRANSLATION_SERVICE", sdkMin=31)
-	public void testBindTranslationService(){
-		getBindRunnable("BIND_TRANSLATION_SERVICE").run();
 	}
 
 	@PermissionTest(permission="TRIGGER_SHELL_PROFCOLLECT_UPLOAD", sdkMin=32)

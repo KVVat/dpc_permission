@@ -102,7 +102,7 @@ class ReflectionTool {
             }.collect(Collectors.toList())
         }
 
-        fun checkPermissionTestMethod(target: Any): List<PermissionTestRunner.Data> {
+        fun checkPermissionTestMethod(target: Any): MutableList<PermissionTestRunner.Data> {
             val a: MutableList<PermissionTestRunner.Data> = ArrayList()
             val clazz: Class<*> = target.javaClass
             val methods = clazz.declaredMethods
@@ -116,7 +116,7 @@ class ReflectionTool {
                 //Log.d("TAG",container.toString())
                 a.add(container)
             }
-            return a.toList()
+            return a;
         }
         /*
         fun deviceConfigSetProperty(

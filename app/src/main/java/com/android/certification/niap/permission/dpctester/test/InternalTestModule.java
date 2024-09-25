@@ -75,9 +75,10 @@ import java.util.stream.Collectors;
 public class InternalTestModule extends PermissionTestModuleBase {
     public InternalTestModule(@NonNull Activity activity){ super(activity);}
     @Override
-    public void start(Consumer<PermissionTestRunner.Result> callback){
-        super.start(callback);
-        logger.debug("Hello Internal test case!");
+    public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
+		logger.debug("Hello a test case!");
+        return super.prepare(callback);
+
     } 
     @PermissionTest(permission="MANAGE_HOTWORD_DETECTION", sdkMin=31)
     public void testManageHotwordDetection(){

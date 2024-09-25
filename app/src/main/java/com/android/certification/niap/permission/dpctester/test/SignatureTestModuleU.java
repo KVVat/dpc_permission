@@ -59,8 +59,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DropBoxManager;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.IWakeLockCallback;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
@@ -71,6 +74,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.E2eeContactKeysManager;
 import android.security.FileIntegrityManager;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -85,6 +89,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils;
 
 import java.io.File;
@@ -103,29 +108,10 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 
-/////////////////////////
-//Regex for converting
-
-//permission="(.*{0})",
-//permission="""$1""",
-//Transacts.([a-z]{1}.*{0})[,)]
-
-//$1"$2"$3
-//$1"$2"$3
-//Transacts.([a-z]{1}.*{0})([,)])
-//"$1"$2
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
-
 @PermissionTestModule(name="Signature 34(U) Test Cases")
 public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleU(@NonNull Activity activity) {
 		super(activity);
-	}
-
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
 	}
 
 	private <T> T systemService(Class<T> clazz){
@@ -158,13 +144,19 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE", sdkMin=34)
 	public void subscribeToKeyguardLockedState(){
 		//WindowManagerService#addKeyguardLockedStateListener.
-
 		KeyguardManager.KeyguardLockedStateListener listener = new KeyguardManager.KeyguardLockedStateListener() {
 			@Override
 			public void onKeyguardLockedStateChanged(boolean b) {
 			}
 		};
-		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
+
+		//logger.system(ReflectionTool.Companion.checkDeclaredMethod(systemService(WindowManager.class),"add").toString());
+
+		//systemService(WindowManager.class);
+		//.addKeyguardLockedStateListener(listener);
+
+		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE,
+				Transacts.WINDOW_DESCRIPTOR,
 				"addKeyguardLockedStateListener", listener);
 
 	}
@@ -386,7 +378,8 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		BinderTransaction.getInstance().invoke(
 				Context.TELEPHONY_SERVICE,
 				Transacts.TELEPHONY_DESCRIPTOR,
-				"requestIsSatelliteEnabled");
+				"requestIsSatelliteEnabled",0
+				,new android.os.ResultReceiver(new Handler(Looper.getMainLooper())));
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -544,8 +537,11 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		);
 		Intent[] intents = new Intent[]{new Intent(Intent.ACTION_VIEW)};
 		//getIApplicationThread()
+
+		//below method isn't working?
 		Object activityThread = ReflectionUtil.invoke
 				(mActivity,"getActivityThread");
+
 		if(activityThread != null){
 			//Class atClazz;
 			//atClazz = Class.forName("android.app.ActivityThread");
@@ -596,63 +592,30 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 	@RequiresApi(api = Build.VERSION_CODES.Q)
     @PermissionTest(permission="SCREEN_TIMEOUT_OVERRIDE", sdkMin=34)
-	public void testScreenTimeoutOverride(){
+	public void testScreenTimeoutOverride() {
 		//Check EarlyScreenTimeoutDetectorEnable Flag Here and skip if it is disabled
 		//test method : isWakeLockLevelSupported(int level) {(PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK)
-		final int SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK  =0x00000100;
+		final int SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK = 0x00000100;
 		Parcel isSupported = BinderTransaction.getInstance().invoke(Transacts.POWER_SERVICE, Transacts.POWER_DESCRIPTOR,
 				"isWakeLockLevelSupported",
 				SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK);
-		if(!isSupported.readBoolean()){
+		if (!isSupported.readBoolean()) {
 			throw new BypassTestException("WakeLock feature SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK is not supported on this device. Bypassed");
 		}
 
 		BinderTransaction.getInstance().invoke(Transacts.POWER_SERVICE, Transacts.POWER_DESCRIPTOR,
 				"acquireWakeLock",
-				getActivityToken(),SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK,
-				"tag",mContext.getPackageName(),
-				new WorkSource(),"historyTag",0,null);
+				new Binder(),
+				SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK,
+				"tag", mContext.getPackageName(),
+				new WorkSource(), "historyTag", 1, new IWakeLockCallback.Stub() {
+					@Override
+					public void onStateChanged(boolean enabled) throws RemoteException {
+
+					}
+				});
 	}
 
-
-	@PermissionTest(permission="BIND_CALL_STREAMING_SERVICE", sdkMin=34)
-	public void testBindCallStreamingService(){
-		getBindRunnable("BIND_CALL_STREAMING_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CREDENTIAL_PROVIDER_SERVICE", sdkMin=34)
-	public void testBindCredentialProviderService(){
-		getBindRunnable("BIND_CREDENTIAL_PROVIDER_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_FIELD_CLASSIFICATION_SERVICE", sdkMin=34)
-	public void testBindFieldClassificationService(){
-		getBindRunnable("BIND_FIELD_CLASSIFICATION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE", sdkMin=34)
-	public void testBindRemoteLockscreenValidationService(){
-		getBindRunnable("BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_SATELLITE_GATEWAY_SERVICE", sdkMin=34)
-	public void testBindSatelliteGatewayService() {
-		getBindRunnable("BIND_SATELLITE_GATEWAY_SERVICE");
-	}
-	@PermissionTest(permission="BIND_SATELLITE_SERVICE", sdkMin=34)
-	public void testBindSatelliteService(){
-		getBindRunnable("BIND_SATELLITE_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_VISUAL_QUERY_DETECTION_SERVICE", sdkMin=34)
-	public void testBindVisualQueryDetectionService(){
-		getBindRunnable("BIND_VISUAL_QUERY_DETECTION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_WEARABLE_SENSING_SERVICE", sdkMin=34)
-	public void testBindWearableSensingService(){
-		getBindRunnable("BIND_WEARABLE_SENSING_SERVICE");
-	}
 
 }
 

@@ -128,7 +128,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Install Test Cases")
+@PermissionTestModule(name="Install Test Cases",label = "Run Install Permission Test")
 public class InstallTestModule extends PermissionTestModuleBase {
 	public InstallTestModule(@NonNull Activity activity){ super(activity);}
 
@@ -139,13 +139,14 @@ public class InstallTestModule extends PermissionTestModuleBase {
 
 	BluetoothAdapter mBluetoothAdapter;
 
+	@NonNull
 	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
+	public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
+
 		try {
 			mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
 		} catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
-
+		return super.prepare(callback);
 	}
 
 	private <T> T systemService(Class<T> clazz){
@@ -808,6 +809,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			mContext.startForegroundService(serviceIntent);
 		} catch (Throwable t) {
 			logger.error(permission, t);
+			throw t;
 		}
 	}
 
@@ -817,11 +819,10 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		Intent serviceIntent = new Intent(mActivity, FgCameraService.class);
 		try {
 			mActivity.startForegroundService(serviceIntent);
-
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_CAMERA", t);
-
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -833,6 +834,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_LOCATION", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -844,6 +846,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_MICROPHONE", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -855,41 +858,33 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_CONNECTED_DEVICE", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	@PermissionTest(permission=FOREGROUND_SERVICE_DATA_SYNC, sdkMin=34, customCase=true)
 	public void testForegroundServiceDataSync(){
-		Intent serviceIntent = new Intent(mActivity, FgDataSyncService.class);
-		try {
-			mActivity.startForegroundService(serviceIntent);
-			tryBindingForegroundService(serviceIntent);
-		} catch(Throwable t){
-			logger.debug("FOREGROUND_SERVICE_DATA_SYNC", t);
-		}
+	Intent serviceIntent = new Intent(mActivity, FgDataSyncService.class);
+
+		mActivity.startForegroundService(serviceIntent);
+		tryBindingForegroundService(serviceIntent);
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	@PermissionTest(permission=FOREGROUND_SERVICE_HEALTH, sdkMin=34, customCase=true)
 	public void testForegroundServiceHealth(){
 		Intent serviceIntent = new Intent(mActivity, FgHealthService.class);
-		try {
-			mActivity.startForegroundService(serviceIntent);
-			tryBindingForegroundService(serviceIntent);
-		} catch(Throwable t){
-			logger.debug("FOREGROUND_SERVICE_HEALTH", t);
-		}
+		mActivity.startForegroundService(serviceIntent);
+		tryBindingForegroundService(serviceIntent);
 	}
+
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	@PermissionTest(permission=FOREGROUND_SERVICE_MEDIA_PLAYBACK, sdkMin=34, customCase=true)
 	public void testForegroundServiceMediaPlayback(){
 		Intent serviceIntent = new Intent(mActivity, FgMediaPlaybackService.class);
-		try {
-			mActivity.startForegroundService(serviceIntent);
-			tryBindingForegroundService(serviceIntent);
-		} catch(Throwable t){
-			logger.debug("FOREGROUND_SERVICE_MEDIA_PLAYBACK", t);
-		}
+		mActivity.startForegroundService(serviceIntent);
+		tryBindingForegroundService(serviceIntent);
 	}
+
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	@PermissionTest(permission=FOREGROUND_SERVICE_MEDIA_PROJECTION, sdkMin=34, customCase=true)
 	public void testForegroundServiceMediaProjection(){
@@ -899,6 +894,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_MEDIA_PROJECTION", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -910,6 +906,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_PHONE_CALL", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -921,6 +918,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_REMOTE_MESSAGING", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -932,6 +930,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_SPECIAL_USE", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -943,6 +942,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_SYSTEM_EXEMPTED", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -955,6 +955,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			tryBindingForegroundService(serviceIntent);
 		} catch(Throwable t){
 			logger.debug("FOREGROUND_SERVICE_MEDIA_PROCESSING", t);
+			throw t;
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)

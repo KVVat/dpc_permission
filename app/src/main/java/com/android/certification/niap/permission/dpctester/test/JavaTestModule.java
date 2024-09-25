@@ -22,11 +22,7 @@ public class JavaTestModule extends PermissionTestModuleBase {
     public JavaTestModule(@NonNull Activity ctx) {
         super(ctx);
     }
-    @Override
-    public void start(Consumer<PermissionTestRunner.Result> callback) {
-        super.start(callback);
-        logger.system("on start! message from java!");
-    }
+
 
     @PermissionTest(permission = ".Java Fun",sdkMin = 34,sdkMax = 35)
     public void checkJavaIsWorking() {

@@ -9,6 +9,7 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.android.certification.niap.permission.dpctester.DpcApplication
+import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.common.Constants
 import com.android.certification.niap.permission.dpctester.common.SignatureUtils
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException
@@ -26,9 +27,12 @@ open class PermissionTestModuleBase(activity: Activity) {
     @JvmField
     protected var logger: ActivityLogger
     @JvmField
-    var testCases: List<PermissionTestRunner.Data>
+    var testCases: MutableList<PermissionTestRunner.Data>
     @JvmField
-    val testSize: Int
+    var enabled = true;
+
+    open var testSize: Int = 0
+
     @JvmField
     val mActivity: Activity = activity
     @JvmField
@@ -41,15 +45,19 @@ open class PermissionTestModuleBase(activity: Activity) {
     protected val mExecutor = (mContext.applicationContext as DpcApplication).executorService
     @JvmField
     val appUid = mContext.applicationInfo.uid
-
+    @JvmField
     protected val mAppSignature : Signature =
         SignatureUtils.getTestAppSigningCertificate(mContext);
+
     @JvmField
     protected val isPlatformSignatureMatch:Boolean =
         mPackageManager.hasSigningCertificate(
             Constants.PLATFORM_PACKAGE,
             mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509
         );
+
+    @JvmField
+    val info = Info();
 
     init {
         testCases = ReflectionTool.checkPermissionTestMethod(this)
@@ -58,9 +66,31 @@ open class PermissionTestModuleBase(activity: Activity) {
             title!!,
             activity as ActivityLogger.LogListAdaptable
         ) as ActivityLogger
-        logger.system("The module `$title` has ${testSize} test cases.")
+        //logger.system("The module `$title` has ${testSize} test cases.")
+        info.title = title
+        info.count_tests = testSize
+        info.count_errors = 0
+        info.count_bypassed = 0
     }
 
+
+    open class Info {
+        var title: String? = null
+        var details:String? = null
+        var count_tests: Int = 0
+        var count_errors: Int = 0
+        var count_bypassed: Int =0
+        override fun toString(): String {
+            return "title=$title count_tests=$count_tests count_errors=$count_errors count_bypassed=$count_bypassed"
+        }
+    }
+
+    open class PrepareInfo {
+        var count_tests: Int = 0
+        var count_errors: Int = 0
+        var count_bypassed: Int =0
+        var count_passed: Int = 0
+    }
 
     fun checkPermissionGranted(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(mContext,permission)==PackageManager.PERMISSION_GRANTED
@@ -71,9 +101,7 @@ open class PermissionTestModuleBase(activity: Activity) {
     }
 
     fun <T> getService(serviceClass: Class<T>,contextName:String): T? {
-        //ContextCompat.getSystemService(mActivity,serviceClass)
         val service_ = mContext.getSystemService(contextName)
-
         //val service = ContextCompat.getSystemService(mContext, serviceClass)
         if(service_.javaClass == serviceClass){
             return service_ as T
@@ -98,14 +126,14 @@ open class PermissionTestModuleBase(activity: Activity) {
         }
     }
 
-    open fun start(callback: Consumer<PermissionTestRunner.Result>?){
+    open fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo{
+        //testSize = testCases.size
 
-        PermissionTestRunner.getInstance().start(this,callback);
-
-    }
-    open fun finalize()
-    {
-        //PermissionTestRunner.getInstance().finalize(this)
+        return PrepareInfo();
     }
 
+    /*open fun finalize(callback: Consumer<PermissionTestRunner.Result>?) {
+        PermissionTestRunner.getInstance().finalize(this, callback)
+    }
+    */
 }

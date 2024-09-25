@@ -80,12 +80,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 //Base class for signature permission test modules
-public class SignaturePermissionTestModuleBase extends PermissionTestModuleBase {
+public abstract class SignaturePermissionTestModuleBase extends PermissionTestModuleBase {
 	public SignaturePermissionTestModuleBase(@NonNull Activity activity){ super(activity);}
 
+	@NonNull
 	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
+	public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
+		return super.prepare(callback);
 	}
 
 	private <T> T systemService(Class<T> clazz){
@@ -202,9 +203,14 @@ public class SignaturePermissionTestModuleBase extends PermissionTestModuleBase 
 			throw new UnexpectedTestFailureException(e);
 		}
 	}
-
+	protected void runBindRunnable(final String permission_){
+		getBindRunnable(permission_).run();
+	}
     protected Runnable getBindRunnable(final String permission_) {
         return () -> {
+
+			//logger.debug("Get Bind Runnable...");
+
 			var permission="";
 			if(!permission_.contains(".")){
 				permission ="android.permission."+permission_;
@@ -240,16 +246,13 @@ public class SignaturePermissionTestModuleBase extends PermissionTestModuleBase 
 			}
 			synchronized (lock) {
 				try {
+					//logger.debug("Get Bind Runnable...Sync");
 					int i = 0;
 					while (!serviceConnection.mConnected.get()) {
-						try {
-							//wait almost 1 sec along increasing waiting time
-							lock.wait(10 + (i * i));
-							if (i++ >= 10) {
-								throw new InterruptedException("Connection Timed Out");
-							}
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
+						lock.wait(10 + (i * i));
+						//logger.debug("Waiting for service connection...");
+						if (i++ >= 10) {
+							throw new InterruptedException("Connection Timed Out");
 						}
 					}
 					logger.info("Connected To Service in the Companion app=" + serviceConnection.mComponentName +

@@ -19,6 +19,7 @@ package com.android.certification.niap.permission.dpctester.test;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
+import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,11 +68,11 @@ public class SignatureTestModuleP extends SignaturePermissionTestModuleBase {
 		super(activity);
 	}
 
+	@NonNull
 	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
+	public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
+		return super.prepare(callback);
 	}
-
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
 	}

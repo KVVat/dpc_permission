@@ -106,11 +106,7 @@ import java.util.function.Consumer;
 @PermissionTestModule(name="Runtime Test Cases")    
 public class RuntimeTestModule extends PermissionTestModuleBase {
     public RuntimeTestModule(@NonNull Activity activity){ super(activity);}
-    @Override
-    public void start(Consumer<PermissionTestRunner.Result> callback){
-        super.start(callback);
-        logger.debug("Hello Runtime test case!");
-    }
+
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
 	}

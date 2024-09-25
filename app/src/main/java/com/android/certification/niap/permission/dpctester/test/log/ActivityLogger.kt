@@ -1,6 +1,7 @@
 package com.android.certification.niap.permission.dpctester.test.log
 
 import android.util.Log
+import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.test.log.Logger.DebugLevel.LEVEL_ERROR
 import com.android.certification.niap.permission.dpctester.test.log.Logger.DebugLevel.LEVEL_INFO
 import com.android.certification.niap.permission.dpctester.test.log.Logger.DebugLevel.LEVEL_DEBUG
@@ -9,7 +10,7 @@ import com.android.certification.niap.permission.dpctester.test.log.Logger.Debug
 
 class ActivityLogger(override val tag: String, val adaptable:LogListAdaptable):Logger{
 
-    private val UI_LEVEL: Int = LEVEL_ERROR
+    private val UI_LEVEL: Int = LEVEL_SYSTEM
 
     override fun debug(message: String) {
         Log.d(tag,message)
@@ -64,10 +65,15 @@ class ActivityLogger(override val tag: String, val adaptable:LogListAdaptable):L
             adaptable.addLogLine(message)
         }
     }
+    fun logbox(box: LogBox) {
+
+
+    }
 
 
     interface LogListAdaptable {
-        fun setLogAdapter()
+        //fun setLogAdapter()
         fun addLogLine(msg: String)
+        fun addLogBox(logbox:LogBox)
     }
 }

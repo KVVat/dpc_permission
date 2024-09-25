@@ -21,23 +21,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="60dp"
-        android:gravity="top"
-        android:text=""
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@id/appBar"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="?attr/actionBarSize"
-        app:layoutManager="LinearLayoutManager"/>
-    <!--
     <ListView
         android:id="@+id/statusTextView"
         android:layout_width="wrap_content"
@@ -53,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="@id/appBar"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="?attr/actionBarSize" />
-      -->
+
     <!--<include layout="@layout/content_main" />-->
     <!--
     <com.google.android.material.floatingactionbutton.FloatingActionButton

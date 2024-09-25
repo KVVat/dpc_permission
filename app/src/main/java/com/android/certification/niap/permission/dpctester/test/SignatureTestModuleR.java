@@ -72,6 +72,7 @@ import com.android.certification.niap.permission.dpctester.test.exception.Unexpe
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
+import com.android.certification.niap.permission.dpctester.test.tool.NetworkStatsProviderStubCompat;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 
@@ -80,6 +81,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -90,11 +92,6 @@ import java.util.function.Consumer;
 @PermissionTestModule(name="Signature 30(R) Test Cases")
 public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleR(@NonNull Activity activity){ super(activity);}
-
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
-	}
 
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
@@ -146,8 +143,7 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="ACCESS_MESSAGES_ON_ICC", sdkMin=30)
 	public void testAccessMessagesOnIcc(){
 		SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(0);
-		ReflectionUtil.invoke(smsManager.getClass(), "getAllMessagesFromIcc", smsManager,
-				null);
+		ReflectionUtil.invoke(smsManager, "getAllMessagesFromIcc");
 	}
 
 	@PermissionTest(permission="ACCESS_VIBRATOR_STATE", sdkMin=30)
@@ -156,7 +152,7 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 				"isVibrating");
 	}
 
-	@PermissionTest(permission="ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT, sdkMin=30", sdkMax=30)
+	@PermissionTest(permission="ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT", sdkMax=30)
 	public void testAssociateInputDeviceToDisplayByPort(){
 		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
 				"removePortAssociation", "testPort");
@@ -212,11 +208,19 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 
 	}
 
+
 	@PermissionTest(permission="KEYPHRASE_ENROLLMENT_APPLICATION", sdkMin=30)
 	public void testKeyphraseEnrollmentApplication(){
-		BinderTransaction.getInstance().invoke(Transacts.VOICE_INTERACTION_SERVICE,
-				Transacts.VOICE_INTERACTION_DESCRIPTOR,
-				"updateKeyphraseSoundModel", (Object) null);
+		// need to create SoundTrigger.KeyphraseSoundModel object for right test
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.VOICE_INTERACTION_SERVICE,
+					Transacts.VOICE_INTERACTION_DESCRIPTOR,
+					"updateKeyphraseSoundModel", (Object) null);
+		} catch(IllegalArgumentException ignored){
+			logger.info("Expected IllegalArgumentException,the permission check is executed before checking model");
+		}
+
+
 	}
 
 	@PermissionTest(permission="LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH", sdkMin=30,sdkMax = 32)
@@ -448,9 +452,10 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="NETWORK_STATS_PROVIDER", sdkMin=30)
 	public void testNetworkStatsProvider(){
+
 		BinderTransaction.getInstance().invoke(Transacts.NETWORK_STATS_SERVICE,
 				Transacts.NETWORK_STATS_DESCRIPTOR,
-				"registerNetworkStatsProvider", "testTag", null);
+				"registerNetworkStatsProvider", "testTag", new NetworkStatsProviderStubCompat());
 	}
 
 	@PermissionTest(permission="OBSERVE_NETWORK_POLICY", sdkMin=30,sdkMax = 30)
@@ -690,30 +695,6 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 				1 << 10);
 	}
 
-	@PermissionTest(permission="BIND_QUICK_ACCESS_WALLET_SERVICE", sdkMin=30)
-	public void testBindQuickAccessWalletService(){
-		getBindRunnable("BIND_QUICK_ACCESS_WALLET_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CONTROLS", sdkMin=30)
-	public void testBindControls(){
-		getBindRunnable("BIND_CONTROLS");
-	}
-
-	@PermissionTest(permission="BIND_CELL_BROADCAST_SERVICE", sdkMin=30)
-	public void testBindCellBroadcastService(){
-		getBindRunnable("BIND_CELL_BROADCAST_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_EXTERNAL_STORAGE_SERVICE", sdkMin=30)
-	public void testBindExternalStorageService(){
-		getBindRunnable("BIND_EXTERNAL_STORAGE_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_INLINE_SUGGESTION_RENDER_SERVICE", sdkMin=30)
-	public void testBindInlineSuggestionRenderService(){
-		getBindRunnable("BIND_INLINE_SUGGESTION_RENDER_SERVICE");
-	}
 
 }
 

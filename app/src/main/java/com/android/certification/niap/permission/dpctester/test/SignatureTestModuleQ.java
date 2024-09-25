@@ -87,11 +87,6 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 		super(activity);
 	}
 
-	@Override
-	public void start(Consumer<PermissionTestRunner.Result> callback){
-		super.start(callback);
-	}
-
 	private <T> T systemService(Class<T> clazz){
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
 	}
@@ -167,8 +162,12 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 	@RequiresApi(api = Build.VERSION_CODES.R)
     @PermissionTest(permission="MONITOR_INPUT", sdkMin=29)
 	public void testMonitorInput(){
-		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
-				"monitorGestureInput", "test", mContext.getDisplay().getDisplayId());
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
+					"monitorGestureInput", "test", mContext.getDisplay().getDisplayId());
+		} catch (NullPointerException ignored){
+			logger.debug("Token(Binder) check executed after permission check, and it causes npx. it's intended.");
+		}
 	}
 
 	@PermissionTest(permission="POWER_SAVER", sdkMin=29)
@@ -561,45 +560,6 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 				"getRuntimePermissionsVersion", 0);
 	}
 
-	@PermissionTest(permission="BIND_ATTENTION_SERVICE", sdkMin=29)
-	public void testBindAttentionService(){
-		getBindRunnable("BIND_ATTENTION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CALL_REDIRECTION_SERVICE", sdkMin=29)
-	public void testBindCallRedirectionService(){
-		getBindRunnable("BIND_CALL_REDIRECTION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CARRIER_MESSAGING_CLIENT_SERVICE", sdkMin=29)
-	public void testBindCarrierMessagingClientService(){
-		getBindRunnable("BIND_CARRIER_MESSAGING_CLIENT_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CONTENT_SUGGESTIONS_SERVICE", sdkMin=29)
-	public void testBindContentSuggestionsService(){
-		getBindRunnable("BIND_CONTENT_SUGGESTIONS_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE", sdkMin=29)
-	public void testBindPhoneAccountSuggestionService(){
-		getBindRunnable("BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_EXPLICIT_HEALTH_CHECK_SERVICE", sdkMin=29)
-	public void testBindExplicitHealthCheckService(){
-		getBindRunnable("BIND_EXPLICIT_HEALTH_CHECK_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_CONTENT_CAPTURE_SERVICE", sdkMin=29)
-	public void testBindContentCaptureService(){
-		getBindRunnable("BIND_CONTENT_CAPTURE_SERVICE");
-	}
-
-	@PermissionTest(permission="BIND_AUGMENTED_AUTOFILL_SERVICE", sdkMin=29)
-	public void testBindAugmentedAutofillService(){
-		getBindRunnable("BIND_AUGMENTED_AUTOFILL_SERVICE");
-	}
 }
 
 

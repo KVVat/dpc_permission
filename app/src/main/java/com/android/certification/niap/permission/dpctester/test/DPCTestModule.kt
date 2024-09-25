@@ -95,7 +95,7 @@ class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
     val pm  =ctx.packageManager
     val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
-    val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
+    //val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
     init {
         //Enable Permission Check Flag
         //"enable_permission_based_access"
@@ -103,17 +103,19 @@ class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
         //logger.system("enable_permission_based_access"+DeviceConfigTool.getProperty("device_policy_manager", "enable_permission_based_access")!!)
     }
 
-    override fun finalize() {
-        super.finalize()
+    /*override fun finalize(callback: Consumer<PermissionTestRunner.Result>?){
+        super.finalize(callback)
         logger.system("Module finalized")
         //Reset Permission Check Flag
         //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","false",true)
-    }
+    }*/
     /**
      * Override and describe the routine which dependent on the module after each test
      */
-    override fun start(callback: Consumer<PermissionTestRunner.Result>?) {
-        PermissionTestRunner.getInstance().start(this) { result ->
+    override fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo {
+
+        //TODO:Modify Result
+        /*PermissionTestRunner.getInstance().start(this) { result ->
             //If the app priviledge is the active admin level and found no corresponding
             //permission in the package manager, the behvaiour is intended
             if(pm.checkPermission(ctx.packageName,result.source.permission)
@@ -128,7 +130,8 @@ class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
             }
             //we can evaluate the results here
             callback?.accept(result)
-        }
+        }*/
+        return prepare(callback);
     }
     //Permission Test Cases for SDK34
 
