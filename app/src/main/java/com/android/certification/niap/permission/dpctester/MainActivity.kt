@@ -1,9 +1,6 @@
 package com.android.certification.niap.permission.dpctester
 
-import android.app.Activity
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,15 +8,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -56,7 +48,6 @@ import com.android.certification.niap.permission.dpctester.test.runner.Permissio
 import com.android.certification.niap.permission.dpctester.test.suite.SignatureTestSuite
 import com.android.certification.niap.permission.dpctester.test.suite.SingleModuleTestSuite
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.internal.ContextUtils.getActivity
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -81,16 +72,28 @@ class MainViewAdapter(private val list: List<LogBox>,
 
     // ViewHolder内に表示するデータを指定。
     override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-        //holder.textView.text = "{$position} aaa"
-        holder.itemView.findViewById<TextView>(R.id.logrowLabel).text = list[position].name
-        holder.itemView.findViewById<TextView>(R.id.logrowText).text = list[position].description
-        val type = list[position].type
-        holder.itemView.findViewById<TextView>(R.id.logrowIndicator).setTextColor(Color.TRANSPARENT)
-        holder.itemView.findViewById<TextView>(R.id.logrowNextArrow).visibility = View.INVISIBLE
-        if(type == "normal"){
-            holder.itemView.findViewById<TextView>(R.id.logrowIndicator).setTextColor(Color.LTGRAY)
+        fun textView(resId:Int):TextView {
+            return holder.itemView.findViewById(resId)
         }
+        //
+        textView(R.id.logrowLabel).text = list[position].name
+        textView(R.id.logrowText).text = list[position].description
 
+        textView(R.id.logrowIndicator).setTextColor(Color.TRANSPARENT)
+        textView(R.id.logrowNextArrow).visibility = View.INVISIBLE
+
+        val type = list[position].type
+        if(type == "normal"){
+            textView(R.id.logrowIndicator).setTextColor(Color.LTGRAY)
+        } else if(type== "passed") {
+            textView(R.id.logrowIndicator).setTextColor(Color.GREEN)
+        } else if(type == "error" || type == "bypassed" ){
+            textView(R.id.logrowNextArrow).visibility = View.VISIBLE
+            textView(R.id.logrowIndicator).setTextColor(Color.rgb(0xFB,0xBD,0x0D))
+            if(type == "error") {
+                textView(R.id.logrowIndicator).setTextColor(Color.RED)
+            }
+        }
 
         holder.itemView.setOnClickListener {
             listener.onClickItem(it, list[position])
@@ -108,7 +111,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    var mBottomSheet: BottomSheetBehavior<LinearLayout>? = null
+    private var mBottomSheet: BottomSheetBehavior<LinearLayout>? = null
     private val mTestButtons: MutableList<Button> = mutableListOf()
     private val logger: Logger =
         LoggerFactory.createActivityLogger(TAG, this);
@@ -123,31 +126,12 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         recyclerView?.getAdapter()?.notifyDataSetChanged()
     }
 
-    val activityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            // 呼び出し先のActivityを閉じた時に呼び出されるコールバックを登録
-            // (呼び出し先で埋め込んだデータを取り出して処理する)
-            if (result.resultCode == Activity.RESULT_OK) {
-                // RESULT_OK時の処理
-                val resultIntent = result.data
-                val message = resultIntent?.getStringExtra("message")
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-
-        //supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS)
-        /* Instantiates headerAdapter and flowersAdapter. Both adapters are added to concatAdapter.
-        which displays the contents sequentially */
-        //val headerAdapter = HeaderAdapter()
-        //val flowersAdapter = LogBoxAdapter { logbox -> adapterOnClick(logbox) }
-        //val concatAdapter = ConcatAdapter(headerAdapter, flowersAdapter)
 
         this.recyclerView = findViewById(R.id.recycler_view)
         this.recyclerView?.apply {
@@ -158,7 +142,24 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 generateItemList(),
                 object : MainViewAdapter.ListListener {
                     override fun onClickItem(tappedView: View, itemModel: LogBox) {
+                        if(itemModel.childs.size>0){
+                            //TODO : launch child activty to show errors
+                            val intent = Intent(
+                                this@MainActivity,
+                                DetailsActivity::class.java
+                            )
+                            val bundle:Bundle = Bundle()
+                            bundle.putParcelableArrayList("logboxes",itemModel.childs as ArrayList<LogBox>)
+                            intent.putExtra("name", itemModel.name)
+                            intent.putExtra("description",itemModel.description)
+                            intent.putExtras(bundle)
 
+                            //MainActivityからMainActivity2への移動を開始
+                            startActivity(intent)
+                            /*for(box in itemModel.childs){
+                                logger.info(box.description!!)
+                            }*/
+                        }
                     }
                 }
             )
@@ -167,12 +168,12 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
 
         //setLogAdapter()
         if (savedInstanceState != null) {
-            mStatusData = savedInstanceState.getStringArrayList("listViewData")!!
+            /*mStatusData = savedInstanceState.getAgetStringArrayList("listViewData")!!
             runOnUiThread {
                 for (s in mStatusData) {
                     addLogLine(s)
                 }
-            }
+            }*/
         } else {
             logger.system("Welcome!")
         }
@@ -228,62 +229,90 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             if(resources.getBoolean(R.bool.dpc_mode))
                 modules.add(DPCHealthTestModule(this))
         }
-
-        val success = AtomicInteger(0)
-
         // let the tester know the test result should be inverse or not
         resources.getBoolean(R.bool.inverse_test_result).let {
             PermissionTestRunner.inverse_test_result = it
         }
 
-
+        val suiteTestCnt = AtomicInteger(0)
+        val moduleTestCnt = AtomicInteger(0);
         suites.forEach { suite ->
             val testButton = Button(this)
             testButton.setText("${suite.label}")
             testButton.setOnClickListener { view ->
                 displayProgressDialog()
                 removeItemList()
-                val testSuite = suite
 
-                testSuite.start(callback ={ result ->
+                suiteTestCnt.set(0)
+                suite.start(callback ={ result ->
                     if(!result.bypassed){
                         if(!result.success)
-                            logger.error(""+result.source.permission.replace("android.permission.","")+"=>"+result.success)
+                            logger.error("Test Failed:"+result.source.permission.replace("android.permission.","")+"=>"+result.success)
 
                     } else {
-                        //logger.system(""+result.source.permission.replace("android.permission.","")+"=>Bypassed")
                         logger.debug(""+result.message)
                     }
-                    if(result.success){
-                        success.incrementAndGet()
-                    } else {
+                    if(!result.success){
                         if(!result.bypassed)
                             logger.error("Failed:${result.source.permission} ("+result.message+")");
                     }
-                },cbSuiteStart_ = { info->
-                    logger.system("Start ${info.title} test suite. The suite has ${info.count_modules} modules.")
-                    for (button in mTestButtons) {
-                        button.isEnabled = false
+                    suiteTestCnt.incrementAndGet()
+                    //logger.info("${suiteTestCnt.get()},${suite.testCount}")
+                    if(suiteTestCnt.get()>=suite.testCount){
+                        //If all the test thread has been executed, process reach this line.
+                        //We can leverage it to safely execute next test suite.
+                        logger.system("All test threads has been finished.${suiteTestCnt.get()}/${suite.testCount}");
+                        hideProgressDialog()
+                        PermissionTestRunner.running=false
+                        runOnUiThread {
+                            for (button in mTestButtons) {
+                                button.isEnabled = true
+                                button.isClickable = true
+                            }
+                        }
                     }
-
-                },cbSuiteFinish_ = { info ->
-                    logger.system("Finish test suite. ${info}")
-                    for (button in mTestButtons) {
-                        button.isEnabled = true
+                },cbModuleControl_= { info->
+                    //Run module sequentially with callback to avoid too much
+                    //over wrapping the test processes
+                    if(moduleTestCnt.incrementAndGet()>=info.count_tests) {
+                        //logger.system("${info.title}"+moduleTestCnt.get()+"/"+info.count_tests)
+                        moduleTestCnt.set(0);
+                        PermissionTestRunner.getInstance()
+                            .runNextModule(suite, suite.methodCallback)
                     }
-                    hideProgressDialog()
+                }, cbTestControl_ = {info->
+                    logger.info("back name=${info.title} info.count_bypassed=${info.count_bypassed}")
+                    if(PermissionTestRunner.testThreadMutex.isLocked)
+                        PermissionTestRunner.testThreadMutex.unlock();
+                }, cbSuiteStart_ = { info->
+                        logger.system("Start '${info.title}' suite. (${info.count_modules} modules)")
+                        for (button in mTestButtons) {
+                            button.isEnabled = false
+                            button.isClickable = false
+                        }
+                }, cbSuiteFinish_ = { info ->
+                    logger.system("Finish the test suite.")
                 }, cbModuleStart_ = {info->
-                    logger.system("Start ${info.title} test module. The module has ${info.count_tests} tests.")
+                    logger.system("Start ${info.title} (${info.count_tests} test)")
                 }, cbModuleFinish_ = {info->
-                    logger.system("Finish ${info.title} module.${info}")
+                    val desc= "Finish ${info.title} \r\n ❗${info.count_errors} ⚠${info.count_bypassed}";
+                    val box = LogBox(Random.nextLong(), "Finish module", desc
+                        , childs = info.moduleLog);
+                    if(info.count_errors>0){
+                        box.type="error"
+                    } else if(info.count_bypassed>0){
+                        box.type="bypassed"
+                    } else {
+                        box.type="passed"
+                    }
+                    addLogBox(box)
+                    logger.info(desc)
                 });
             }
             binding.mainLayout.addView(testButton)
             mTestButtons.add(testButton)
         }
         progressAlertDialog= createProgressDialog( this )
-
-        //createProgressDialog(this)
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -305,8 +334,14 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         }
     }
 
-    private lateinit var progressAlertDialog: AlertDialog
+    override fun onResume() {
+        super.onResume()
+        if(progressAlertDialog.isShowing){
+            displayProgressDialog()
+        }
+    }
 
+    private lateinit var progressAlertDialog: AlertDialog
     private fun createProgressDialog(currentActivity: AppCompatActivity): AlertDialog {
         val vLayout = LinearLayout(currentActivity)
         vLayout.orientation = LinearLayout.VERTICAL
@@ -338,49 +373,12 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
     /********************************************
      * Goodies for local list view
      ********************************************/
-    private var mStatusListView: ListView? = null
     var mStatusData: java.util.ArrayList<String> = java.util.ArrayList()
-    //var mStatusAdapter: ArrayAdapter<String>? = null
-    class LogArrayAdapter(context: Context?, textViewResourceId: Int,data: List<String>?):
-        ArrayAdapter<String?>(context!!, textViewResourceId, data!!) {
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val textView = super.getView(position, convertView, parent) as TextView
-            if(textView.text.endsWith(">false")) {
-                textView.setTextColor(Color.RED)
-                textView.setBackgroundColor(Color.YELLOW)
-                textView.setTextSize(18f);
-            } else if (textView.text.endsWith(">true")){
-                textView.setTextColor(Color.BLACK)
-                textView.setBackgroundColor(Color.GREEN)
-                textView.setTextSize(18f);
-            } else if (textView.text.endsWith(">Bypassed")){
-                textView.setTextColor(Color.BLACK)
-                textView.setBackgroundColor(Color.LTGRAY);
-                textView.setTextSize(18f);
-            } else {
-                textView.setBackgroundColor(Color.TRANSPARENT)
-                textView.setTextSize(12f);
-            }
-            return textView
-        }
-    }
-    /*override fun setLogAdapter() {
-        mStatusAdapter = LogArrayAdapter(
-            (this as Context),
-            android.R.layout.simple_list_item_1,mStatusData
-        ) as ArrayAdapter<String>
 
-        mStatusListView = findViewById(R.id.statusTextView)
-        mStatusListView!!.setAdapter(mStatusAdapter)
-    }*/
-    override fun addLogBox(box:LogBox){
+    override fun addLogBox(logbox:LogBox){
         runOnUiThread {
-
-            itemList.add(box)
-
-
+            itemList.add(logbox)
             this.recyclerView?.adapter?.notifyItemInserted(itemList.size-1)
-            this.recyclerView?.adapter?.notifyDataSetChanged()
         }
     }
 
@@ -388,15 +386,12 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         runOnUiThread {
             itemList.add(LogBox(Random.nextLong(), "normal", msg))
             this.recyclerView?.adapter?.notifyItemInserted(itemList.size-1)
-            this.recyclerView?.adapter?.notifyDataSetChanged()
         }
     }
 
     fun notifyUpdate() {
         runOnUiThread {
             this.recyclerView?.adapter?.notifyDataSetChanged()
-            //mStatusAdapter!!.notifyDataSetChanged()
-            //getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
         }
     }
 }

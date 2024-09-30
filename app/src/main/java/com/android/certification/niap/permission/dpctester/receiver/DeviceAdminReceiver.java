@@ -403,7 +403,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
                                 R.plurals.password_failed_attempts_content, maxAttempts, maxAttempts);
 
         NotificationCompat.Builder warn = NotificationUtil.getNotificationBuilder(context);
-        warn.setSmallIcon(R.drawable.ic_launcher)
+        warn.setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setTicker(title)
                 .setContentTitle(title)
                 .setContentText(content)
@@ -555,7 +555,7 @@ public class DeviceAdminReceiver extends android.app.admin.DeviceAdminReceiver {
             }
             final NotificationCompat.Builder warn = NotificationUtil.getNotificationBuilder(context);
             warn.setOngoing(true)
-                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setStyle(style)
                     .setContentIntent(
                             PendingIntent.getActivity(

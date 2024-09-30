@@ -113,12 +113,10 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 
     @PermissionTest(permission=BODY_SENSORS)
     public void testBodySensors(){
-		
 		if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HEART_RATE)) {
 		    throw new BypassTestException(
-		            "A heard rate monitor is not available to run this test");
+		            "A heart rate monitor is not available to run this test");
 		}
-
 		Sensor sensor = systemService(SensorManager.class).getDefaultSensor(Sensor.TYPE_HEART_RATE);
 		if (sensor == null) {
 		    throw new SecurityException(

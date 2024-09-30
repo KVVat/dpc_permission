@@ -210,33 +210,31 @@ public class GmsTestModule extends SignaturePermissionTestModuleBase {
 		List<String> gmsDeclaredPermissions = getAllGmsDeclaredSignaturePermissions();
 		//setTestSize(getTestSize()+gmsDeclaredPermissions.size());
 		//setTestSize(gmsDeclaredPermissions.size()+getTestSize());
-		qs.setCount_tests(gmsDeclaredPermissions.size());
-
+		//qs.setCount_tests(gmsDeclaredPermissions.size());
+		//qs.setCount_tests(gmsDeclaredPermissions.size()+qs.getCount_tests());
+		setAdditionalTestSize(gmsDeclaredPermissions.size());
 		gmsDeclaredPermissions.forEach(gmsp->{
 			boolean permissionGranted = mContext.checkSelfPermission(gmsp)
 					== PackageManager.PERMISSION_GRANTED;
 
 			if (permissionGranted != (gmsSignatureMatch || isPlatformSignatureMatch)) {
 				//always ignore size
-				/*callback.accept(
+				callback.accept(
 						new Result(false,null,
 								new PermissionTestRunner.Data(gmsp),
 								-1, getTestSize(),
-								false,""));*/
+								false,""));
 				qs.setCount_errors(qs.getCount_errors()+1);
 			} else {
-				/*callback.accept(
+				callback.accept(
 						new Result(true,null,
 								new PermissionTestRunner.Data(gmsp),
 								-1, getTestSize(),
-								false,""));*/
+								false,"gmsp error"));
 				qs.setCount_passed(qs.getCount_passed()+1);
 			}
 		});
-
 		return qs;
-
-		//evaluate declared permissions
 	}
 
 	/**

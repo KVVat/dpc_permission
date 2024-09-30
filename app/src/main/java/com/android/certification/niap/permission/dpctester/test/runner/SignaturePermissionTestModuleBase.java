@@ -86,11 +86,11 @@ public abstract class SignaturePermissionTestModuleBase extends PermissionTestMo
 	@NonNull
 	@Override
 	public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
-		return super.prepare(callback);
-	}
+		if(!isPlatformSignatureMatch){
+			inverseForPlatformTesting = true;
+		}
 
-	private <T> T systemService(Class<T> clazz){
-		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
+		return super.prepare(callback);
 	}
 
 	/**

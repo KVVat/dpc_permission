@@ -128,7 +128,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Install Test Cases",label = "Run Install Permission Test")
+@PermissionTestModule(name="Install Test Cases",label = "Run Install Permission Test",sync=true)
 public class InstallTestModule extends PermissionTestModuleBase {
 	public InstallTestModule(@NonNull Activity activity){ super(activity);}
 
@@ -506,7 +506,6 @@ public class InstallTestModule extends PermissionTestModuleBase {
 				final String msg = "The test for QUERY_ALL_PACKAGES permission is bypassed " +
 						"when the app is signing with a platform signature." +
 						"(see details in the process document)";
-				logger.system(msg);
 				throw new BypassTestException(msg);
 			}
 			// The companion package should be installed to act as a queryable package
@@ -963,6 +962,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		FgServiceConnection serviceConnection = new FgServiceConnection();
 
 		//ExecutorService executorService = mContext.getApplicationContext().getMainExecutor();
+
 		mContext.bindService(serviceIntent,
 				Context.BIND_AUTO_CREATE, mExecutor,serviceConnection);
 		synchronized (lock) {
@@ -973,6 +973,10 @@ public class InstallTestModule extends PermissionTestModuleBase {
 					try {
 						//wait almost 1 sec along increasing waiting time
 						lock.wait(10+(i*i));
+						//final int n = i;
+						/*mActivity.runOnUiThread(() -> {
+							((MainActivity)mActivity).addLogLine("sync "+(n));
+						});*/
 						if(i++>=40){
 							throw new InterruptedException("Connection Timed Out");
 						}

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:theme="@style/Theme.MaterialComponents"
-    tools:context="com.android.certification.niap.permission.dpctester.MainActivity">
+    tools:context="com.android.certification.niap.permission.dpctester.DetailsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
@@ -37,34 +37,5 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="?attr/actionBarSize"
         app:layoutManager="LinearLayoutManager"/>
-
-    <LinearLayout
-        android:id="@+id/mainLayout"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:gravity="center_horizontal|top"
-        android:background="@drawable/layer_card_background"
-        android:layout_margin="10dp"
-        android:padding="8dp"
-        android:layout_marginBottom="5dp"
-        android:orientation="vertical"
-        android:elevation="30dp"
-        app:behavior_hideable="false"
-        app:behavior_peekHeight="60dp"
-        android:theme="@style/Theme.MaterialComponents.Bridge"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        tools:ignore="MissingConstraints">
-        <TextView
-            android:id="@+id/bsArrow"
-            android:layout_width="fill_parent"
-            android:layout_height="24sp"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/arrow_text"
-            android:gravity="center_horizontal"
-            android:textSize="18sp"
-            android:textColor="@color/text_black"
-            android:layout_marginBottom="10dp"
-            />
-    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

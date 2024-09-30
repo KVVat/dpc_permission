@@ -12,6 +12,7 @@ annotation class PermissionTestModule(
     val name:String="title",
     val label:String="module label",
     val priority:Int=0,
+    val sync:Boolean=false,
 )
 
 annotation class PermissionTest(
@@ -19,7 +20,6 @@ annotation class PermissionTest(
     val sdkMin:Int=0,
     val sdkMax:Int=100000,
     val priority:Int=-1,
-    val sync:Boolean=false,
     val customCase:Boolean=false,
     val requiredServices:Array<KClass<out Any>> =[],
     val requiredPermissions:Array<String> =[],

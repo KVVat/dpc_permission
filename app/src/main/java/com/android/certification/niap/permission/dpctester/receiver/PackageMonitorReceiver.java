@@ -31,7 +31,7 @@ public class PackageMonitorReceiver extends BroadcastReceiver {
         String notificationBody = buildNotificationText(context, packageName, action);
         Notification notification =
                 NotificationUtil.getNotificationBuilder(context)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle(context.getString(R.string.package_changed_notification_title))
                         .setContentText(notificationBody)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(notificationBody))

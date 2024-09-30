@@ -27,17 +27,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <activity
-        android:name=".activity.TestActivity"
-        android:theme="@style/NoActionBar"
-        android:launchMode="singleTop"
-        android:exported="true">
-        <intent-filter>
-            <action
-                android:name="android.permission.action.ACTION_VIEW_APP_FEATURES" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+        <activity
+            android:name="com.android.certification.niap.permission.dpctester.DetailsActivity"
+            android:theme="@style/NoActionBar"
+            android:launchMode="singleTop"
+            android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="android.permission.action.ACTION_VIEW_APP_FEATURES" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.TestActivity"
+            android:theme="@style/NoActionBar"
+            android:launchMode="singleTop"
+            android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="android.permission.action.ACTION_VIEW_APP_FEATURES" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+         </activity>
 
     </application>
 

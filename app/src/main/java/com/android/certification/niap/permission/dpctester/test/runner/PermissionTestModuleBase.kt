@@ -12,6 +12,7 @@ import com.android.certification.niap.permission.dpctester.DpcApplication
 import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.common.Constants
 import com.android.certification.niap.permission.dpctester.common.SignatureUtils
+import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
@@ -23,7 +24,8 @@ import java.util.function.Consumer
 open class PermissionTestModuleBase(activity: Activity) {
     open var TAG: String = PermissionTestModuleBase::class.java.simpleName
     val title: String? = javaClass.getAnnotation(PermissionTestModule::class.java)?.name
-
+    @JvmField
+    val isSync:Boolean = javaClass.getAnnotation(PermissionTestModule::class.java)?.sync?:false
     @JvmField
     protected var logger: ActivityLogger
     @JvmField
@@ -48,6 +50,8 @@ open class PermissionTestModuleBase(activity: Activity) {
     @JvmField
     protected val mAppSignature : Signature =
         SignatureUtils.getTestAppSigningCertificate(mContext);
+    @JvmField
+    var inverseForPlatformTesting = false
 
     @JvmField
     protected val isPlatformSignatureMatch:Boolean =
@@ -58,21 +62,21 @@ open class PermissionTestModuleBase(activity: Activity) {
 
     @JvmField
     val info = Info();
+    var additionalTestSize=0
 
     init {
         testCases = ReflectionTool.checkPermissionTestMethod(this)
-        testSize = testCases.size
         logger = LoggerFactory.createActivityLogger(
             title!!,
             activity as ActivityLogger.LogListAdaptable
         ) as ActivityLogger
-        //logger.system("The module `$title` has ${testSize} test cases.")
         info.title = title
-        info.count_tests = testSize
         info.count_errors = 0
         info.count_bypassed = 0
+        testSize = testCases.size
+        info.count_tests = testSize
+        //logger.system("The module `$title` has ${testSize} test cases.")
     }
-
 
     open class Info {
         var title: String? = null
@@ -80,6 +84,7 @@ open class PermissionTestModuleBase(activity: Activity) {
         var count_tests: Int = 0
         var count_errors: Int = 0
         var count_bypassed: Int =0
+        val moduleLog:MutableList<LogBox> = mutableListOf();
         override fun toString(): String {
             return "title=$title count_tests=$count_tests count_errors=$count_errors count_bypassed=$count_bypassed"
         }
@@ -127,8 +132,6 @@ open class PermissionTestModuleBase(activity: Activity) {
     }
 
     open fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo{
-        //testSize = testCases.size
-
         return PrepareInfo();
     }
 
