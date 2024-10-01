@@ -220,7 +220,7 @@ public abstract class SignaturePermissionTestModuleBase extends PermissionTestMo
 			if (SYSTEM_ONLY_BIND_PERMISSIONS.contains(permission)
 					&& checkPermissionGranted(permission)) {
 				throw new BypassTestException(
-						"Only the system can bind to this service with this permission granted");
+						"Only the system can bind to this service with this permission("+permission_+") granted");
 			}
 			StringBuilder serviceName = new StringBuilder();
 			serviceName.append("Test");
@@ -255,8 +255,8 @@ public abstract class SignaturePermissionTestModuleBase extends PermissionTestMo
 							throw new InterruptedException("Connection Timed Out");
 						}
 					}
-					logger.info("Connected To Service in the Companion app=" + serviceConnection.mComponentName +
-							"," + serviceConnection.binderSuccess.get());
+					//logger.info("Connected To Service in the Companion app=" + serviceConnection.mComponentName +
+					//			"," + serviceConnection.binderSuccess.get());
 					if (!serviceConnection.binderSuccess.get()) {
 						throw new SecurityException("Test for " + serviceConnection.mComponentName + " has been failed.");
 					}

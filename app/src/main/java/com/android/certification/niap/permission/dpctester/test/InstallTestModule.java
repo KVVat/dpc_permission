@@ -116,6 +116,8 @@ import static android.hardware.usb.UsbManager.EXTRA_PERMISSION_GRANTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -124,7 +126,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -658,28 +662,61 @@ public class InstallTestModule extends PermissionTestModuleBase {
 	@RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @PermissionTest(permission=DETECT_SCREEN_CAPTURE, sdkMin=34)
 	public void testDetectScreenCapture(){
+		CountDownLatch latch = new CountDownLatch(1);
 		final Activity.ScreenCaptureCallback cb
 				= new Activity.ScreenCaptureCallback() {
 			@Override
 			public void onScreenCaptured() {
 				// Add logic to take action in your app.
-				logger.debug("screen captured");
+				latch.countDown();
+				//logger.debug("screen captured");
 			}
 		};
 		try {
 			mActivity.registerScreenCaptureCallback(mExecutor, cb);
-			Screenshot.capture();//androidx.test.runner deprecated?
+			//Screenshot.capture();//androidx.test.runner was deprecated?
+			runShellCommand("input keyevent 120");
 			try {
-				Thread.sleep(500);
+				latch.await(2, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				throw new SecurityException("Failed to detect screen capture in time");
 			}
 		} finally {
 			mActivity.unregisterScreenCaptureCallback(cb);//close it anyway
 		}
 
 	}
+	/**
+	 * Invokes and logs the stdout / stderr of the provided shell {@code command}, returning the
+	 * exit code from the command.
+	 */
+	protected int runShellCommand(String command) {
+		try {
+			logger.debug("Attempting to run command " + command);
+			java.lang.Process process = Runtime.getRuntime().exec(command);
+			int returnCode = process.waitFor();
+			BufferedReader stdout = new BufferedReader(
+					new InputStreamReader(process.getInputStream()));
+			BufferedReader stderr = new BufferedReader(
+					new InputStreamReader(process.getErrorStream()));
+			StringBuilder stdoutBuilder = new StringBuilder();
+			String line;
+			while ((line = stdout.readLine()) != null) {
+				stdoutBuilder.append(line + "\n");
+			}
 
+			StringBuilder stderrBuilder = new StringBuilder();
+			while ((line = stderr.readLine()) != null) {
+				stderrBuilder.append(line + "\n");
+			}
+			logger.debug("Process return code: " + returnCode);
+			logger.debug("Process stdout: " + stdoutBuilder.toString());
+			logger.debug("Process stderr: " + stderrBuilder.toString());
+			return returnCode;
+		} catch (Throwable e) {
+			throw new UnexpectedTestFailureException(e);
+		}
+	}
 
 	//Helper
 	private static class LocalDirectExecutor implements Executor {

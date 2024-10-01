@@ -63,6 +63,10 @@ open class PermissionTestModuleBase(activity: Activity) {
     @JvmField
     val info = Info();
     var additionalTestSize=0
+        set(value) {
+            field = value
+            info.count_additional_tests = value
+        }
 
     init {
         testCases = ReflectionTool.checkPermissionTestMethod(this)
@@ -84,6 +88,7 @@ open class PermissionTestModuleBase(activity: Activity) {
         var count_tests: Int = 0
         var count_errors: Int = 0
         var count_bypassed: Int =0
+        var count_additional_tests: Int =0
         val moduleLog:MutableList<LogBox> = mutableListOf();
         override fun toString(): String {
             return "title=$title count_tests=$count_tests count_errors=$count_errors count_bypassed=$count_bypassed"

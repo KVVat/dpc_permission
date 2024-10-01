@@ -77,7 +77,7 @@ class PermissionTestRunner {
                             "${testCase.permission} : SDK${Build.VERSION.SDK_INT} is not supported to run.(SDK MAX:${testCase.sdkMax})"
                         )
                     }
-                    StaticLogger.debug("running=>"+testCase.methodName)
+                    //StaticLogger.debug("running=>"+testCase.methodName)
                     ReflectionUtil.invoke(root, testCase.methodName)
 
                 } catch (ex: ReflectionUtil.ReflectionIsTemporaryException) {
@@ -100,7 +100,6 @@ class PermissionTestRunner {
                 } else {
                     throwable = ex
                     success = B_FAILURE
-                    //@TODO cause fatal error?
                     message = if (ex.message != null) ex.message!! else ex.toString()
                 }//ex.message!!
             } catch(ex:SecurityException) {
@@ -147,7 +146,12 @@ class PermissionTestRunner {
             //testLatch = CountDownLatch(1);
             //suite.info.count_errors = suite.info.count_errors + if(success) 0 else 1
             root.mActivity.runOnUiThread{
-                callback?.accept(Result(success,throwable,testCase, finished_cnt,root.testSize,bypassed,message))
+                callback?.accept(Result(
+                    success=success,
+                    throwable=throwable,
+                    source=testCase,
+                    bypassed=bypassed,
+                    message=message))
                 suite.cbModuleControl?.accept(root.info)
                 suite.cbTestControl?.accept(root.info)
             }
@@ -224,8 +228,20 @@ class PermissionTestRunner {
 
     }
 
-    data class Result(var success:Boolean, val throwable:Throwable? = null, val source: Data, val finished: Int,
-                      val testSize: Int, var bypassed: Boolean = false,var message:String="")
+    /*
+    "permission_granted:false" +
+    ",api_successful:false" +
+    ",signature_match:false" +
+    ",platform_signature_match:false" +
+     */
+    data class Result(
+        var success:Boolean, val throwable:Throwable? = null, val source: Data,
+        var bypassed: Boolean = false,
+        var granted:Boolean=false,
+        var api_successful:Boolean=false,
+        var signature_match:Boolean=false,
+        var platform_signature_match:Boolean=false,
+        var message:String="")
 
     data class Data(
         var permission: String,

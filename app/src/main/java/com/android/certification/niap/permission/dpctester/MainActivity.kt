@@ -89,7 +89,7 @@ class MainViewAdapter(private val list: List<LogBox>,
             textView(R.id.logrowIndicator).setTextColor(Color.GREEN)
         } else if(type == "error" || type == "bypassed" ){
             textView(R.id.logrowNextArrow).visibility = View.VISIBLE
-            textView(R.id.logrowIndicator).setTextColor(Color.rgb(0xFB,0xBD,0x0D))
+            textView(R.id.logrowIndicator).setTextColor(Color.BLUE)//Color.rgb(0xFB,0xBD,0x0D))
             if(type == "error") {
                 textView(R.id.logrowIndicator).setTextColor(Color.RED)
             }
@@ -143,7 +143,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 object : MainViewAdapter.ListListener {
                     override fun onClickItem(tappedView: View, itemModel: LogBox) {
                         if(itemModel.childs.size>0){
-                            //TODO : launch child activty to show errors
+
                             val intent = Intent(
                                 this@MainActivity,
                                 DetailsActivity::class.java
@@ -246,22 +246,35 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 suiteTestCnt.set(0)
                 suite.start(callback ={ result ->
                     if(!result.bypassed){
-                        if(!result.success)
-                            logger.error("Test Failed:"+result.source.permission.replace("android.permission.","")+"=>"+result.success)
-
+                        if(!result.success) {
+                            /*logger.error(
+                                "Test Failed:" + result.source.permission.replace(
+                                    "android.permission.",
+                                    ""
+                                ) + "=>" + result.success
+                            )*/
+                        } else {
+                            logger.debug(
+                                result.source.permission+
+                                        ": PASSED {" +
+                                        "permission_granted:false" +
+                                        ",api_successful:false" +
+                                        ",signature_match:false" +
+                                        ",platform_signature_match:false" +
+                                        "}");
+                        }
                     } else {
-                        logger.debug(""+result.message)
+                        logger.debug(
+                            result.source.permission+
+                            ": BYPASSED {message='"+result.message+"'}");
                     }
-                    if(!result.success){
-                        if(!result.bypassed)
-                            logger.error("Failed:${result.source.permission} ("+result.message+")");
-                    }
+
                     suiteTestCnt.incrementAndGet()
                     //logger.info("${suiteTestCnt.get()},${suite.testCount}")
                     if(suiteTestCnt.get()>=suite.testCount){
                         //If all the test thread has been executed, process reach this line.
                         //We can leverage it to safely execute next test suite.
-                        logger.system("All test threads has been finished.${suiteTestCnt.get()}/${suite.testCount}");
+                        //logger.system("All test threads has been finished.${suiteTestCnt.get()}/${suite.testCount}");
                         hideProgressDialog()
                         PermissionTestRunner.running=false
                         runOnUiThread {
@@ -269,6 +282,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                                 button.isEnabled = true
                                 button.isClickable = true
                             }
+                            logger.system("All spawned test threads gently finished. test=${suite.testCount}")
                         }
                     }
                 },cbModuleControl_= { info->
@@ -281,21 +295,30 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                             .runNextModule(suite, suite.methodCallback)
                     }
                 }, cbTestControl_ = {info->
-                    logger.info("back name=${info.title} info.count_bypassed=${info.count_bypassed}")
                     if(PermissionTestRunner.testThreadMutex.isLocked)
                         PermissionTestRunner.testThreadMutex.unlock();
                 }, cbSuiteStart_ = { info->
+                    if(info.count_modules>=2) {
                         logger.system("Start '${info.title}' suite. (${info.count_modules} modules)")
-                        for (button in mTestButtons) {
-                            button.isEnabled = false
-                            button.isClickable = false
-                        }
+                    }
+                    for (button in mTestButtons) {
+                        button.isEnabled = false
+                        button.isClickable = false
+                    }
                 }, cbSuiteFinish_ = { info ->
-                    logger.system("Finish the test suite.")
+                    //logger.system("Finish the test suite.")
                 }, cbModuleStart_ = {info->
-                    logger.system("Start ${info.title} (${info.count_tests} test)")
+                    logger.system("Start ${info.title} (${info.count_tests}+${info.count_additional_tests} test)")
                 }, cbModuleFinish_ = {info->
-                    val desc= "Finish ${info.title} \r\n ❗${info.count_errors} ⚠${info.count_bypassed}";
+
+                    var desc= "Finish ${info.title}\r\n";
+                    if(info.count_errors>0){
+                        desc +=" ❗${info.count_errors}"
+                    }
+                    if(info.count_bypassed>0){
+                        desc +=" ⚠${info.count_bypassed}"
+                    }
+
                     val box = LogBox(Random.nextLong(), "Finish module", desc
                         , childs = info.moduleLog);
                     if(info.count_errors>0){
