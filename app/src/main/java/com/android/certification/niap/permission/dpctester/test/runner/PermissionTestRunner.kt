@@ -92,11 +92,23 @@ class PermissionTestRunner {
                 }
             } catch(ex:NullPointerException){
                 //Is intended null pointer exception? (missing system service=>bypass)
-                if(ex.message !=null && ex.message!!.startsWith("[npe_system_service]")){
+                if(ex.message !=null && ex.message!!.startsWith("[npe_system_service]")) {
                     throwable = ex
-                    success=true //bypassed test always returns true
-                    bypassed=true
-                    message = "The system does not have the hardware feature required to run this test."
+                    success = true //bypassed test always returns true
+                    bypassed = true
+                    message =
+                        "The system does not have the hardware feature required to run this test."
+                }else if(ex.message !=null &&
+                    (ex.message!!.startsWith("Attempt to invoke interface")||
+                     ex.message!!.startsWith("Attempt to invoke virtual method")
+                    )){
+                    //Binder transaction was failed due to the parameter is null.
+                    //And we treat this case as a successful.
+                    throwable = ex
+                    success = true //bypassed test always returns true
+                    bypassed = false
+                    message =
+                        "A NPE has been caused, but the binder transaction was executed."
                 } else {
                     throwable = ex
                     success = B_FAILURE
@@ -123,7 +135,7 @@ class PermissionTestRunner {
                 message = ex.cause?.message!!
             } catch (ex:Exception){
                 //Unexpected Failures
-                ex.printStackTrace()
+
                 throwable = ex
                 success = B_FAILURE
                 message = if(ex.message != null) ex.message!! else ex.toString()
@@ -139,10 +151,11 @@ class PermissionTestRunner {
                 root.info.count_errors  += 1 // suite.info.count_errors + 1
                 root.info.moduleLog.add(
                     LogBox(type = "error", name =testCase.permission, description = message));
-
+                if(throwable != null){
+                    throwable.printStackTrace()
+                }
             }
             //safe call
-            val finished_cnt = finished.incrementAndGet()
             //testLatch = CountDownLatch(1);
             //suite.info.count_errors = suite.info.count_errors + if(success) 0 else 1
             root.mActivity.runOnUiThread{

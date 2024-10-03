@@ -505,27 +505,26 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		}
 		// The API guarded by this permission is also guarded by the signature
 		// permission UWB_PRIVILEGED, so if this signature permission is not granted
-		// then skip this test.
+		// then skip this test. UWB_PRIVILEGED is a signature level
 		if (mContext.checkSelfPermission("android.permission.UWB_PRIVILEGED") != PackageManager.PERMISSION_GRANTED) {
 			throw new BypassTestException(
 					"The UWB_PRIVILEGED permission must be granted for this test");
 		}
 		// The UwbManager with the API guarded by this permission is hidden, so a
 		// direct transact is required.
-		final AttributionSource attributionSource = AttributionSource.myAttributionSource();
+		final AttributionSource attributionSource =
+				AttributionSource.myAttributionSource();
 		Parcelable sessionHandle = new Parcelable() {
 			@Override
 			public int describeContents() {
 				return 0;
 			}
-
 			@Override
 			public void writeToParcel(@NonNull Parcel parcel, int i) {
 				parcel.writeInt(1);
 				parcel.writeString(attributionSource.getPackageName());
 				parcel.writeInt(attributionSource.getUid());
 				parcel.writeInt(attributionSource.getPid());
-
 			}
 		};
 

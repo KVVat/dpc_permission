@@ -74,6 +74,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.E2eeContactKeysManager;
 import android.security.FileIntegrityManager;
+import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -84,6 +85,7 @@ import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
@@ -537,11 +539,11 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		);
 		Intent[] intents = new Intent[]{new Intent(Intent.ACTION_VIEW)};
 		//getIApplicationThread()
+		StaticLogger.debug(ReflectionTool.Companion.checkDeclaredMethod(mActivity,"get").toString());
 
 		//below method isn't working?
 		Object activityThread = ReflectionUtil.invoke
-				(mActivity,"getActivityThread");
-
+				(mActivity,"getActivityThread",new Class<?>[]{});
 		if(activityThread != null){
 			//Class atClazz;
 			//atClazz = Class.forName("android.app.ActivityThread");
@@ -614,6 +616,23 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 					}
 				});
+	}
+
+	@PermissionTest(permission = "MANAGE_PROFILE_AND_DEVICE_OWNERS",sdkMax = 34)
+	public void testManageProfileAndDeviceOwners() {
+		// Tests fails with a SecurityException without the permission but still
+		// fails with the permission with another exception since the device owner
+		// cannot be set if the device is already setup-up.
+		ComponentName componentName = new ComponentName(mContext, MainActivity.class);
+		try {
+			//Interface changes since sdk 34
+			BinderTransaction.getInstance().invoke(Transacts.DEVICE_POLICY_SERVICE,
+					Transacts.DEVICE_POLICY_DESCRIPTOR,
+					"setDeviceOwner",
+					componentName, appUid);
+		} catch(IllegalStateException ex){
+			//expected ignore
+		}
 	}
 
 

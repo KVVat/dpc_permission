@@ -12,6 +12,7 @@ adb uninstall com.android.certification.niap.permission.dpctester
 #enable priviledges
 #adb shell dpm set-active-admin com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 #adb shell dpm set-profile-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
+adb shell settings put global hidden_api_policy  1
 adb shell dpm set-device-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 adb shell cmd role set-bypassing-role-qualification true
 adb shell cmd role add-role-holder android.app.role.DEVICE_POLICY_MANAGEMENT com.android.certification.niap.permission.dpctester

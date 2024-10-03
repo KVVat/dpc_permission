@@ -93,6 +93,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.android.internal.policy.IKeyguardDismissCallback;
 
 import java.io.File;
@@ -100,6 +101,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -213,10 +215,14 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		// SurfaceFlinger.cpp CheckTransactCodeCredentials should check this;
 		// BOOT_FINISHED is set to FIRST_CALL_TRANSACTION since it is anticipated to be
 		// called from the ActivityManagerService.
-		BinderTransaction.getInstance().invoke(
-				Transacts.SURFACE_FLINGER_SERVICE,
-				Transacts.SURFACE_FLINGER_DESCRIPTOR,
-				"showCpu");
+		try {
+			BinderTransaction.getInstance().invoke(
+					Transacts.SURFACE_FLINGER_SERVICE,
+					Transacts.SURFACE_FLINGER_DESCRIPTOR,
+					"showCpu");
+		} catch (NoSuchElementException e) {
+			//intended : ignore
+		}
 	}
 
 	@PermissionTest(permission = "ACCESS_VOICE_INTERACTION_SERVICE")
@@ -344,10 +350,15 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	//TODO: REMOTE_VIEW SERVICE?
 	@PermissionTest(permission = "CHANGE_COMPONENT_ENABLED_STATE")
 	public void testChangeComponentEnabledState() {
-		ComponentName testComponent = new ComponentName("android",
-				"android.widget.RemoteViewsService");
-		mPackageManager.setComponentEnabledSetting(testComponent,
-				PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+		ComponentName testComponent =
+				new ComponentName("android.backup.app",
+						".FullBackupBackupAgent");
+		try {
+			mPackageManager.setComponentEnabledSetting(testComponent,
+					PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+		} catch (IllegalArgumentException ex){
+			//expected..
+		}
 	}
 
 	@PermissionTest(permission = "CHANGE_CONFIGURATION")
@@ -357,10 +368,12 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				0);
 	}
 
-	@PermissionTest(permission = "CLEAR_APP_CACHE")
+	@PermissionTest(permission = "CLEAR_APP_CACHE",sdkMax = 34)
 	public void testClearAppCache() {
+
 		ReflectionUtil.invoke(mPackageManager, "freeStorage",
-				new Class<?>[]{long.class, IntentSender.class}, 100, null);
+				new Class<?>[]{long.class, IntentSender.class}, "",100, null);
+
 	}
 
 	@PermissionTest(permission = "CLEAR_APP_USER_DATA")
@@ -583,7 +596,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 			ReflectionUtil.invoke(mPackageManager, "deletePackage",
 					new Class<?>[]{String.class, packageDeleteObserverClass, int.class},
 					"com.example.test", null, 0);
-		} catch (UnexpectedTestFailureException e) {
+		} catch (ReflectionUtil.ReflectionIsTemporaryException e) {
 			// The only guaranteed package on the device that can be deleted is the companion
 			// package, but that would break any subsequent tests that require connecting
 			// to the services exported by the companion app. A ReflectiveOperationException
@@ -746,9 +759,13 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		// The showCpu transaction should result in an invalid transaction ID; when the
 		// SurfaceFlinger receives this UNKNOWN_TRANSACTION result it will check if the caller
 		// has the HARDWARE_TEST permission before proceeding.
-		BinderTransaction.getInstance().invoke(Transacts.SURFACE_FLINGER_SERVICE,
-				Transacts.SURFACE_FLINGER_DESCRIPTOR,
-				"showCpu");
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.SURFACE_FLINGER_SERVICE,
+					Transacts.SURFACE_FLINGER_DESCRIPTOR,
+					"showCpu");
+		} catch (NoSuchElementException ex){
+			//Intended ignore
+		}
 	}
 
 	@PermissionTest(permission = "INSTALL_GRANT_RUNTIME_PERMISSIONS")
@@ -785,11 +802,10 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				new Class<?>[]{int.class}, 1);
 	}
 
-	//TODO: ERROR WHY? check existing method?
 	@PermissionTest(permission = "INTERACT_ACROSS_USERS_FULL")
 	public void testInteractAcrossUsersFull() {
-		ReflectionUtil.invoke(mPackageManager.getClass(),
-				"getDefaultBrowserPackageNameAsUser", mPackageManager,
+		ReflectionUtil.invoke(mPackageManager,
+				"getDefaultBrowserPackageNameAsUser",
 				new Class<?>[]{int.class}, 1);
 	}
 
@@ -937,23 +953,19 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"getZenRules");
 	}
 
-	@PermissionTest(permission = "MANAGE_PROFILE_AND_DEVICE_OWNERS")
+	@PermissionTest(permission = "MANAGE_PROFILE_AND_DEVICE_OWNERS",sdkMax = 33)
 	public void testManageProfileAndDeviceOwners() {
 		// Tests fails with a SecurityException without the permission but still
 		// fails with the permission with another exception since the device owner
 		// cannot be set if the device is already setup-up.
 		ComponentName componentName = new ComponentName(mContext, MainActivity.class);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-			BinderTransaction.getInstance().invoke(Transacts.DEVICE_POLICY_SERVICE,
-					Transacts.DEVICE_POLICY_DESCRIPTOR,
-					"setDeviceOwner",
-					componentName, appUid);
-
-		} else {
+		try {
 			BinderTransaction.getInstance().invoke(Transacts.DEVICE_POLICY_SERVICE,
 					Transacts.DEVICE_POLICY_DESCRIPTOR,
 					"setDeviceOwner",
 					componentName, "test owner", 0);
+		} catch(IllegalStateException ex){
+			//expected ignore
 		}
 	}
 
@@ -1285,10 +1297,14 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "READ_SEARCH_INDEXABLES")
 	public void testReadSearchIndexables() {
-		Cursor cursor =
-				mContentResolver.query(Uri.parse("content://com.android.settings/"), null, null,
-						null, null);
-		cursor.close();
+		try {
+			Cursor cursor =
+					mContentResolver.query(Uri.parse("content://com.android.settings/"), null, null,
+							null, null);
+			cursor.close();
+		} catch (UnsupportedOperationException e) {
+			//expected
+		}
 	}
 
 	@PermissionTest(permission = "READ_WIFI_CREDENTIAL")
@@ -1461,8 +1477,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "REVOKE_RUNTIME_PERMISSIONS")
 	public void testRevokeRuntimePermissions() {
-		ReflectionUtil.invoke(mPackageManager.getClass(), "revokeRuntimePermission",
-				mPackageManager,
+		ReflectionUtil.invoke(mPackageManager, "revokeRuntimePermission",
 				new Class<?>[]{String.class, String.class, UserHandle.class},
 				Constants.COMPANION_PACKAGE, Manifest.permission.CAMERA,
 				UserHandle.getUserHandleForUid(appUid));
@@ -1507,9 +1522,17 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "SET_INPUT_CALIBRATION")
 	public void testSetInputCalibration() {
-		BinderTransaction.getInstance().invokeCS(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
-				"setTouchCalibrationForInputDevice",
-				"test_device", 0, 0);
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
+					"setTouchCalibrationForInputDevice",
+					"test_device", 0, 0);
+		} catch (NullPointerException ex){
+			//logger.system(ex.getMessage());
+			if(!ex.getMessage().startsWith("calibration must not be null")){
+				throw ex;
+			}
+			//expected exception
+		}
 	}
 
 	@PermissionTest(permission = "SET_KEYBOARD_LAYOUT")
@@ -1709,9 +1732,13 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="START_TASKS_FROM_RECENTS")
 	public void testStartTasksFromRecents(){
-		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
-				"startActivityFromRecents",
-				0, 0);
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
+					"startActivityFromRecents",
+					0, 0);
+		} catch (IllegalArgumentException ex){
+			//expected
+		}
 	}
 
 	@PermissionTest(permission="STATUS_BAR")

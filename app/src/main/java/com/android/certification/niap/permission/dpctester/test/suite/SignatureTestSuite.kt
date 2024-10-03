@@ -29,7 +29,8 @@ class SignatureTestSuite(activity: Activity): PermissionTestSuiteBase(
     SignatureTestModuleS(activity),
     SignatureTestModuleT(activity),
     SignatureTestModuleU(activity),
-    SignatureTestModuleV(activity))
+    SignatureTestModuleV(activity)
+        )
 ){
 
 }

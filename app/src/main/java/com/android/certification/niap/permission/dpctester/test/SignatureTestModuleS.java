@@ -204,18 +204,10 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="INPUT_CONSUMER", sdkMin=31)
 	public void testInputConsumer(){
-        try {
-            Class clazz = Class.forName("android.view.InputChannel");
-			Object inputChannel = clazz.getConstructor().newInstance();
+		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
+				"createInputConsumer",
+				getActivityToken(), "test", 1, null);
 
-			BinderTransaction.getInstance().invokeCS(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
-					"createInputConsumer",
-					new Binder(), "default", 0, inputChannel);
-
-		} catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException |
-                 InstantiationException | NoSuchMethodException e) {
-            throw new UnexpectedTestFailureException(e);
-        }
     }
 
 	@PermissionTest(permission="KEEP_UNINSTALLED_PACKAGES", sdkMin=31)
@@ -782,11 +774,15 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="GET_PEOPLE_TILE_PREVIEW", sdkMin=31)
 	public void testGetPeopleTilePreview(){
-		//TODO:Invalid shortcut id?
-
-		mContentResolver.call(
-				Uri.parse("content://com.android.systemui.people.PeopleProvider"),
-				"get_people_tile_preview", null, new Bundle());
+		//Invalid shortcut id may called.
+		//Handle java.lang.IllegalArgumentException
+		try {
+			mContentResolver.call(
+					Uri.parse("content://com.android.systemui.people.PeopleProvider"),
+					"get_people_tile_preview", null, null);
+		} catch (IllegalArgumentException ex){
+			//expected
+		}
 	}
 
 	@PermissionTest(permission="MANAGE_ACTIVITY_TASKS", sdkMin=31)

@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -59,6 +60,7 @@ import androidx.core.app.ActivityCompat;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
@@ -564,19 +566,13 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 	public void testUseOnDeviceIntelligence(){
 		@SuppressLint("WrongConstant") Object ond = mContext.getSystemService("on_device_intelligence");
 		//logger.system(">"+ond.toString());
-		//logger.system(">"+ ReflectionTool.Companion.checkDeclaredMethod(ond,"getVersion").toString());
-
-		//public void getFeature(
-		//            int featureId,
-		//            @NonNull @CallbackExecutor Executor callbackExecutor,
-		//            @NonNull OutcomeReceiver<Feature, OnDeviceIntelligenceException> featureReceiver) {
 		try {
 			ReflectionUtil.invoke(ond,
 					"getVersion",
 					new Class<?>[]{Executor.class, LongConsumer.class},
 					mContext.getMainExecutor(), (LongConsumer) result -> {
 					});
-		} catch (UnexpectedTestFailureException ex){
+		} catch (ReflectionUtil.ReflectionIsTemporaryException ex){
 			if(ex.getCause() != null  &&  ex.getCause() instanceof InvocationTargetException){
 				if(ex.getCause().getCause() != null && ex.getCause() instanceof IllegalStateException){
 					//ok? : remote service is not configured
@@ -603,7 +599,8 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 	public void testSyncFlags(){
 		try {
 			Object featureFlags = ReflectionUtil.invoke(
-					"android.flags.FeatureFlags","getInstance");
+					Class.forName("android.flags.FeatureFlags"),"getInstance");
+
 			ReflectionUtil.invoke(Class.forName("android.flags.FeatureFlags"),
 					"booleanFlag",
 					new Class<?>[]{String.class,String.class,boolean.class},"dummy","dummy-boolean",true);
@@ -731,6 +728,12 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		BinderTransaction.getInstance().invoke(Transacts.SOUND_TRIGGER_SERVICE,
 				Transacts.SOUND_TRIGGER_DESCRIPTOR, "attachAsMiddleman",
 				identity, identity, null, new Binder());
+	}
+
+	@PermissionTest(permission = "CLEAR_APP_CACHE",sdkMin = 35)
+	public void testClearAppCache() {
+		ReflectionUtil.invoke(mPackageManager, "freeStorage",
+				new Class<?>[]{String.class,long.class, IntentSender.class}, "",100, null);
 	}
 
 }

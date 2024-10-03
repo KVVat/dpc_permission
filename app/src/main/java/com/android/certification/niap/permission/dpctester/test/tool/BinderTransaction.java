@@ -66,12 +66,13 @@ public class BinderTransaction  {
     }
 
 
-    private static void handleBinderInput(Parcel data,Object parameter,Boolean useCharSequence,Class<?> clazzRemoteCallback) throws ReflectionUtil.ReflectionIsTemporaryException {
+    private static Parcel handleBinderInput(Parcel data,Object parameter,Boolean useCharSequence,Class<?> clazzRemoteCallback) throws ReflectionUtil.ReflectionIsTemporaryException {
 
-        if(parameter == null) {
-            data.writeInt(0);
-        } else if (parameter instanceof CharSequence && useCharSequence) {
 
+        if (parameter instanceof CharSequence && useCharSequence) {
+            /*if(parameter == null) {
+                data.writeInt(0);
+            }*/
             data.writeInt(1);
             TextUtils.writeToParcel((CharSequence) parameter, data, 0);
 
@@ -129,6 +130,7 @@ public class BinderTransaction  {
             data.writeInt(1);
             ((Parcelable) parameter).writeToParcel(data, 0);
         }
+        return data;
     }
 
 
@@ -175,9 +177,9 @@ public class BinderTransaction  {
             Parcel data  = Parcel.obtain();
             data.writeInterfaceToken(descriptor);
 
-            for(Object parameter : parameters)
-                handleBinderInput(data,parameter,useCharSequence,clazzRemoteCallback);
-
+            for(Object parameter : parameters) {
+               data =  handleBinderInput(data, parameter, useCharSequence, clazzRemoteCallback);
+            }
             //Log.d("tag",">"+tId+":"+methodName);
             binder.transact(tId, data, reply, 0);
             //Log.d("tag",">"+tId+":"+reply.toString());

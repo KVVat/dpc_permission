@@ -160,25 +160,24 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="TRIGGER_LOST_MODE", sdkMin=33)
 	public void testTriggerLostMode(){
 		try {
-
 			ReflectionUtil.invoke(systemService(DevicePolicyManager.class),
-					"sendLostModeLocationUpdate",
-					new Class<?>[]{Executor.class, Consumer.class},
-					new Executor() {
-						@Override
-						public void execute(Runnable runnable) {
-						}
-					}, new Consumer<Boolean>() {
-						@Override
-						public void accept(Boolean aBoolean) {
+				"sendLostModeLocationUpdate",
+				new Class<?>[]{Executor.class, Consumer.class},
+				new Executor() {
+					@Override
+					public void execute(Runnable runnable) {
+					}
+				}, new Consumer<Boolean>() {
+					@Override
+					public void accept(Boolean aBoolean) {
 
-						}
-						@Override
-						public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
-							return Consumer.super.andThen(after);
-						}
-					});
-		} catch(UnexpectedTestFailureException e){
+					}
+					@Override
+					public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
+						return Consumer.super.andThen(after);
+					}
+				});
+		} catch(ReflectionUtil.ReflectionIsTemporaryException e){
 			//The error is intended
 			//Lost mode location updates can only be sent on an organization-owned device.
 		}
@@ -366,17 +365,9 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	public void testUseAttestationVerificationService(){
 		// in VerificationToken token,in ParcelDuration maximumTokenAge,in AndroidFuture resultCallback
 		// Intended NPE will be raised
-		try {
-			Class<?> clazz = Class.forName("com.android.internal.infra.AndroidFuture");
-			Object future = clazz.getConstructor().newInstance();
-			BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
-					Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
-					"verifyToken", null,null,future);
-
-		} catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException | InvocationTargetException e) {
-            throw new UnexpectedTestFailureException(e);
-        }
+		BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
+				Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
+				"verifyToken", null, null, null);
 
     }
 

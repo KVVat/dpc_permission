@@ -395,7 +395,7 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 						@Override
 						public Object invoke(Object o, Method method, Object[] objects)
 								throws Throwable {
-							logger.debug("invoke: " + method);
+							//logger.debug("invoke: " + method);
 							return null;
 						}
 					});

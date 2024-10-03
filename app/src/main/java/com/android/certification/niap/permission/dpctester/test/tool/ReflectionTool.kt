@@ -87,6 +87,23 @@ class ReflectionTool {
             }.collect(Collectors.toList())
         }
 
+        fun checkDeclaredMethod(javaClass: Class<*>, filter: String?): List<String> {
+            val a: MutableList<String> = ArrayList()
+            val clazz: Class<*> = javaClass
+            val methods = clazz.declaredMethods
+            for (m in methods) {
+                val method = StringBuilder(m.name + "(")
+                val types = m.parameterTypes
+                for (t in types) method.append(" ").append(t.typeName)
+                a.add("$method)")
+            }
+            return a.stream().filter { str: String ->
+                str.startsWith(
+                    filter!!
+                )
+            }.collect(Collectors.toList())
+        }
+
         fun checkDeclaredFields(target: Any, filter: String?): List<String> {
             val a: MutableList<String> = ArrayList()
             val clazz: Class<*> = target.javaClass

@@ -202,33 +202,6 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             )
         }
 
-
-        val modules: MutableList<PermissionTestModuleBase> = if(resources.getBoolean(R.bool.dpc_mode)){
-            mutableListOf(DPCTestModule(this))
-        } else {
-            mutableListOf(
-                GmsTestModule(this),
-                NonPlatformTestModule(this),
-                InstallTestModule(this),
-                RuntimeTestModule(this),
-                SignatureTestModule(this),
-                SignatureTestModuleP(this),
-                SignatureTestModuleQ(this),
-                SignatureTestModuleR(this),
-                SignatureTestModuleS(this),
-                SignatureTestModuleT(this),
-                SignatureTestModuleU(this),
-                SignatureTestModuleV(this),
-                InternalTestModule(
-                    this
-                )
-            )
-        }
-        if(resources.getBoolean(R.bool.debug_mode)){
-            modules.add(JavaTestModule(this))
-            if(resources.getBoolean(R.bool.dpc_mode))
-                modules.add(DPCHealthTestModule(this))
-        }
         // let the tester know the test result should be inverse or not
         resources.getBoolean(R.bool.inverse_test_result).let {
             PermissionTestRunner.inverse_test_result = it

@@ -12,6 +12,7 @@ adb uninstall com.android.certification.niap.permission.dpctester
 ./gradlew installNormalDebug
 
 #enable priviledges
+adb shell settings put global hidden_api_policy  1
 adb shell dpm set-active-admin com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 #adb shell dpm set-profile-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
 #adb shell dpm set-device-owner com.android.certification.niap.permission.dpctester/.receiver.DeviceAdminReceiver
