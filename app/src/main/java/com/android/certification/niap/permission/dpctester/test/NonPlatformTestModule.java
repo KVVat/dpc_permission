@@ -92,9 +92,10 @@ public class NonPlatformTestModule extends SignaturePermissionTestModuleBase {
 		setAdditionalTestSize(total);
 		//pp.setCount_tests(total);
 		//setTestSize(total);
-		boolean inverse_test_result = PermissionTestRunner.inverse_test_result;
+		boolean inverse_test_result = false;//PermissionTestRunner.inverse_test_result;
 		boolean B_SUCCESS = inverse_test_result? false : true;
 		boolean B_FAILURE = inverse_test_result? true : false;
+		StaticLogger.info("Test Result Inverse: "+inverse_test_result);
 
 		for(String permission:targetPermissions){
 			//int finalTestSize = getTestSize();

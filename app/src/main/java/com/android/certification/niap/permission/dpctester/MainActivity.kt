@@ -190,8 +190,8 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         }
         //Change the test modules here by resource settings
         val suites:MutableList<PermissionTestSuiteBase> = if(resources.getBoolean(R.bool.dpc_mode)){
-            //mutableListOf(DPCTestSuite(this))
-            mutableListOf(SignatureTestSuite(this))
+            mutableListOf(SingleModuleTestSuite(this,DPCTestModule(this)))
+            //mutableListOf(SignatureTestSuite(this))
         } else {
             mutableListOf(
                 SignatureTestSuite(this),
@@ -219,23 +219,17 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 suiteTestCnt.set(0)
                 suite.start(callback ={ result ->
                     if(!result.bypassed){
-                        if(!result.success) {
-                            /*logger.error(
-                                "Test Failed:" + result.source.permission.replace(
-                                    "android.permission.",
-                                    ""
-                                ) + "=>" + result.success
-                            )*/
-                        } else {
-                            logger.debug(
-                                result.source.permission+
-                                        ": PASSED {" +
-                                        "permission_granted:false" +
-                                        ",api_successful:false" +
-                                        ",signature_match:false" +
-                                        ",platform_signature_match:false" +
-                                        "}");
-                        }
+                        val res = if(result.success) "PASSED" else "FAILED"
+                        val msg = result.source.permission+
+                                ": $res{" +
+                                "permission_granted:${result.granted}" +
+                                ",api_successful:${result.api_successful}" +
+                                ",signature_match:false" +
+                                ",platform_signature_match:false" +
+                                ",message='${result.message}'"+
+                                "}"
+
+                        if(!result.success) logger.error(msg); else logger.debug(msg)
                     } else {
                         logger.debug(
                             result.source.permission+

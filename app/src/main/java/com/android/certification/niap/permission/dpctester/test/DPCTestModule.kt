@@ -89,50 +89,40 @@ import java.lang.UnsupportedOperationException
 import java.util.function.Consumer
 
 
-@PermissionTestModule("DPC Test Cases")
+@PermissionTestModule("DPC Test Cases", label = "Run DPC Test Cases")
 class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
     override var TAG: String = DPCTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
     val pm  =ctx.packageManager
     val dpsLevel:DeviceOwnerLevel = PermissionTool.getDeviceOwnerLevel(dpm)
-    //val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
+    val nopermMode = ctx.resources.getBoolean(R.bool.inverse_test_result)
+
     init {
         //Enable Permission Check Flag
         //"enable_permission_based_access"
         //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","true",false)
         //logger.system("enable_permission_based_access"+DeviceConfigTool.getProperty("device_policy_manager", "enable_permission_based_access")!!)
+        inverseForPlatformTesting=false
     }
 
-    /*override fun finalize(callback: Consumer<PermissionTestRunner.Result>?){
-        super.finalize(callback)
-        logger.system("Module finalized")
-        //Reset Permission Check Flag
-        //DeviceConfigTool.setProperty("device_policy_manager", "enable_permission_based_access","false",true)
-    }*/
-    /**
-     * Override and describe the routine which dependent on the module after each test
-     */
-    override fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo {
 
-        //TODO:Modify Result
-        /*PermissionTestRunner.getInstance().start(this) { result ->
-            //If the app priviledge is the active admin level and found no corresponding
-            //permission in the package manager, the behvaiour is intended
-            if(pm.checkPermission(ctx.packageName,result.source.permission)
-                == android.content.pm.PackageManager.PERMISSION_DENIED
-                && result.success==false
-                && nopermMode==false
-                && dpsLevel == DeviceOwnerLevel.DPS_ACTIVE_ADMIN_APP
-                ){
-                result.bypassed = true
-                logger.debug(
-                    "Package Manager does not recognize the permission `${result.source.permission}`.")
-            }
-            //we can evaluate the results here
-            callback?.accept(result)
-        }*/
-        return prepare(callback);
+    override fun resultHook(result:PermissionTestRunner.Result):PermissionTestRunner.Result{
+
+        if(pm.checkPermission(ctx.packageName,result.source.permission)
+            == android.content.pm.PackageManager.PERMISSION_DENIED
+            && result.success==false
+            && nopermMode==false
+            && dpsLevel == DeviceOwnerLevel.DPS_ACTIVE_ADMIN_APP
+        ){
+            result.bypassed = true
+            logger.debug(
+                "Package Manager does not recognize the permission `${result.source.permission}`.")
+        }
+
+        return result;
     }
+
+
     //Permission Test Cases for SDK34
 
     /*@PermissionTest(MANAGE_DEVICE_POLICY_ACCESSIBILITY,34,35)

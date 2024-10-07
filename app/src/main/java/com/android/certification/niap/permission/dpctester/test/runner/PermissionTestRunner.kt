@@ -32,6 +32,8 @@ class PermissionTestRunner {
             return instance_!!
         }
         var testThreadMutex = Mutex(false);
+
+
     }
     /**
      * Inverse the results of the test cases
@@ -48,9 +50,12 @@ class PermissionTestRunner {
             val B_FAILURE = if(is_inverse) true else false
             var success=B_SUCCESS
 
+
             var throwable:Throwable? = null
             var bypassed = false
-            var message = "(none)"
+            var apisuccess = true
+            var message = "(none)";// else "In this case the test should be failed."
+
             try {
                 try {
                     //Preliminary Conditions Check
@@ -96,6 +101,7 @@ class PermissionTestRunner {
                     throwable = ex
                     success = true //bypassed test always returns true
                     bypassed = true
+                    apisuccess=false
                     message =
                         "The system does not have the hardware feature required to run this test."
                 }else if(ex.message !=null &&
@@ -107,16 +113,20 @@ class PermissionTestRunner {
                     throwable = ex
                     success = true //bypassed test always returns true
                     bypassed = false
+                    apisuccess=false
                     message =
                         "A NPE has been caused, but the binder transaction was executed."
                 } else {
                     throwable = ex
                     success = B_FAILURE
+                    apisuccess=false
                     message = if (ex.message != null) ex.message!! else ex.toString()
                 }//ex.message!!
             } catch(ex:SecurityException) {
                 throwable = ex
                 success = B_FAILURE
+                apisuccess=false
+
                 if(ex.message != null)
                     message = ex.message!!
 
@@ -124,6 +134,7 @@ class PermissionTestRunner {
                 throwable = ex
                 success=true //bypassed test always returns true
                 bypassed=true
+                apisuccess=false
                 message = ex.message!!
             } catch (ex:UnexpectedTestFailureException) {
                 //Unexpected Failures
@@ -131,6 +142,7 @@ class PermissionTestRunner {
                 //ex.printStackTrace()
                 throwable = ex.cause
                 success = B_FAILURE
+                apisuccess=false
                 bypassed=false
                 message = ex.cause?.message!!
             } catch (ex:Exception){
@@ -138,15 +150,33 @@ class PermissionTestRunner {
 
                 throwable = ex
                 success = B_FAILURE
+                apisuccess=false
                 message = if(ex.message != null) ex.message!! else ex.toString()
             }
-            if(bypassed){
+
+
+
+            val result = root.resultHook(
+                Result(
+                    success=success,
+                    throwable=throwable,
+                    source=testCase,
+                    bypassed=bypassed,
+                    granted=ActivityCompat.checkSelfPermission(root.mContext, testCase.permission)
+                            == PackageManager.PERMISSION_GRANTED,
+                    api_successful=apisuccess,
+                    platform_signature_match = root.isPlatformSignatureMatch,
+                    gms_signature_match = false,
+                    message=message)
+            )
+            if(result.bypassed){
                 suite.info.count_bypassed += 1
                 root.info.count_bypassed  += 1 // suite.info.count_bypassed + 1
                 root.info.moduleLog.add(
                     LogBox(type = "bypassed", name =testCase.permission, description = message));
             }
-            if(!success){
+
+            if(!success && !result.bypassed){
                 suite.info.count_errors += 1
                 root.info.count_errors  += 1 // suite.info.count_errors + 1
                 root.info.moduleLog.add(
@@ -159,12 +189,7 @@ class PermissionTestRunner {
             //testLatch = CountDownLatch(1);
             //suite.info.count_errors = suite.info.count_errors + if(success) 0 else 1
             root.mActivity.runOnUiThread{
-                callback?.accept(Result(
-                    success=success,
-                    throwable=throwable,
-                    source=testCase,
-                    bypassed=bypassed,
-                    message=message))
+                callback?.accept(result)
                 suite.cbModuleControl?.accept(root.info)
                 suite.cbTestControl?.accept(root.info)
             }
@@ -238,7 +263,6 @@ class PermissionTestRunner {
         modulePos=0
         runNextModule(suite_,this.suite.methodCallback)
 
-
     }
 
     /*
@@ -252,7 +276,7 @@ class PermissionTestRunner {
         var bypassed: Boolean = false,
         var granted:Boolean=false,
         var api_successful:Boolean=false,
-        var signature_match:Boolean=false,
+        var gms_signature_match:Boolean=false,
         var platform_signature_match:Boolean=false,
         var message:String="")
 

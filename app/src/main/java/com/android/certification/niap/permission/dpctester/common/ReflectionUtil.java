@@ -182,6 +182,10 @@ public final class ReflectionUtil {
             Log.w(TAG, "Exception calling method " + method + ":", e);
             if (e instanceof InvocationTargetException) {
                 Throwable cause = e.getCause();
+                if(cause instanceof SecurityException){
+                    throw (SecurityException) cause;
+                }
+
                 if (cause instanceof RuntimeException) {
                     throw (RuntimeException) cause;
                 }

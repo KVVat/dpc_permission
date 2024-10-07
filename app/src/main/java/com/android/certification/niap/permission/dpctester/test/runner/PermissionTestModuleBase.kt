@@ -54,7 +54,7 @@ open class PermissionTestModuleBase(activity: Activity) {
     var inverseForPlatformTesting = false
 
     @JvmField
-    protected val isPlatformSignatureMatch:Boolean =
+    val isPlatformSignatureMatch:Boolean =
         mPackageManager.hasSigningCertificate(
             Constants.PLATFORM_PACKAGE,
             mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509
@@ -79,6 +79,7 @@ open class PermissionTestModuleBase(activity: Activity) {
         info.count_bypassed = 0
         testSize = testCases.size
         info.count_tests = testSize
+        inverseForPlatformTesting=false
         //logger.system("The module `$title` has ${testSize} test cases.")
     }
 
@@ -137,9 +138,11 @@ open class PermissionTestModuleBase(activity: Activity) {
     }
 
     open fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo{
-        return PrepareInfo();
+        return PrepareInfo()
     }
-
+    open fun resultHook(result:PermissionTestRunner.Result):PermissionTestRunner.Result{
+        return result
+    }
     /*open fun finalize(callback: Consumer<PermissionTestRunner.Result>?) {
         PermissionTestRunner.getInstance().finalize(this, callback)
     }

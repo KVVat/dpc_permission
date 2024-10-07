@@ -6,8 +6,8 @@ adb shell cmd role remove-role-holder android.app.role.DEVICE_POLICY_MANAGEMENT 
 adb uninstall com.android.certification.niap.permission.dpctester
 
 #assemble and install
-./gradlew assembleNopermDebug
-./gradlew installNopermDebug
+./gradlew assembleDpc-nopermDebug
+./gradlew installDpc-nopermDebug
 
 #enable priviledges
 adb shell settings put global hidden_api_policy  1

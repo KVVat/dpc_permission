@@ -1535,18 +1535,13 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission = "SET_KEYBOARD_LAYOUT")
+	@PermissionTest(permission = "SET_KEYBOARD_LAYOUT",sdkMin = 34)
 	public void testSetKeyboardLayout() {
-		if (Build.VERSION.SDK_INT >= 35) {
-			//method name changed and interface changed
-//			BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
-//					"setKeyboardLayoutForInputDevice",InputDeviceIdentifier(),
-//					0,InputMethodInfo,InputMethodSubtype() "test_descriptor");
-		} else {
-			BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
-					"addKeyboardLayoutForInputDevice",
-					0, "test_descriptor");
-		}
+
+		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
+				"addKeyboardLayoutForInputDevice",
+				0, "test_descriptor");
+
 	}
 
 	@PermissionTest(permission = "SET_MEDIA_KEY_LISTENER")

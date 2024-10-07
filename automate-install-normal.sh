@@ -8,8 +8,8 @@ adb uninstall com.android.certification.niap.permission.dpctester
 #assemble and install
 #./gradlew assembleNopermDebug
 #./gradlew installNopermDebug
-./gradlew assembleNormalmDebug
-./gradlew installNormalDebug
+./gradlew assembleDpc-normalDebug
+./gradlew installDpc-normalDebug
 
 #enable priviledges
 adb shell settings put global hidden_api_policy  1

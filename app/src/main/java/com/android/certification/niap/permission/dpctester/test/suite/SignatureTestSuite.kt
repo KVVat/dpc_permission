@@ -21,15 +21,15 @@ class SignatureTestSuite(activity: Activity): PermissionTestSuiteBase(
     async = false,
     activity = activity,
     values = arrayOf(
-    RuntimeTestModule(activity),
+    //RuntimeTestModule(activity),
     SignatureTestModule(activity),
-    SignatureTestModuleP(activity),
+    /*SignatureTestModuleP(activity),
     SignatureTestModuleQ(activity),
     SignatureTestModuleR(activity),
     SignatureTestModuleS(activity),
     SignatureTestModuleT(activity),
     SignatureTestModuleU(activity),
-    SignatureTestModuleV(activity)
+    SignatureTestModuleV(activity)*/
         )
 ){
 

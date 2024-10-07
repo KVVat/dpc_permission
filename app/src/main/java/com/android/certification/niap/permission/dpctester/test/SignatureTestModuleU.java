@@ -82,6 +82,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
+import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
@@ -540,7 +541,6 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		Intent[] intents = new Intent[]{new Intent(Intent.ACTION_VIEW)};
 		//getIApplicationThread()
 		StaticLogger.debug(ReflectionTool.Companion.checkDeclaredMethod(mActivity,"get").toString());
-
 		//below method isn't working?
 		Object activityThread = ReflectionUtil.invoke
 				(mActivity,"getActivityThread",new Class<?>[]{});

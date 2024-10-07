@@ -42,6 +42,7 @@ import androidx.annotation.RequiresApi;
 
 import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner.Result;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
@@ -93,7 +94,7 @@ import java.util.stream.Collectors;
 //BinderTransaction.getInstance().invoke(
 
 @PermissionTestModule(name="Gms Permission Test Cases",label = "Run Gms Tests")
-public class GmsTestModule extends SignaturePermissionTestModuleBase {
+public class GmsTestModule extends PermissionTestModuleBase {
 	public GmsTestModule(@NonNull Activity activity) {
 		super(activity);
 	}
@@ -195,6 +196,7 @@ public class GmsTestModule extends SignaturePermissionTestModuleBase {
 				"com.google.android.gms.vehicle.permission.SHARED_AUTO_SENSOR_DATA");
 	}
 
+	Boolean gmsSignatureMatch = false;
 	@NonNull
 	@Override
 	public PrepareInfo prepare(Consumer<Result> callback) {
@@ -203,7 +205,7 @@ public class GmsTestModule extends SignaturePermissionTestModuleBase {
 
 		// An app should only have access to the GMS signature permissions if it is signed with the
 		// GMS signing key or the platform signing key.
-		boolean gmsSignatureMatch = mPackageManager.hasSigningCertificate(Constants.GMS_PACKAGE_NAME,
+		gmsSignatureMatch = mPackageManager.hasSigningCertificate(Constants.GMS_PACKAGE_NAME,
 				mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509);
 
 		//evaluate gms permissions separately
@@ -235,6 +237,13 @@ public class GmsTestModule extends SignaturePermissionTestModuleBase {
 			}
 		});
 		return qs;
+	}
+
+	@NonNull
+	@Override
+	public Result resultHook(@NonNull Result result) {
+		result.setGms_signature_match(gmsSignatureMatch);
+		return super.resultHook(result);
 	}
 
 	/**
