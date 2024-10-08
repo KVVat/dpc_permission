@@ -267,7 +267,10 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 		// Note this is fragile since the implementation of SmartspaceSessionId can
 		// change in the future, but since there is no way to construct an instance
 		// of SmartspaceSessionId this at least allows the test to proceed.
-
+		if(checkPermissionGranted("android.permission.ACCESS_SMARTSPACE") && !isPlatformSignatureMatch){
+			//when access smart space permission is granted this test would be passed with ordinal signature
+			throw new BypassTestException("Cannot test this case when ACCESS_SMARTSPACE is granted.");
+		}
 		Parcelable smartspaceId = new Parcelable() {
 			@Override
 			public int describeContents() {

@@ -69,6 +69,7 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -573,9 +574,12 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 					mContext.getMainExecutor(), (LongConsumer) result -> {
 					});
 		} catch (ReflectionUtil.ReflectionIsTemporaryException ex){
+
 			if(ex.getCause() != null  &&  ex.getCause() instanceof InvocationTargetException){
 				if(ex.getCause().getCause() != null && ex.getCause() instanceof IllegalStateException){
-					//ok? : remote service is not configured
+					//expected message : Remote service is not configured
+				} else {
+					throw ex;//Secuirty Exception?
 				}
 			}
 		}
@@ -682,24 +686,23 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				getActivityToken(),0,null);
 	}
 
-	@PermissionTest(permission="SETUP_FSVERITY", sdkMin=35)
+	@RequiresApi(api = Build.VERSION_CODES.R)
+    @PermissionTest(permission="SETUP_FSVERITY", sdkMin=35)
 	public void testSetupFsverity(){
 
-		if (Build.VERSION.SDK_INT >= 35) {
-			@SuppressLint("WrongConstant") FileIntegrityManager fmg =
-					(FileIntegrityManager) mContext.getSystemService(Context.FILE_INTEGRITY_SERVICE);
-			try {
-				File file = File.createTempFile("authfd", ".tmp",mContext.getFilesDir());
-				ReflectionUtil.invoke
-						(fmg.getClass(),"setupFsVerity",fmg,
-								new Class<?>[]{File.class},file);
+		@SuppressLint("WrongConstant") FileIntegrityManager fmg =
+				(FileIntegrityManager) mContext.getSystemService(Context.FILE_INTEGRITY_SERVICE);
 
-			} catch (SecurityException e) {
-				throw e;
-			} catch (Exception e){
-				//expected (may catch InvocationTargetException for null pointer exception)
-			}
-		}
+        File file = null;
+        try {
+            file = File.createTempFile("authfd", ".tmp",mContext.getFilesDir());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate a tmporary file.");
+        }
+        ReflectionUtil.invoke
+				(fmg.getClass(),"setupFsVerity",fmg,
+						new Class<?>[]{File.class},file);
+
 	}
 
 	@PermissionTest(permission="SOUNDTRIGGER_DELEGATE_IDENTITY", sdkMin=35)

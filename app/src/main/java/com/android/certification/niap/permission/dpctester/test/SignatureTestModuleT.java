@@ -49,12 +49,14 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.OutcomeReceiver;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.keystore.KeyGenParameterSpec;
+import android.util.Log;
 import android.view.Display;
 import android.view.accessibility.CaptioningManager;
 import android.window.ITaskFpsCallback;
@@ -89,6 +91,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -159,28 +162,25 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="TRIGGER_LOST_MODE", sdkMin=33)
 	public void testTriggerLostMode(){
-		try {
-			ReflectionUtil.invoke(systemService(DevicePolicyManager.class),
-				"sendLostModeLocationUpdate",
-				new Class<?>[]{Executor.class, Consumer.class},
-				new Executor() {
-					@Override
-					public void execute(Runnable runnable) {
-					}
-				}, new Consumer<Boolean>() {
-					@Override
-					public void accept(Boolean aBoolean) {
 
-					}
-					@Override
-					public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
-						return Consumer.super.andThen(after);
-					}
-				});
-		} catch(ReflectionUtil.ReflectionIsTemporaryException e){
-			//The error is intended
-			//Lost mode location updates can only be sent on an organization-owned device.
-		}
+		ReflectionUtil.invoke(systemService(DevicePolicyManager.class),
+			"sendLostModeLocationUpdate",
+			new Class<?>[]{Executor.class, Consumer.class},
+			new Executor() {
+				@Override
+				public void execute(Runnable runnable) {
+				}
+			}, new Consumer<Boolean>() {
+				@Override
+				public void accept(Boolean aBoolean) {
+
+				}
+				@Override
+				public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
+					return Consumer.super.andThen(after);
+				}
+			});
+
 	}
 
 	@PermissionTest(permission="QUERY_USERS", sdkMin=33)
@@ -422,7 +422,22 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="MODIFY_USER_PREFERRED_DISPLAY_MODE", sdkMin=33)
 	public void testModifyUserPreferredDisplayMode(){
-		Display.Mode mode = systemService(DisplayManager.class).getDisplays()[0].getMode();
+
+		Display.Mode[] modes = systemService(DisplayManager.class).getDisplays()[0].getSupportedModes();
+		Display.Mode default_m = systemService(DisplayManager.class).getDisplays()[0].getMode();
+		boolean found= false;
+		Display.Mode target_m = null;
+		for(int i=0;i<modes.length;i++){
+			if(modes[i].getModeId()!=default_m.getModeId()) {
+				target_m = modes[i];
+				found=true;
+				break;
+			}
+		}
+		if(!found){
+			throw new BypassTestException("display mode for transtion was not found");
+		}
+
 
 		//The method may not find if the app is signing by the platform signing key
 		//logger.logInfo(ReflectionUtils.checkDeclaredMethod(mDisplayManager,"setGlobalUser").toString());
@@ -431,7 +446,15 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		//        new Class[]{Display.Mode.class},mode);
 
 		BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
-				"setUserPreferredDisplayMode",0,mode);
+				"setUserPreferredDisplayMode",0,target_m);
+
+		Parcel result = BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
+				"getUserPreferredDisplayMode",0,target_m);
+		//check is changed?
+
+		//systemService(DisplayManager.class).getDisplays()[0]
+		logger.system("set user preffered result: "+target_m.toString());
+		//logger.system("set user preffered result: "+p.readInt());
 	}
 
 	@PermissionTest(permission="ACCESS_ULTRASOUND", sdkMin=33)

@@ -110,7 +110,7 @@
       "deactivateFactoryResetProtection": 12
     },
     "android.os.INetworkManagementService": {
-      "setDataSaverModeEnabled": 30
+      "setDataSaverModeEnabled": 20
     },
     "android.devicelock.IDeviceLockService": {
       "isDeviceLocked": 3
@@ -138,15 +138,16 @@
       "isDreaming": 7
     },
     "android.hardware.display.IDisplayManager": {
-      "setRefreshRateSwitchingType": 51,
-      "setHdrConversionMode": 45,
-      "setTemporaryAutoBrightnessAdjustment": 38,
+      "setRefreshRateSwitchingType": 52,
+      "setHdrConversionMode": 46,
+      "setTemporaryAutoBrightnessAdjustment": 39,
       "startWifiDisplayScan": 6,
-      "setUserPreferredDisplayMode": 42,
-      "shouldAlwaysRespectAppRequestedMode": 50,
-      "requestDisplayModes": 59,
+      "setUserPreferredDisplayMode": 43,
+      "shouldAlwaysRespectAppRequestedMode": 51,
+      "requestDisplayModes": 60,
       "requestColorMode": 20,
-      "enableConnectedDisplay": 56
+      "enableConnectedDisplay": 57,
+      "getUserPreferredDisplayMode": 44
     },
     "android.view.IWindowManager": {
       "requestAppKeyboardShortcuts": 80,
@@ -263,10 +264,10 @@
     "android.media.IAudioService": {
       "setRingtonePlayer": 78,
       "getRingtonePlayer": 79,
-      "isAudioServerRunning": 138,
+      "isAudioServerRunning": 139,
       "forceRemoteSubmixFullVolume": 18,
       "setVolumeGroupVolumeIndex": 25,
-      "getDeviceVolumeBehavior": 163
+      "getDeviceVolumeBehavior": 164
     },
     "com.android.internal.app.IBatteryStats": {
       "noteStartAudio": 5,
@@ -321,11 +322,11 @@
     },
     "android.app.IActivityTaskManager": {
       "getFrontActivityScreenCompatMode": 18,
-      "getAssistContextExtras": 57,
+      "getAssistContextExtras": 56,
       "setFrontActivityScreenCompatMode": 19,
-      "getWindowOrganizerController": 64,
+      "getWindowOrganizerController": 63,
       "startActivityFromGameSession": 11,
-      "startActivityAsCaller": 14,
+      "startActivityAsCaller": 13,
       "getActivityClientController": 17
     },
     "android.media.IResourceManagerService": {
@@ -426,55 +427,55 @@
       "registerManager": 28
     },
     "android.app.admin.IDevicePolicyManager": {
-      "setUserControlDisabledPackages": 340,
+      "setUserControlDisabledPackages": 341,
       "setKeyguardDisabledFeatures": 61,
-      "getDoNotAskCredentialsOnBoot": 234,
-      "setShortSupportMessage": 248,
+      "getDoNotAskCredentialsOnBoot": 235,
+      "setShortSupportMessage": 249,
       "getNearbyNotificationStreamingPolicy": 58,
-      "setPermittedInputMethods": 144,
-      "setStrings": 376,
+      "setPermittedInputMethods": 145,
+      "setStrings": 377,
       "setApplicationRestrictions": 127,
-      "getWifiSsidPolicy": 368,
-      "setPermissionGrantState": 239,
-      "setUsbDataSignalingEnabled": 362,
-      "forceSecurityLogs": 274,
-      "setResetPasswordToken": 295,
+      "getWifiSsidPolicy": 369,
+      "setPermissionGrantState": 240,
+      "setUsbDataSignalingEnabled": 363,
+      "forceSecurityLogs": 275,
+      "setResetPasswordToken": 296,
       "setFactoryResetProtectionPolicy": 42,
-      "addCrossProfileWidgetProvider": 215,
-      "setConfiguredNetworksLockdownState": 185,
-      "setCommonCriteriaModeEnabled": 342,
-      "getCrossProfileWidgetProviders": 217,
-      "setAccountManagementDisabled": 170,
-      "setStatusBarDisabled": 232,
-      "setSystemUpdatePolicy": 228,
+      "addCrossProfileWidgetProvider": 216,
+      "setConfiguredNetworksLockdownState": 186,
+      "setCommonCriteriaModeEnabled": 343,
+      "getCrossProfileWidgetProviders": 218,
+      "setAccountManagementDisabled": 171,
+      "setStatusBarDisabled": 233,
+      "setSystemUpdatePolicy": 229,
       "setDeviceOwner": 78,
       "isPackageSuspended": 99,
-      "setProfileOwnerOnOrganizationOwnedDevice": 323,
-      "setTrustAgentConfiguration": 213,
-      "getString": 378,
-      "hasLockdownAdminConfiguredNetworks": 186,
-      "setLockTaskPackages": 177,
-      "setOrganizationName": 259,
-      "isDevicePotentiallyStolen": 369,
-      "getPermittedInputMethodsAsUser": 146,
-      "setApplicationExemptions": 382,
+      "setProfileOwnerOnOrganizationOwnedDevice": 324,
+      "setTrustAgentConfiguration": 214,
+      "getString": 379,
+      "hasLockdownAdminConfiguredNetworks": 187,
+      "setLockTaskPackages": 178,
+      "setOrganizationName": 260,
+      "isDevicePotentiallyStolen": 370,
+      "getPermittedInputMethodsAsUser": 147,
+      "setApplicationExemptions": 383,
       "setDefaultSmsApplication": 125,
       "setPasswordExpirationTimeout": 20,
       "installCaCert": 101,
       "setUserRestriction": 134,
-      "setSecurityLoggingEnabled": 269,
+      "setSecurityLoggingEnabled": 270,
       "setMaximumTimeToLock": 36,
       "setScreenCaptureDisabled": 55,
-      "clearSystemUpdatePolicyFreezePeriodRecord": 230,
+      "clearSystemUpdatePolicyFreezePeriodRecord": 231,
       "setCameraDisabled": 53,
-      "installUpdateFromFile": 324,
-      "setMtePolicy": 384,
+      "installUpdateFromFile": 325,
+      "setMtePolicy": 385,
       "setMaximumFailedPasswordsForWipe": 33,
       "installKeyPair": 106
     },
     "android.media.tv.ITvInputManager": {
       "getAvailableExtensionInterfaceNames": 5,
-      "getCurrentTunedInfos": 41
+      "getCurrentTunedInfos": 42
     },
     "android.app.IGrammaticalInflectionManager": {
       "getSystemGrammaticalGender": 3
