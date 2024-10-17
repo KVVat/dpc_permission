@@ -22,10 +22,8 @@ import static android.Manifest.permission.SCHEDULE_EXACT_ALARM;
 import static android.Manifest.permission.USE_EXACT_ALARM;
 import static android.os.PowerManager.SCREEN_DIM_WAKE_LOCK;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.KeyguardManager;
@@ -34,31 +32,15 @@ import android.app.PendingIntent;
 import android.companion.AssociationRequest;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.flags.SyncableFlag;
-import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.display.HdrConversionMode;
-import android.hardware.input.IStickyModifierStateListener;
 import android.health.connect.aidl.IMigrationCallback;
 import android.health.connect.migration.MigrationException;
-import android.media.IMediaRouter2Manager;
-import android.media.MediaRoute2Info;
-import android.media.RouteDiscoveryPreference;
-import android.media.RouteListingPreference;
-import android.media.RoutingSessionInfo;
 import android.net.Uri;
-import android.net.nsd.NsdManager;
-import android.net.nsd.OffloadEngine;
-import android.net.nsd.OffloadServiceInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IWakeLockCallback;
@@ -66,28 +48,19 @@ import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelUuid;
-import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.provider.E2eeContactKeysManager;
-import android.security.FileIntegrityManager;
-import android.util.Log;
-import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
 import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
@@ -95,20 +68,18 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import org.robolectric.RuntimeEnvironment;
+
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 
 @PermissionTestModule(name="Signature 34(U) Test Cases")
@@ -346,16 +317,15 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 	}
 
-	@PermissionTest(permission="MODIFY_HDR_CONVERSION_MODE", sdkMin=34)
+	@RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @PermissionTest(permission="MODIFY_HDR_CONVERSION_MODE", sdkMin=34)
 	public void testModifyHdrConversionMode(){
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-			BinderTransaction.getInstance().invoke(
-					Context.DISPLAY_SERVICE,
-					Transacts.DISPLAY_DESCRIPTOR,
-					"setHdrConversionMode",
-					new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM)
-			);
-		}
+		BinderTransaction.getInstance().invoke(
+				Context.DISPLAY_SERVICE,
+				Transacts.DISPLAY_DESCRIPTOR,
+				"setHdrConversionMode",
+				new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM)
+		);
 	}
 
 	@PermissionTest(permission="MONITOR_KEYBOARD_BACKLIGHT", sdkMin=34)
@@ -493,14 +463,12 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission="WRITE_ALLOWLISTED_DEVICE_CONFIG", sdkMin=34)
 	public void testWriteAllowlistedDeviceConfig(){
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-			//frameworks/base/core/java/android/provider/Settings.java
-			Uri CONTENT_URI = Uri.parse("content://settings/config");
-			//CALL_METHOD_SET_ALL_CONFIG = "SET_ALL_config";
-			mContentResolver.call(
-					CONTENT_URI,
-					"SET_ALL_config",null,null);
-		}
+		//frameworks/base/core/java/android/provider/Settings.java
+		Uri CONTENT_URI = Uri.parse("content://settings/config");
+		//CALL_METHOD_SET_ALL_CONFIG = "SET_ALL_config";
+		mContentResolver.call(
+				CONTENT_URI,
+				"SET_ALL_config",null,null);
 	}
 
 	@PermissionTest(permission="READ_WRITE_SYNC_DISABLED_MODE_CONFIG", sdkMin=34)
@@ -539,14 +507,10 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 				new Class<?>[]{boolean.class},false
 		);
 		Intent[] intents = new Intent[]{new Intent(Intent.ACTION_VIEW)};
-		//getIApplicationThread()
-		StaticLogger.debug(ReflectionTool.Companion.checkDeclaredMethod(mActivity,"get").toString());
-		//below method isn't working?
-		Object activityThread = ReflectionUtil.invoke
-				(mActivity,"getActivityThread",new Class<?>[]{});
+
+		//Use Robolectlic module to bypass restriction
+		Object activityThread = RuntimeEnvironment.getActivityThread();
 		if(activityThread != null){
-			//Class atClazz;
-			//atClazz = Class.forName("android.app.ActivityThread");
 			Object applicationThread = ReflectionUtil.invoke
 					(activityThread,"getApplicationThread");
 			for(Intent i:intents) {
@@ -634,8 +598,6 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 			//expected ignore
 		}
 	}
-
-
 }
 
 

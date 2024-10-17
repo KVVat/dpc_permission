@@ -147,7 +147,9 @@ public class NonPlatformTestModule extends SignaturePermissionTestModuleBase {
 								false,false,
 								false,
 								false,
-								false,"message"));
+								false,
+								false,inverse_test_result,
+								"message"));
 
 			});
 			thread.start();

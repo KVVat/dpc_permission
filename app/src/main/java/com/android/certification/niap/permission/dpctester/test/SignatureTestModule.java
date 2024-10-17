@@ -22,9 +22,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.LocaleManager;
 import android.app.PendingIntent;
-import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManager;
 import android.bluetooth.BluetoothAdapter;
@@ -79,7 +77,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.activity.TestActivity;
@@ -93,7 +90,6 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
-import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.android.internal.policy.IKeyguardDismissCallback;
 
 import java.io.File;
@@ -107,18 +103,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-/////////////////////////
-//Regex for converting
-
-//permission=""(.*{0}")",
-//permission=""$1"",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
-
 @PermissionTestModule(name="Signature Test Cases")
 public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	public SignatureTestModule(@NonNull Activity activity) {
@@ -130,7 +114,6 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	@NonNull
 	@Override
 	public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
-
 		try {
 			mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
 		} catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
@@ -142,7 +125,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		return Objects.requireNonNull(getService(clazz), "[npe_system_service]" + clazz.getSimpleName());
 	}
 
-	@PermissionTest(permission = "ACCESS_AMBIENT_LIGHT_STATS")
+	@PermissionTest(permission = "ACCESS_AMBIENT_LIGHT_STATS",developmentProtection=true)
 	public void testAccessAmbientLightStats() {
 		ReflectionUtil.invoke(systemService(DisplayManager.class), "getAmbientBrightnessStats");
 	}
@@ -277,13 +260,13 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				true);
 	}
 
-	@PermissionTest(permission = "BATTERY_STATS")
+	@PermissionTest(permission = "BATTERY_STATS",developmentProtection = true)
 	public void testBatteryStats() {
 		BinderTransaction.getInstance().invoke(Transacts.BATTERY_STATS_SERVICE, Transacts.BATTERY_STATS_DESCRIPTOR,
 				"getAwakeTimeBattery");
 	}
 
-	@PermissionTest(permission = "BRIGHTNESS_SLIDER_USAGE")
+	@PermissionTest(permission = "BRIGHTNESS_SLIDER_USAGE",developmentProtection = true)
 	public void testBrightnessSliderUsage() {
 
 		ReflectionUtil.invoke(systemService(DisplayManager.class), "getBrightnessEvents");
@@ -361,7 +344,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission = "CHANGE_CONFIGURATION")
+	@PermissionTest(permission = "CHANGE_CONFIGURATION",developmentProtection = true)
 	public void testChangeConfiguration() {
 		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
 				"updateConfiguration",
@@ -405,7 +388,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission = "CONFIGURE_DISPLAY_BRIGHTNESS")
+	@PermissionTest(permission = "CONFIGURE_DISPLAY_BRIGHTNESS",developmentProtection = true)
 	public void testConfigureDisplayBrightness() {
 		ReflectionUtil.invoke(systemService(DisplayManager.class), "getBrightnessConfiguration");
 	}
@@ -637,7 +620,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				1);
 	}
 
-	@PermissionTest(permission = "DUMP")
+	@PermissionTest(permission = "DUMP",developmentProtection = true)
 	public void testDump() {
 		// The stats service cannot be used for this test since it is guarded by SELinux
 		// policy.
@@ -716,7 +699,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				mContext.getPackageName(), appUid);
 	}
 
-	@PermissionTest(permission = "GET_APP_OPS_STATS")
+	@PermissionTest(permission = "GET_APP_OPS_STATS",developmentProtection = true)
 	public void testGetAppOpsStats() {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
 
@@ -796,7 +779,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				Collections.singletonList("test_intent_filter"));
 	}
 
-	@PermissionTest(permission = "INTERACT_ACROSS_USERS")
+	@PermissionTest(permission = "INTERACT_ACROSS_USERS",developmentProtection = true)
 	public void testInteractAcrossUsers() {
 		ReflectionUtil.invoke(systemService(ActivityManager.class), "isUserRunning",
 				new Class<?>[]{int.class}, 1);
@@ -1204,7 +1187,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"getWifiApConfiguration");
 	}
 
-	@PermissionTest(permission = "PACKAGE_USAGE_STATS")
+	@PermissionTest(permission = "PACKAGE_USAGE_STATS",developmentProtection = true)
 	public void testPackageUsageStats() {
 		ReflectionUtil.invoke(systemService(ActivityManager.class), "getPackageImportance",
 				new Class<?>[]{String.class},
@@ -1249,7 +1232,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"screenshotWallpaper");
 	}
 
-	@PermissionTest(permission = "READ_LOGS")
+	@PermissionTest(permission = "READ_LOGS",developmentProtection = true)
 	public void testReadLogs() {
 		DropBoxManager manager = (DropBoxManager) mContext.getSystemService(
 				Context.DROPBOX_SERVICE);
@@ -1489,21 +1472,21 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"performIdleMaintenance");
 	}
 
-	@PermissionTest(permission = "SET_ALWAYS_FINISH")
+	@PermissionTest(permission = "SET_ALWAYS_FINISH",developmentProtection = true)
 	public void testSetAlwaysFinish() {
 		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
 				"setAlwaysFinish",
 				false);
 	}
 
-	@PermissionTest(permission = "SET_ANIMATION_SCALE")
+	@PermissionTest(permission = "SET_ANIMATION_SCALE",developmentProtection = true)
 	public void testSetAnimationScale() {
 		BinderTransaction.getInstance().invoke(Transacts.WINDOW_SERVICE, Transacts.WINDOW_DESCRIPTOR,
 				"setAnimationScale",
 				0, 0.1f);
 	}
 
-	@PermissionTest(permission = "SET_DEBUG_APP")
+	@PermissionTest(permission = "SET_DEBUG_APP",developmentProtection = true)
 	public void testSetDebugApp() {
 		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
 				"setDumpHeapDebugLimit",
@@ -1544,7 +1527,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	}
 
-	@PermissionTest(permission = "SET_MEDIA_KEY_LISTENER")
+	@PermissionTest(permission = "SET_MEDIA_KEY_LISTENER",developmentProtection = true)
 	public void testSetMediaKeyListener() {
 		BinderTransaction.getInstance().invoke(Transacts.MEDIA_SESSION_SERVICE,
 				Transacts.MEDIA_SESSION_DESCRIPTOR,
@@ -1610,7 +1593,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				timeZone);
 	}
 
-	@PermissionTest(permission = "SET_VOLUME_KEY_LONG_PRESS_LISTENER")
+	@PermissionTest(permission = "SET_VOLUME_KEY_LONG_PRESS_LISTENER",developmentProtection = true)
 	public void testSetVolumeKeyLongPressListener() {
 		BinderTransaction.getInstance().invoke(Transacts.MEDIA_SESSION_SERVICE,
 				Transacts.MEDIA_SESSION_DESCRIPTOR,
@@ -1694,7 +1677,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				1000);
 	}
 
-	@PermissionTest(permission="SIGNAL_PERSISTENT_PROCESSES")
+	@PermissionTest(permission="SIGNAL_PERSISTENT_PROCESSES",developmentProtection = true)
 	public void testSignalPersistentProcesses(){
 		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
 				"signalPersistentProcesses",
@@ -1788,19 +1771,13 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"isInTabletMode");
 	}
 
-	@PermissionTest(permission="TETHER_PRIVILEGED")
+	@PermissionTest(permission="TETHER_PRIVILEGED",sdkMax = 29)
 	public void testTetherPrivileged(){
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-			BinderTransaction.getInstance().invoke(Transacts.CONNECTIVITY_SERVICE,
-					Transacts.CONNECTIVITY_DESCRIPTOR,
-					"tether",
-					"wlan0",
-					mContext.getPackageName());
-		} else {
-			ReflectionUtil.invoke(systemService(ConnectivityManager.class),
-					"isTetheringSupported");
-		}
-
+		BinderTransaction.getInstance().invoke(Transacts.CONNECTIVITY_SERVICE,
+				Transacts.CONNECTIVITY_DESCRIPTOR,
+				"tether",
+				"wlan0",
+				mContext.getPackageName());
 	}
 
 	@PermissionTest(permission="TRUST_LISTENER")
@@ -1867,7 +1844,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 				"awaken");
 	}
 
-	@PermissionTest(permission="WRITE_EMBEDDED_SUBSCRIPTIONS")
+	@PermissionTest(permission="WRITE_EMBEDDED_SUBSCRIPTIONS",developmentProtection = true)
 	public void testWriteEmbeddedSubscriptions(){
 
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -1882,7 +1859,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission="WRITE_SECURE_SETTINGS")
+	@PermissionTest(permission="WRITE_SECURE_SETTINGS",developmentProtection = true)
 	public void testWriteSecureSettings(){
 		Settings.Secure.putString(mContentResolver, "TEST_KEY", "TEST_VALUE");
 	}

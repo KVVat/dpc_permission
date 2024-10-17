@@ -132,7 +132,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Install Test Cases",label = "Run Install Permission Test",sync=true)
+@PermissionTestModule(name="Install Test Cases",label = "Run Install Permission Test",sync = true)
 public class InstallTestModule extends PermissionTestModuleBase {
 	public InstallTestModule(@NonNull Activity activity){ super(activity);}
 
@@ -995,10 +995,8 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		}
 	}
 	@RequiresApi(api = Build.VERSION_CODES.Q)
-    private void tryBindingForegroundService(Intent serviceIntent){
+    public void tryBindingForegroundService(Intent serviceIntent){
 		FgServiceConnection serviceConnection = new FgServiceConnection();
-
-		//ExecutorService executorService = mContext.getApplicationContext().getMainExecutor();
 
 		mContext.bindService(serviceIntent,
 				Context.BIND_AUTO_CREATE, mExecutor,serviceConnection);
@@ -1011,9 +1009,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 						//wait almost 1 sec along increasing waiting time
 						lock.wait(10+(i*i));
 						//final int n = i;
-						/*mActivity.runOnUiThread(() -> {
-							((MainActivity)mActivity).addLogLine("sync "+(n));
-						});*/
+
 						if(i++>=40){
 							throw new InterruptedException("Connection Timed Out");
 						}
@@ -1021,7 +1017,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 						throw new UnexpectedTestFailureException(e);
 					}
 				}
-				logger.info("Connected To Service in the Tester app="+serviceConnection.mComponentName+
+				logger.info("Connected To Foreground Service in the Tester app="+serviceConnection.mComponentName+
 						","+serviceConnection.binderSuccess.get());
 				if(!serviceConnection.binderSuccess.get()){
 					throw new SecurityException("Test for "+serviceConnection.mComponentName+" has been failed.");

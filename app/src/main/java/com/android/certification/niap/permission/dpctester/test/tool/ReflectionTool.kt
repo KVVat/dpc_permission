@@ -129,7 +129,7 @@ class ReflectionTool {
                 if (ann == null) continue;
                 val container =
                     PermissionTestRunner.Data(ann.permission, ann.sdkMin, ann.sdkMax,
-                        m.name,ann.requiredPermissions,ann.requiredServices)
+                        m.name,ann.requiredPermissions,ann.developmentProtection);//ann.requiredPermissions,ann.requiredServices)
                 //Log.d("TAG",container.toString())
                 a.add(container)
             }

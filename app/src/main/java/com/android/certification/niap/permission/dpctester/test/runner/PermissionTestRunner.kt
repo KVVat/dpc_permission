@@ -167,8 +167,11 @@ class PermissionTestRunner {
                     api_successful=apisuccess,
                     platform_signature_match = root.isPlatformSignatureMatch,
                     gms_signature_match = false,
+                    developmentProtection = testCase.developmentProtection,
+                    isInverse = is_inverse,
                     message=message)
             )
+
             if(result.bypassed){
                 suite.info.count_bypassed += 1
                 root.info.count_bypassed  += 1 // suite.info.count_bypassed + 1
@@ -176,7 +179,7 @@ class PermissionTestRunner {
                     LogBox(type = "bypassed", name =testCase.permission, description = message));
             }
 
-            if(!success && !result.bypassed){
+            if(!result.success && !result.bypassed){
                 suite.info.count_errors += 1
                 root.info.count_errors  += 1 // suite.info.count_errors + 1
                 root.info.moduleLog.add(
@@ -265,12 +268,6 @@ class PermissionTestRunner {
 
     }
 
-    /*
-    "permission_granted:false" +
-    ",api_successful:false" +
-    ",signature_match:false" +
-    ",platform_signature_match:false" +
-     */
     data class Result(
         var success:Boolean, val throwable:Throwable? = null, val source: Data,
         var bypassed: Boolean = false,
@@ -278,6 +275,8 @@ class PermissionTestRunner {
         var api_successful:Boolean=false,
         var gms_signature_match:Boolean=false,
         var platform_signature_match:Boolean=false,
+        var developmentProtection: Boolean=false,
+        var isInverse:Boolean=false,
         var message:String="")
 
     data class Data(
@@ -286,11 +285,11 @@ class PermissionTestRunner {
         val sdkMax: Int,
         val methodName: String,
         val requiredPermissions: Array<String>,
-        val requiredServices: Array<KClass<out Any>>,
+        val developmentProtection: Boolean
     ){
         constructor(permission: String) : this(permission=permission,
-            sdkMin = 0,sdkMax=1000, methodName = "",
-            requiredPermissions = arrayOf(),requiredServices= arrayOf()
+            sdkMin = 0,sdkMax=1000, methodName = "", requiredPermissions= emptyArray(),
+            developmentProtection=false
         )
 
         init {
@@ -298,5 +297,7 @@ class PermissionTestRunner {
                 permission ="android.permission."+permission;
             }
         }
+
+
     }
 }

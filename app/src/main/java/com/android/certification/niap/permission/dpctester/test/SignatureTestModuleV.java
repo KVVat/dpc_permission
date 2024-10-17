@@ -54,41 +54,29 @@ import android.provider.E2eeContactKeysManager;
 import android.security.FileIntegrityManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
-import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
+import com.android.certification.niap.permission.dpctester.test.tool.DeviceConfigTool;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
-import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import java.util.function.LongConsumer;
-
-/////////////////////////
-//Regex for converting
-
-//permission="(.*{0})",
-//permission=""$1"",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//mTransacts.invokeTransact(
-//BinderTransaction.getInstance().invoke(
 
 @PermissionTestModule(name="Signature 35(V) Test Cases")
 public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
@@ -224,7 +212,7 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				new Class<?>[]{OffloadEngine.class},
 				mock);
 	}
-
+	/* TODO:Should be moved to DPM test cases
 	@PermissionTest(permission="QUARANTINE_APPS", sdkMin=35)
 	public void testQuarantineApps(){
 		//final boolean quarantined = ((flags & PackafgeManager.FLAG_SUSPEND_QUARANTINED) != 0)
@@ -245,16 +233,16 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 					Transacts.PACKAGE_SERVICE,
 					Transacts.PACKAGE_DESCRIPTOR,
 					"setPackagesSuspendedAsUser",
-					new String[]{"dummy.package.suspending"}, false,
+					new String[]{mContext.getPackageName()}, false,
 					new PersistableBundle(),new PersistableBundle(),dialogInfo,
-					FLAG_SUSPEND_QUARANTINED,"dummy.package.suspending",appUid,appUid);
+					FLAG_SUSPEND_QUARANTINED,mContext.getPackageName(),appUid,appUid);
 
 		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
                  IllegalAccessException | InstantiationException ex){
 			throw new UnexpectedTestFailureException(ex);
 		}
 
-    }
+    }*/
 
 	@PermissionTest(permission="CONFIGURE_FACTORY_RESET_PROTECTION", sdkMin=35)
 	public void testConfigureFactoryResetProtection(){
@@ -301,7 +289,7 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		//"getEnhancedConfirmationTrustedPackages, (Object) null");
 	}
 
-	@PermissionTest(permission="READ_DROPBOX_DATA", sdkMin=35)
+	@PermissionTest(permission="READ_DROPBOX_DATA", sdkMin=35,developmentProtection = true)
 	public void testReadDropboxData(){
 		//Same as PEEK_DROPBOX_DATA
 		if (mContext.checkSelfPermission(Manifest.permission.READ_LOGS)
@@ -481,7 +469,7 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 
 	}
 
-	@PermissionTest(permission="ACCESS_SMARTSPACE", sdkMin=35)
+	@PermissionTest(permission="ACCESS_SMARTSPACE", sdkMin=35,developmentProtection = true)
 	public void testAccessSmartspace(){
 		// Regard same as MANAGE_SMARTSPACE
 		// Note this is fragile since the implementation of SmartspaceSessionId can
@@ -574,29 +562,17 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 					mContext.getMainExecutor(), (LongConsumer) result -> {
 					});
 		} catch (ReflectionUtil.ReflectionIsTemporaryException ex){
-
-			if(ex.getCause() != null  &&  ex.getCause() instanceof InvocationTargetException){
-				if(ex.getCause().getCause() != null && ex.getCause() instanceof IllegalStateException){
+			Throwable cause = ex.getCause();
+			if(cause instanceof InvocationTargetException){
+				Throwable cause2 = cause.getCause();
+				if(cause2 instanceof IllegalStateException){
+					logger.debug("Expected Result:Remote service is not configured.");
 					//expected message : Remote service is not configured
 				} else {
 					throw ex;//Secuirty Exception?
 				}
 			}
 		}
-		/*
-		ReflectionUtil.invoke(ond.getClass(),
-				"getFeature",ond,
-				new Class<?>[]{int.class,Executor.class, OutcomeReceiver.class},
-				1,mContext.getMainExecutor(),(OutcomeReceiver) result->{});
-
-		 */
-
-//                    BinderTransaction.getInstance().invoke(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
-//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
-//                            Transacts.getFeature,ii_callback);
-//                            invokeTransactWithCharSequence(Transacts.ON_DEVICE_INTELLIGENCE_SERVICE,
-//                            Transacts.ON_DEVICE_INTELLINGENCE_DESCRIPTOR,
-//                            Transacts.getFeature,false,ii_callback);
 	}
 
 	@PermissionTest(permission="SYNC_FLAGS", sdkMin=35)
@@ -669,14 +645,14 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				PackageManager.MATCH_ALL,appUid);
 	}
 
-	@PermissionTest(permission="READ_SYSTEM_GRAMMATICAL_GENDER", sdkMin=35)
+
+	@RequiresApi(api = Build.VERSION_CODES.S)
+    @PermissionTest(permission="READ_SYSTEM_GRAMMATICAL_GENDER", sdkMin=35)
 	public void testReadSystemGrammaticalGender(){
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			BinderTransaction.getInstance().invoke(Transacts.GRAMMATICAL_INFLECTION_SERVICE,
-					Transacts.GRAMMATICAL_INFLECTION_DESCRIPTOR,
-					"getSystemGrammaticalGender",
-					mContext.getAttributionSource(),appUid);
-		}
+		BinderTransaction.getInstance().invoke(Transacts.GRAMMATICAL_INFLECTION_SERVICE,
+				Transacts.GRAMMATICAL_INFLECTION_DESCRIPTOR,
+				"getSystemGrammaticalGender",
+				mContext.getAttributionSource(),appUid);
 	}
 
 	@PermissionTest(permission="RESTRICT_DISPLAY_MODES", sdkMin=35)
@@ -689,19 +665,48 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 	@RequiresApi(api = Build.VERSION_CODES.R)
     @PermissionTest(permission="SETUP_FSVERITY", sdkMin=35)
 	public void testSetupFsverity(){
-
+		String prop =
+				DeviceConfigTool.Companion.getProperty("hardware_backed_security",
+						"android.security.fsverity_api");
 		@SuppressLint("WrongConstant") FileIntegrityManager fmg =
 				(FileIntegrityManager) mContext.getSystemService(Context.FILE_INTEGRITY_SERVICE);
 
+		if(prop==null || !prop.equals("true") || !fmg.isApkVeritySupported()){
+			throw new BypassTestException("fsverity api is not supported");
+		}
+
         File file = null;
         try {
-            file = File.createTempFile("authfd", ".tmp",mContext.getFilesDir());
+            file = File.createTempFile("authfd", ".tmp",mContext.getCacheDir());
+			String TEST_FILE_CONTENT = "fs-verity";
+			try (var fos = new FileOutputStream(file)) {
+				fos.write(TEST_FILE_CONTENT.getBytes());
+			}
+			//Thread.sleep(250);
+			logger.debug("testEnableAndMeasureFsVerityByFile: "+file.getAbsolutePath());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate a tmporary file.");
+            throw new RuntimeException("Failed to generate a temporary file.");
         }
-        ReflectionUtil.invoke
-				(fmg.getClass(),"setupFsVerity",fmg,
-						new Class<?>[]{File.class},file);
+		//logger.system("fmg="+fmg.isApkVeritySupported());
+		//"android.security.fsverity_api";
+		try {
+			ReflectionUtil.invoke
+					(fmg, "setupFsVerity", file);
+		} catch (ReflectionUtil.ReflectionIsTemporaryException ex){
+			Throwable cause = ex.getCause();
+			logger.info("here"+cause.toString());
+			if(cause instanceof InvocationTargetException){
+				Throwable cause2 = cause.getCause();
+				if(cause2 instanceof NullPointerException){
+					logger.debug("Expected Result:Nullpointer Exception.");
+				} else {
+					throw ex;
+				}
+			} else {
+				throw ex;
+			}
+		}
+
 
 	}
 

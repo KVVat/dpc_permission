@@ -223,7 +223,7 @@ public class GmsTestModule extends PermissionTestModuleBase {
 								false,
 								gmsSignatureMatch,
 								true,
-								isPlatformSignatureMatch,"not granted"));
+								isPlatformSignatureMatch,false,false,"not granted"));
 				qs.setCount_errors(qs.getCount_errors()+1);
 			} else {
 				callback.accept(
@@ -232,7 +232,7 @@ public class GmsTestModule extends PermissionTestModuleBase {
 								true,
 								gmsSignatureMatch,
 								true,
-								isPlatformSignatureMatch,"granted"));
+								isPlatformSignatureMatch,false,false,"granted"));
 				qs.setCount_passed(qs.getCount_passed()+1);
 			}
 		});

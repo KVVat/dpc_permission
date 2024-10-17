@@ -21,7 +21,6 @@ annotation class PermissionTest(
     val sdkMax:Int=100000,
     val priority:Int=-1,
     val customCase:Boolean=false,
-    val requiredServices:Array<KClass<out Any>> =[],
-    val requiredPermissions:Array<String> =[],
-
+    val requiredPermissions:Array<String> = emptyArray(),
+    val developmentProtection: Boolean =false
     )

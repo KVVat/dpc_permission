@@ -16,15 +16,6 @@ import java.util.function.Consumer
 class DPCHealthTestModule(ctx: Activity): PermissionTestModuleBase(ctx){
     override var TAG: String = DPCHealthTestModule::class.java.simpleName
     val dpm = DevicePolicyManagerGatewayImpl(ctx)
-
-    //val pm  =ctx.packageManager
-    /*override fun prepare(callback: Consumer<PermissionTestRunner.Result>?):PrepareInfo {
-        PermissionTestRunner.getInstance().start(this) { result ->
-            callback?.accept(result)
-        }
-
-
-    }*/
     @PermissionTest(".Owner Level",34,35)
     fun checkDeviceOwnerLevel() {
         //logger.system(">"+dpm.admin)

@@ -2,6 +2,7 @@ package com.android.certification.niap.permission.dpctester
 
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -12,6 +13,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -22,27 +24,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
-import com.android.certification.niap.permission.dpctester.test.DPCHealthTestModule
+import com.android.certification.niap.permission.dpctester.service.FgLocationService
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
 import com.android.certification.niap.permission.dpctester.test.GmsTestModule
 import com.android.certification.niap.permission.dpctester.test.InstallTestModule
-import com.android.certification.niap.permission.dpctester.test.InternalTestModule
-import com.android.certification.niap.permission.dpctester.test.JavaTestModule
 import com.android.certification.niap.permission.dpctester.test.NonPlatformTestModule
-import com.android.certification.niap.permission.dpctester.test.RuntimeTestModule
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModule
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleBinder
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleP
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleQ
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleR
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleS
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleT
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleU
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleV
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestSuiteBase
 import com.android.certification.niap.permission.dpctester.test.suite.SignatureTestSuite
@@ -153,29 +143,17 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                             intent.putExtra("name", itemModel.name)
                             intent.putExtra("description",itemModel.description)
                             intent.putExtras(bundle)
-
-                            //MainActivityからMainActivity2への移動を開始
                             startActivity(intent)
-                            /*for(box in itemModel.childs){
-                                logger.info(box.description!!)
-                            }*/
                         }
                     }
                 }
             )
         }
 
-
-        //setLogAdapter()
         if (savedInstanceState != null) {
-            /*mStatusData = savedInstanceState.getAgetStringArrayList("listViewData")!!
-            runOnUiThread {
-                for (s in mStatusData) {
-                    addLogLine(s)
-                }
-            }*/
+            //Resume
         } else {
-            logger.system("Welcome!")
+            logger.system("Welcome!") //Dump os
         }
         //val layout = findViewById<LinearLayout>(R.id.mainLayout)
         val mStatusTextView = findViewById<TextView>(R.id.bsArrow)
@@ -198,7 +176,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 SingleModuleTestSuite(this, InstallTestModule(this)),
                 SingleModuleTestSuite(this, NonPlatformTestModule(this)),
                 SingleModuleTestSuite(this, GmsTestModule(this)),
-                SingleModuleTestSuite(this, SignatureTestModuleBinder(this)),
+                //SingleModuleTestSuite(this, SignatureTestModuleBinder(this)),
             )
         }
 
@@ -303,6 +281,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             mTestButtons.add(testButton)
         }
         progressAlertDialog= createProgressDialog( this )
+
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

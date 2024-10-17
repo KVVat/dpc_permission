@@ -694,7 +694,13 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 				.createVirtualDisplay(getTAG(), 10, 10, 1, null,
 				1 << 10);
 	}
+	@PermissionTest(permission="TETHER_PRIVILEGED",sdkMin = 30)
+	public void testTetherPrivileged(){
 
+		ReflectionUtil.invoke(systemService(ConnectivityManager.class),
+				"isTetheringSupported");
+
+	}
 
 }
 

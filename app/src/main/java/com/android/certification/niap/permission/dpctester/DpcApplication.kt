@@ -22,6 +22,7 @@ class DpcApplication : Application() {
                 Transacts.DEVICE_POLICY_DESCRIPTOR,
                 Transacts.getNearbyNotificationStreamingPolicy, 0);*/
         //call it in more suitable place
+
         BinderTransaction.Builder(applicationContext).build()
         BinderTransactsDict.Builder(applicationContext).build()
     }

@@ -20,6 +20,7 @@ playServicesBase = "18.5.0"
 playServicesLocation = "21.3.0"
 playServicesVision = "20.1.3"
 preference = "1.2.1"
+robolectric = "3.0"
 runner = "1.6.1"
 workRuntime = "2.9.1"
 credentials = "1.2.2"
@@ -48,6 +49,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-vision = { module = "com.google.android.gms:play-services-vision", version.ref = "playServicesVision" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

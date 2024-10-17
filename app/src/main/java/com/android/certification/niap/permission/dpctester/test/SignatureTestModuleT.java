@@ -48,6 +48,8 @@ import android.net.IpConfiguration;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,6 +58,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.keystore.KeyGenParameterSpec;
+import android.telephony.PhoneStateListener;
+import android.telephony.SignalStrength;
+import android.telephony.SignalStrengthUpdateRequest;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.accessibility.CaptioningManager;
@@ -92,10 +98,13 @@ import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -163,23 +172,37 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="TRIGGER_LOST_MODE", sdkMin=33)
 	public void testTriggerLostMode(){
 
-		ReflectionUtil.invoke(systemService(DevicePolicyManager.class),
-			"sendLostModeLocationUpdate",
-			new Class<?>[]{Executor.class, Consumer.class},
-			new Executor() {
-				@Override
-				public void execute(Runnable runnable) {
-				}
-			}, new Consumer<Boolean>() {
-				@Override
-				public void accept(Boolean aBoolean) {
+		DevicePolicyManager dm = systemService(DevicePolicyManager.class);
+		try {
+			ReflectionUtil.invoke(dm,
+					"sendLostModeLocationUpdate",
+					new Class<?>[]{Executor.class, Consumer.class},
+					new Executor() {
+						@Override
+						public void execute(Runnable runnable) {
+						}
+					}, new Consumer<Boolean>() {
+						@Override
+						public void accept(Boolean aBoolean) {
 
+						}
+
+						@Override
+						public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
+							return Consumer.super.andThen(after);
+						}
+					});
+		}catch (ReflectionUtil.ReflectionIsTemporaryException e){
+			Throwable cause = e.getCause();
+			if(cause != null && cause.getClass().getSimpleName().equals("InvocationTargetException")){
+				Throwable cause2 = cause.getCause();
+				if(cause2 != null && cause2.getClass().getSimpleName().equals("IllegalStateException")){
+					logger.debug("The test should raise IllegalState Exception. Intended behaviour");
+					return;
 				}
-				@Override
-				public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
-					return Consumer.super.andThen(after);
-				}
-			});
+			}
+			throw e;
+		}
 
 	}
 
@@ -246,7 +269,8 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_APP_STREAMING", sdkMin=33)
+	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @PermissionTest(permission="REQUEST_COMPANION_PROFILE_APP_STREAMING", sdkMin=33)
 	public void testRequestCompanionProfileAppStreaming(){
 		if (!mPackageManager.hasSystemFeature(
 				PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
@@ -255,31 +279,32 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 							+ "PackageManager#FEATURE_COMPANION_DEVICE_SETUP feature "
 							+ "for this test");
 		}
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			AssociationRequest request = null;
-			request = new AssociationRequest.Builder().setDeviceProfile(
-					AssociationRequest.DEVICE_PROFILE_APP_STREAMING).build();
+		AssociationRequest request = null;
+		request = new AssociationRequest.Builder().setDeviceProfile(
+				AssociationRequest.DEVICE_PROFILE_APP_STREAMING).build();
 
-			CompanionDeviceManager.Callback callback =
-					new CompanionDeviceManager.Callback() {
-						@Override
-						public void onDeviceFound(IntentSender intentSender) {
-							logger.debug(
-									"onDeviceFound: intentSender = " + intentSender);
-						}
+		CompanionDeviceManager.Callback callback =
+				new CompanionDeviceManager.Callback() {
+					@Override
+					public void onDeviceFound(IntentSender intentSender) {
+						logger.debug(
+								"onDeviceFound: intentSender = " + intentSender);
+					}
 
-						@Override
-						public void onFailure(CharSequence charSequence) {
-							logger.debug("onFailure: charSequence = " + charSequence);
-						}
-					};
-			CompanionDeviceManager companionDeviceManager = mActivity.getSystemService(
-					CompanionDeviceManager.class);
-			companionDeviceManager.associate(request, callback, null);
-		}
+					@Override
+					public void onFailure(CharSequence charSequence) {
+						logger.debug("onFailure: charSequence = " + charSequence);
+					}
+				};
+		CompanionDeviceManager companionDeviceManager = mActivity.getSystemService(
+				CompanionDeviceManager.class);
+		companionDeviceManager.associate(request, callback, null);
+
 	}
 
-	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_COMPUTER", sdkMin=33)
+
+	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @PermissionTest(permission="REQUEST_COMPANION_PROFILE_COMPUTER", sdkMin=33)
 	public void testRequestCompanionProfileComputer(){
 
 		if (!mPackageManager.hasSystemFeature(
@@ -289,28 +314,27 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 							+ "PackageManager#FEATURE_COMPANION_DEVICE_SETUP feature "
 							+ "for this test");
 		}
-		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			AssociationRequest request = null;
-			request = new AssociationRequest.Builder().setDeviceProfile(
-					AssociationRequest.DEVICE_PROFILE_COMPUTER).build();
+		AssociationRequest request = null;
+		request = new AssociationRequest.Builder().setDeviceProfile(
+				AssociationRequest.DEVICE_PROFILE_COMPUTER).build();
 
-			CompanionDeviceManager.Callback callback =
-					new CompanionDeviceManager.Callback() {
-						@Override
-						public void onDeviceFound(IntentSender intentSender) {
-							logger.debug(
-									"onDeviceFound: intentSender = " + intentSender);
-						}
+		CompanionDeviceManager.Callback callback =
+				new CompanionDeviceManager.Callback() {
+					@Override
+					public void onDeviceFound(IntentSender intentSender) {
+						logger.debug(
+								"onDeviceFound: intentSender = " + intentSender);
+					}
 
-						@Override
-						public void onFailure(CharSequence charSequence) {
-							logger.debug("onFailure: charSequence = " + charSequence);
-						}
-					};
-			CompanionDeviceManager companionDeviceManager = mActivity.getSystemService(
-					CompanionDeviceManager.class);
-			companionDeviceManager.associate(request, callback, null);
-		}
+					@Override
+					public void onFailure(CharSequence charSequence) {
+						logger.debug("onFailure: charSequence = " + charSequence);
+					}
+				};
+		CompanionDeviceManager companionDeviceManager = mActivity.getSystemService(
+				CompanionDeviceManager.class);
+		companionDeviceManager.associate(request, callback, null);
+
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
@@ -425,6 +449,9 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 		Display.Mode[] modes = systemService(DisplayManager.class).getDisplays()[0].getSupportedModes();
 		Display.Mode default_m = systemService(DisplayManager.class).getDisplays()[0].getMode();
+
+
+
 		boolean found= false;
 		Display.Mode target_m = null;
 		for(int i=0;i<modes.length;i++){
@@ -435,8 +462,11 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 			}
 		}
 		if(!found){
-			throw new BypassTestException("display mode for transtion was not found");
+			throw new BypassTestException("display mode for transition was not found");
 		}
+
+		BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
+				"setUserPreferredDisplayMode",0,default_m);
 
 
 		//The method may not find if the app is signing by the platform signing key
@@ -445,15 +475,14 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		//        "setGlobalUserPreferredDisplayMode", mDisplayManager,
 		//        new Class[]{Display.Mode.class},mode);
 
-		BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
-				"setUserPreferredDisplayMode",0,target_m);
 
-		Parcel result = BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
-				"getUserPreferredDisplayMode",0,target_m);
+
+		//Parcel result = BinderTransaction.getInstance().invoke(Transacts.DISPLAY_SERVICE,Transacts.DISPLAY_DESCRIPTOR,
+		//		"getUserPreferredDisplayMode",0,default_m);default_m
 		//check is changed?
 
 		//systemService(DisplayManager.class).getDisplays()[0]
-		logger.system("set user preffered result: "+target_m.toString());
+		//logger.system("set user preffered result: "+target_m.toString());
 		//logger.system("set user preffered result: "+p.readInt());
 	}
 
@@ -476,7 +505,7 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 				"isLowPowerStandbySupported");
 	}
 
-	@PermissionTest(permission="ACCESS_BROADCAST_RESPONSE_STATS", sdkMin=33)
+	@PermissionTest(permission="ACCESS_BROADCAST_RESPONSE_STATS", sdkMin=33,developmentProtection = true)
 	public void testAccessBroadcastResponseStats(){
 		ReflectionUtil.invoke(systemService(UsageStatsManager.class),
 				"queryBroadcastResponseStats",
@@ -659,8 +688,7 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 				"makeUidVisible",1200000,1300000);
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.S)
-    @RequiresExtension(extension = Build.VERSION_CODES.UPSIDE_DOWN_CAKE, version = 3)
+	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @PermissionTest(permission="MANAGE_ETHERNET_NETWORKS", sdkMin=33)
 	public void testManageEthernetNetworks(){
 		//disableInterface,enableInterface,updateConfiguration
@@ -713,8 +741,40 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 	@PermissionTest(permission="LOCATION_HARDWARE")
 	public void testLocationHardware(){
-
 		ReflectionUtil.invoke(systemService(LocationManager.class), "flushGnssBatch");
+	}
+
+	@PermissionTest(permission="MANAGE_ACTIVITY_TASKS", sdkMin=33)
+	public void testManageActivityTasks(){
+		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE,
+				Transacts.ACTIVITY_DESCRIPTOR,
+				"stopAppForUser","test.packagename",0);
+
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.S)
+    @PermissionTest(permission="LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH", sdkMin=33)
+	public void testListenAlwaysReportedSignalStrength(){
+
+		//The way to using the listner was obsolated after android T, so let me choose using this option instead
+		//https://cs.android.com/android/platform/superproject/+/master:cts/tests/tests/telephony/current/src/android/telephony/cts/PhoneStateListenerTest.java;l=328;drc=e64188140ba71c7b7424b044119b37af1dde6609?=4186
+		//problem : if the signature does not match it always fail,because the method also checks MODIFY_PHONE_STATE permission
+
+		SignalStrengthUpdateRequest.Builder builder = new SignalStrengthUpdateRequest.Builder()
+				.setSignalThresholdInfos(Collections.EMPTY_LIST);
+
+		builder = (SignalStrengthUpdateRequest.Builder)
+				ReflectionUtil.invoke(builder,
+						"setSystemThresholdReportingRequestedWhileIdle",
+						new Class<?>[]{boolean.class},true);
+		SignalStrengthUpdateRequest request = builder.build();
+		try {
+			systemService(TelephonyManager.class).setSignalStrengthUpdateRequest(request);
+		} catch (IllegalStateException ex){
+			logger.info("Expected:"+ex.getMessage());
+		}
+
+
 	}
 }
 

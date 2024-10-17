@@ -95,9 +95,10 @@ public final class ReflectionUtil {
                  | IllegalArgumentException
                  | IllegalAccessException
                  | InvocationTargetException e) {
-            //Log.e(TAG, "Reflection failed.", e);
-
-            throw new ReflectionIsTemporaryException("Failed to invoke " + methodName+":"+e.getMessage(), e);
+            Log.e(TAG, "Reflection failed.", e);
+            //e.printStackTrace();
+            throw new ReflectionIsTemporaryException(
+                    "Failed to invoke " + methodName+":"+e+":"+e.getMessage(), e);
             //ReflectionIsTemporaryException.rethrow(e, clazz, methodName, args);
             //return null;
         }

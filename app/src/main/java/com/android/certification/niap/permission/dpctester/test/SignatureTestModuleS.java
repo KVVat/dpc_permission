@@ -788,20 +788,11 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 		}
 	}
 
-	@PermissionTest(permission="MANAGE_ACTIVITY_TASKS", sdkMin=31)
+	@PermissionTest(permission="MANAGE_ACTIVITY_TASKS", sdkMin=31,sdkMax = 32)
 	public void testManageActivityTasks(){
-		
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			//stopAppForUser(final String packageName, int userId)
-			BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE,
-					Transacts.ACTIVITY_DESCRIPTOR,
-					"stopAppForUser","test.packagename",0);
-		} else {
-			BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_TASK_SERVICE,
-					Transacts.ACTIVITY_TASK_DESCRIPTOR,
-					"getWindowOrganizerController");
-		}
-
+		BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_TASK_SERVICE,
+				Transacts.ACTIVITY_TASK_DESCRIPTOR,
+				"getWindowOrganizerController");
 	}
 
 	@PermissionTest(permission="SET_CLIP_SOURCE", sdkMin=31)

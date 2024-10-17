@@ -90,8 +90,27 @@ public abstract class SignaturePermissionTestModuleBase extends PermissionTestMo
 		if(!isPlatformSignatureMatch){
 			inverseForPlatformTesting = true;
 		}
-
 		return super.prepare(callback);
+	}
+
+	@Override
+	public PermissionTestRunner.Result resultHook(PermissionTestRunner.Result result){
+		if(result.getDevelopmentProtection()){
+			// The development permission flag under signature permissions allows the permission to
+			// be granted via adb, including when installed with the -g option. Since this app is
+			// often installed with the -g flag signature development permissions are allowed to
+			// be granted to the test app. However if a signature permission does not have the
+			// development flag then its grant state should match whether the app is platform signed.
+			boolean B_FAILURE = result.isInverse();
+			//logger.debug(result.getSource().getPermission()+" :failure:=>?"+B_FAILURE+","+isPlatformSignatureMatch+","+result.getGranted());
+			if(!isPlatformSignatureMatch && result.getGranted()){
+				result.setSuccess(B_FAILURE);
+			}
+			if (isPlatformSignatureMatch && !result.getGranted()) {
+				result.setSuccess(B_FAILURE);
+			}
+		}
+		return result;
 	}
 
 	/**

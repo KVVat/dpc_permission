@@ -163,6 +163,7 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		mContentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, null, null, null, null);
     }
  
+    @SuppressLint("HardwareIds")
     @PermissionTest(permission=SEND_SMS)
     public void testSendSms(){
 		String deviceNumber = null;

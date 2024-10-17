@@ -69,6 +69,7 @@ android {
         debug {
             signingConfig = null
             isDebuggable = true
+            isMinifyEnabled = false
         }
     }
     flavorDimensions.add("settings")
@@ -151,7 +152,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.runner)
     implementation(libs.androidx.credentials)
-
+    implementation(libs.robolectric)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.play.services.location)
     implementation(libs.play.services.vision)

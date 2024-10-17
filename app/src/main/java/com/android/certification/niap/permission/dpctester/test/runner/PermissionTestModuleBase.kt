@@ -26,6 +26,7 @@ open class PermissionTestModuleBase(activity: Activity) {
     val title: String? = javaClass.getAnnotation(PermissionTestModule::class.java)?.name
     @JvmField
     val isSync:Boolean = javaClass.getAnnotation(PermissionTestModule::class.java)?.sync?:false
+
     @JvmField
     protected var logger: ActivityLogger
     @JvmField

@@ -23,20 +23,9 @@ public class JavaTestModule extends PermissionTestModuleBase {
         super(ctx);
     }
 
-
     @PermissionTest(permission = ".Java Fun",sdkMin = 34,sdkMax = 35)
     public void checkJavaIsWorking() {
         logger.system("message from java!");
-
-        ;
-
-        /*invokeReflectionCall(statusBarManager.getClass(), "expandNotificationsPanel",
-                statusBarManager, null);
-
-        mTransacts.invokeTransact(Transacts.DEVICE_POLICY_SERVICE,
-                Transacts.DEVICE_POLICY_DESCRIPTOR,
-                Transacts.getNearbyNotificationStreamingPolicy, 0);*/
-
         //.invoke(Context.DEVICE_PO
         BinderTransaction.getInstance().invoke(
                 Context.DEVICE_POLICY_SERVICE,
