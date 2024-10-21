@@ -1,9 +1,12 @@
 package com.android.certification.niap.permission.dpctester.test.runner
 
 import android.app.Activity
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
 import com.android.certification.niap.permission.dpctester.R
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestSuite
+import com.google.common.base.CaseFormat
 import java.util.function.Consumer
 
 open class PermissionTestSuiteBase(val activity: Activity, val async: Boolean, vararg values:PermissionTestModuleBase) {
@@ -11,7 +14,7 @@ open class PermissionTestSuiteBase(val activity: Activity, val async: Boolean, v
     var title: String? = javaClass.getAnnotation(PermissionTestSuite::class.java)?.name
     var label: String? = javaClass.getAnnotation(PermissionTestSuite::class.java)?.label
     var details:String? = javaClass.getAnnotation(PermissionTestSuite::class.java)?.details
-
+    var key:String? = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaClass.simpleName)
     val info:Info = Info()
     val modules:MutableList<PermissionTestModuleBase> = mutableListOf()
     var methodCallback:Consumer<PermissionTestRunner.Result>?=null;
@@ -25,7 +28,6 @@ open class PermissionTestSuiteBase(val activity: Activity, val async: Boolean, v
             //Log.d(TAG, "testCount=$count")
             return count;
         }
-
     init {
        values.forEach { m ->
            modules.add(m)
@@ -48,21 +50,19 @@ open class PermissionTestSuiteBase(val activity: Activity, val async: Boolean, v
                    cbModuleControl_:Consumer<PermissionTestModuleBase.Info>?=null,
                    cbTestControl_:Consumer<PermissionTestModuleBase.Info>?=null
     ){
-
         info.title = title
         info.details = details
-
-        info.ellapsed_time = 0;
-        //cbSuiteStart?.accept(info)
+        info.ellapsed_time = 0
+        //
         cbSuiteFinish = cbSuiteFinish_
         cbSuiteStart = cbSuiteStart_
         cbModuleStart = cbModuleStart_
         cbModuleFinish = cbModuleFinish_
         cbModuleControl = cbModuleControl_
         cbTestControl = cbTestControl_
+
         //
         PermissionTestRunner.getInstance().start(this,callback)
-
     }
 
     open class Info {

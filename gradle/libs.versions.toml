@@ -1,6 +1,7 @@
 [versions]
 activityKtx = "1.9.2"
 agp = "8.5.0-alpha08"
+fragment = "1.8.4"
 groovyJson = "3.0.17"
 guava = "32.1.2-jre"
 guavaVersion = "24.1-jre"
@@ -28,6 +29,8 @@ credentials = "1.2.2"
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-preference = { module = "androidx.preference:preference", version.ref = "preference" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }

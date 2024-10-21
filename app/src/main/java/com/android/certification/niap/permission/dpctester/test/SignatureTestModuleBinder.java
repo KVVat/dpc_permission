@@ -8,7 +8,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 
-@PermissionTestModule(name="Binder Test Cases",label = "Run Signature Binder Test",sync = true)
+@PermissionTestModule(name="Binder Test Cases",label = "Run Signature Binder Test",sync =true,prflabel = "BIND_* Permissions")
 public class SignatureTestModuleBinder extends SignaturePermissionTestModuleBase {
     public SignatureTestModuleBinder(@NonNull Activity activity) {
         super(activity);

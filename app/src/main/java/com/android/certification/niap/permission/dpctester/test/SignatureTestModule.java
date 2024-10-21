@@ -103,7 +103,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Signature Test Cases")
+@PermissionTestModule(name="Signature Test Cases",prflabel = "Signature")
 public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	public SignatureTestModule(@NonNull Activity activity) {
 		super(activity);

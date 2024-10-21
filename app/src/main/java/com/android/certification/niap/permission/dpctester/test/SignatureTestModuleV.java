@@ -78,7 +78,7 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.function.LongConsumer;
 
-@PermissionTestModule(name="Signature 35(V) Test Cases")
+@PermissionTestModule(name="Signature 35(V) Test Cases",prflabel="VIC(15)")
 public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleV(@NonNull Activity activity) {
 		super(activity);
@@ -694,11 +694,10 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 					(fmg, "setupFsVerity", file);
 		} catch (ReflectionUtil.ReflectionIsTemporaryException ex){
 			Throwable cause = ex.getCause();
-			logger.info("here"+cause.toString());
 			if(cause instanceof InvocationTargetException){
 				Throwable cause2 = cause.getCause();
 				if(cause2 instanceof NullPointerException){
-					logger.debug("Expected Result:Nullpointer Exception.");
+					logger.debug("Expected Result:Null pointer Exception.");
 				} else {
 					throw ex;
 				}
@@ -706,7 +705,6 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 				throw ex;
 			}
 		}
-
 
 	}
 

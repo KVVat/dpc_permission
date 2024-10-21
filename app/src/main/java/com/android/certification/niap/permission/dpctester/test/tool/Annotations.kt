@@ -5,12 +5,14 @@ import kotlin.reflect.KClass
 annotation class PermissionTestSuite(
     val name:String="title",
     val label:String="suite label",
-    val details:String="details"
+    val details:String="details",
+    val prflabel:String="prflabel"
 )
 
 annotation class PermissionTestModule(
     val name:String="title",
     val label:String="module label",
+    val prflabel:String="prflabel",
     val priority:Int=0,
     val sync:Boolean=false,
 )

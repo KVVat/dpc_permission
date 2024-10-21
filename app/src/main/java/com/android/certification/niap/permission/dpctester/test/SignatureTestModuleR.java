@@ -89,7 +89,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Signature 30(R) Test Cases")
+@PermissionTestModule(name="Signature 30(R) Test Cases",prflabel = "R(11)")
 public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleR(@NonNull Activity activity){ super(activity);}
 

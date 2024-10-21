@@ -157,7 +157,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.vision)
     implementation(libs.play.services.base)
-
+    implementation(libs.androidx.preference)
     implementation(libs.guava)
     implementation(libs.material)
 
@@ -165,6 +165,9 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.work.runtime)
+
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.fragment.ktx)
 
     implementation(libs.jackson.core)
     implementation(libs.jackson.databind)

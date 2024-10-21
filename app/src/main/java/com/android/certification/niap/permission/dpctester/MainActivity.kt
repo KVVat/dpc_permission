@@ -13,23 +13,22 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import androidx.preference.PreferenceScreen
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.certification.niap.permission.dpctester.activity.SettingsActivity
 import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
-import com.android.certification.niap.permission.dpctester.service.FgLocationService
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
 import com.android.certification.niap.permission.dpctester.test.GmsTestModule
 import com.android.certification.niap.permission.dpctester.test.InstallTestModule
 import com.android.certification.niap.permission.dpctester.test.NonPlatformTestModule
-import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleBinder
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
@@ -38,13 +37,12 @@ import com.android.certification.niap.permission.dpctester.test.runner.Permissio
 import com.android.certification.niap.permission.dpctester.test.suite.SignatureTestSuite
 import com.android.certification.niap.permission.dpctester.test.suite.SingleModuleTestSuite
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import java_cup.Main
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 
-class MainViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
-    val textView: TextView = itemView.findViewById(R.id.logrowText)
-}
+class MainViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 
 class MainViewAdapter(private val list: List<LogBox>,
                       private val listener: ListListener
@@ -52,7 +50,6 @@ class MainViewAdapter(private val list: List<LogBox>,
     interface ListListener {
         fun onClickItem(tappedView: View, itemModel: LogBox)
     }
-    // その名の通りViewHolderを作成。MainViewHolderの引数にinflateしたレイアウトを入れている
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
         return MainViewHolder(
             LayoutInflater.from(parent.context)
@@ -116,6 +113,9 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         recyclerView?.getAdapter()?.notifyDataSetChanged()
     }
 
+    //Change the test modules here by resource settings
+    lateinit var suites:MutableList<PermissionTestSuiteBase>
+    //
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -133,7 +133,6 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 object : MainViewAdapter.ListListener {
                     override fun onClickItem(tappedView: View, itemModel: LogBox) {
                         if(itemModel.childs.size>0){
-
                             val intent = Intent(
                                 this@MainActivity,
                                 DetailsActivity::class.java
@@ -153,8 +152,20 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         if (savedInstanceState != null) {
             //Resume
         } else {
-            logger.system("Welcome!") //Dump os
+            logger.system("Running permission tester on build " + Build.FINGERPRINT)
         }
+
+        suites =  if(resources.getBoolean(R.bool.dpc_mode)){
+            mutableListOf(SingleModuleTestSuite(this,DPCTestModule(this)))
+        } else {
+            mutableListOf(
+                SignatureTestSuite(this),
+                SingleModuleTestSuite(this, InstallTestModule(this)),
+                SingleModuleTestSuite(this, NonPlatformTestModule(this)),
+                SingleModuleTestSuite(this, GmsTestModule(this)),
+            )
+        }
+
         //val layout = findViewById<LinearLayout>(R.id.mainLayout)
         val mStatusTextView = findViewById<TextView>(R.id.bsArrow)
         mBottomSheet = BottomSheetBehavior.from(binding.mainLayout)
@@ -166,20 +177,6 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 mBottomSheet!!.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
-        //Change the test modules here by resource settings
-        val suites:MutableList<PermissionTestSuiteBase> = if(resources.getBoolean(R.bool.dpc_mode)){
-            mutableListOf(SingleModuleTestSuite(this,DPCTestModule(this)))
-            //mutableListOf(SignatureTestSuite(this))
-        } else {
-            mutableListOf(
-                SignatureTestSuite(this),
-                SingleModuleTestSuite(this, InstallTestModule(this)),
-                SingleModuleTestSuite(this, NonPlatformTestModule(this)),
-                SingleModuleTestSuite(this, GmsTestModule(this)),
-                //SingleModuleTestSuite(this, SignatureTestModuleBinder(this)),
-            )
-        }
-
         // let the tester know the test result should be inverse or not
         resources.getBoolean(R.bool.inverse_test_result).let {
             PermissionTestRunner.inverse_test_result = it
@@ -215,7 +212,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     }
 
                     suiteTestCnt.incrementAndGet()
-                    //logger.info("${suiteTestCnt.get()},${suite.testCount}")
+                    logger.info("${suiteTestCnt.get()},${suite.testCount}")
                     if(suiteTestCnt.get()>=suite.testCount){
                         //If all the test thread has been executed, process reach this line.
                         //We can leverage it to safely execute next test suite.
@@ -263,13 +260,30 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     if(info.count_bypassed>0){
                         desc +=" ⚠${info.count_bypassed}"
                     }
-
                     val box = LogBox(Random.nextLong(), "Finish module", desc
                         , childs = info.moduleLog);
                     if(info.count_errors>0){
                         box.type="error"
                     } else if(info.count_bypassed>0){
                         box.type="bypassed"
+                    } else if(info.skipped){
+                        box.type="skipped"
+                        box.description = "Module Skipped By User Settings"
+                        suiteTestCnt.set(suiteTestCnt.get()+info.count_tests)
+                        if(suiteTestCnt.get()>=suite.testCount){
+                            //If all the test thread has been executed, process reach this line.
+                            //We can leverage it to safely execute next test suite.
+                            //logger.system("All test threads has been finished.${suiteTestCnt.get()}/${suite.testCount}");
+                            hideProgressDialog()
+                            PermissionTestRunner.running=false
+                            runOnUiThread {
+                                for (button in mTestButtons) {
+                                    button.isEnabled = true
+                                    button.isClickable = true
+                                }
+                                logger.system("All spawned test threads gently finished. test=${suite.testCount}")
+                            }
+                        }
                     } else {
                         box.type="passed"
                     }
@@ -292,13 +306,30 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+
+                val intent = Intent(this, SettingsActivity::class.java)
+                val l = ArrayList<Pair<String,String>>() // we can't use kotlin map for this purpose
+                //TODO: generate preference data from actual data
+                for(s in suites){
+                    if(s is SingleModuleTestSuite){
+                        l.add(Pair("suite",s.key!!))
+                    } else if(s is SignatureTestSuite){
+                        l.add(Pair("suite",s.key!!))
+                        for(mm in s.modules){
+                            l.add(Pair("module",mm.prflabel+":"+mm.key!!))
+                        }
+                    }
+                }
+                intent.putExtra("prefmap",l);
+                startActivity(intent)
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -338,6 +369,8 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+
+
 
     /********************************************
      * Goodies for local list view

@@ -17,66 +17,30 @@
 package com.android.certification.niap.permission.dpctester.test.runner;
 
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.telecom.TelecomManager;
-import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.android.certification.niap.permission.dpctester.DpcApplication;
-import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.common.Constants;
-import com.android.certification.niap.permission.dpctester.test.Transacts;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
-import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
-import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
-import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
-import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 import com.android.certifications.niap.permissions.companion.services.TestBindService;
 
 import java.io.BufferedReader;
-import java.io.FileDescriptor;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 

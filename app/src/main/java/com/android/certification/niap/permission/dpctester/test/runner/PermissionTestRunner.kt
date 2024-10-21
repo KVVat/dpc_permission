@@ -3,6 +3,7 @@ package com.android.certification.niap.permission.dpctester.test.runner
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
+import androidx.preference.PreferenceManager
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil
 import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException
@@ -13,7 +14,6 @@ import kotlinx.coroutines.sync.Mutex
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
-import kotlin.reflect.KClass
 
 class PermissionTestRunner {
     val TAG: String = PermissionTestRunner::class.java.simpleName
@@ -154,8 +154,6 @@ class PermissionTestRunner {
                 message = if(ex.message != null) ex.message!! else ex.toString()
             }
 
-
-
             val result = root.resultHook(
                 Result(
                     success=success,
@@ -214,7 +212,12 @@ class PermissionTestRunner {
             return false;
         }
         val m:PermissionTestModuleBase = suite_.modules.get(modulePos);
+        StaticLogger.info("key="+m.key)
+
         modulePos+=1;
+
+        val sp = PreferenceManager.getDefaultSharedPreferences(m.mContext);
+        m.enabled = sp.getBoolean(m.key,true);
         if(m.enabled) {
             val prepareInfo = m.prepare(callback)
             val testCases = ReflectionTool.checkPermissionTestMethod(m)
@@ -248,6 +251,17 @@ class PermissionTestRunner {
             m.mActivity.runOnUiThread{
                 this.suite.cbModuleFinish?.accept(m.info)
             }
+        } else {
+            //Skip
+            m.info.skipped=true
+            val prepareInfo = m.prepare(callback)
+            val testCases = ReflectionTool.checkPermissionTestMethod(m)
+            m.info.count_tests = prepareInfo.count_tests + testCases.size
+            m.mActivity.runOnUiThread{
+                this.suite.cbModuleFinish?.accept(m.info)
+            }
+            runNextModule(suite_,this.suite.methodCallback)
+
         }
 
         return true

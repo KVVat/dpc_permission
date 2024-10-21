@@ -1311,5 +1311,6 @@
     <string name="full_screen_intent_notification_message">Notification to test USE_FULL_SCREEN_INTENT</string>
     <string name="notificaton_title">POST_NOTIFICATIONS test</string>
     <string name="intent_notification_message">POST_NOTIFICATIONS works!</string>
+    <string name="action_test_suite_settings">Test Suite Settings</string>
 
 </resources>

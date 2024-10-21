@@ -62,7 +62,7 @@ import java.util.function.Consumer;
 //BinderTransaction.getInstance().invoke(
 //BinderTransaction.getInstance().invoke(
 
-@PermissionTestModule(name="Signature 28(P) Test Cases")
+@PermissionTestModule(name="Signature 28(P) Test Cases",prflabel = "Pie(9)")
 public class SignatureTestModuleP extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleP(@NonNull Activity activity) {
 		super(activity);

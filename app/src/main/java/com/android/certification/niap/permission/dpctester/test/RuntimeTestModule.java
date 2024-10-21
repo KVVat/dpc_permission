@@ -103,7 +103,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
      
-@PermissionTestModule(name="Runtime Test Cases")    
+@PermissionTestModule(name="Runtime Test Cases",prflabel = "Runtime Permissions")
 public class RuntimeTestModule extends PermissionTestModuleBase {
     public RuntimeTestModule(@NonNull Activity activity){ super(activity);}
 

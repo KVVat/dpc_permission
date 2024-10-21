@@ -70,7 +70,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-@PermissionTestModule(name="Signature 31(S),32(V2) Test Cases")
+@PermissionTestModule(name="Signature 31(S),32(V2) Test Cases",prflabel = "Snow Corn(12)")
 public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleS(@NonNull Activity activity) {
 		super(activity);

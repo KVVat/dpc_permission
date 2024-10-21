@@ -18,6 +18,7 @@ import com.android.certification.niap.permission.dpctester.test.log.ActivityLogg
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
+import com.google.common.base.CaseFormat
 import java.util.function.Consumer
 
 //Base class for test cases
@@ -26,6 +27,8 @@ open class PermissionTestModuleBase(activity: Activity) {
     val title: String? = javaClass.getAnnotation(PermissionTestModule::class.java)?.name
     @JvmField
     val isSync:Boolean = javaClass.getAnnotation(PermissionTestModule::class.java)?.sync?:false
+    var key =  CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaClass.simpleName)
+    var prflabel = javaClass.getAnnotation(PermissionTestModule::class.java)?.prflabel?:""
 
     @JvmField
     protected var logger: ActivityLogger
@@ -91,6 +94,7 @@ open class PermissionTestModuleBase(activity: Activity) {
         var count_errors: Int = 0
         var count_bypassed: Int =0
         var count_additional_tests: Int =0
+        var skipped=false
         val moduleLog:MutableList<LogBox> = mutableListOf();
         override fun toString(): String {
             return "title=$title count_tests=$count_tests count_errors=$count_errors count_bypassed=$count_bypassed"
@@ -144,8 +148,4 @@ open class PermissionTestModuleBase(activity: Activity) {
     open fun resultHook(result:PermissionTestRunner.Result):PermissionTestRunner.Result{
         return result
     }
-    /*open fun finalize(callback: Consumer<PermissionTestRunner.Result>?) {
-        PermissionTestRunner.getInstance().finalize(this, callback)
-    }
-    */
 }

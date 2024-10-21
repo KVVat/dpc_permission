@@ -28,6 +28,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.SettingsActivity"
+            android:theme="@style/NoActionBar"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
             android:name="com.android.certification.niap.permission.dpctester.DetailsActivity"
             android:theme="@style/NoActionBar"
             android:launchMode="singleTop"

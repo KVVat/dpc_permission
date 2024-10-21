@@ -82,7 +82,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-@PermissionTestModule(name="Signature 34(U) Test Cases")
+@PermissionTestModule(name="Signature 34(U) Test Cases",prflabel = "UDC(14)")
 public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleU(@NonNull Activity activity) {
 		super(activity);
