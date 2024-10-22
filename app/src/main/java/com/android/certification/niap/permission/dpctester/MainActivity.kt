@@ -212,7 +212,6 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     }
 
                     suiteTestCnt.incrementAndGet()
-                    logger.info("${suiteTestCnt.get()},${suite.testCount}")
                     if(suiteTestCnt.get()>=suite.testCount){
                         //If all the test thread has been executed, process reach this line.
                         //We can leverage it to safely execute next test suite.

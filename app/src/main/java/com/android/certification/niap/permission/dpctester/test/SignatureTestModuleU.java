@@ -70,6 +70,7 @@ import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils
 
 import org.robolectric.RuntimeEnvironment;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -486,8 +487,10 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 	}
 
+
+
 	@RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @PermissionTest(permission="BROADCAST_OPTION_INTERACTIVE", sdkMin=34)
+    @PermissionTest(permission="BROADCAST_OPTION_INTERACTIVE", sdkMin=34,developmentProtection = true)
 	public void testBroadcastOptionInteractive(){
 
 		final String[] requiredPermissions = {"android.permission.BROADCAST_OPTION_INTERACTIVE"};
@@ -495,7 +498,6 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		final String[] excludePackages = {};
 		final BroadcastOptions bOptions;
 		bOptions = BroadcastOptions.makeBasic();
-
 		//setInteractive true
 		ReflectionUtil.invoke(bOptions,
 				"setInteractive",
@@ -508,8 +510,17 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		);
 		Intent[] intents = new Intent[]{new Intent(Intent.ACTION_VIEW)};
 
-		//Use Robolectlic module to bypass restriction
-		Object activityThread = RuntimeEnvironment.getActivityThread();
+		Object activityThread = null;
+		try {
+			Class<?> actThreadCls = Class.forName("android.app.ActivityThread");
+			Method getActivityThread = actThreadCls.getDeclaredMethod("currentActivityThread");
+			getActivityThread.setAccessible(true);
+			activityThread = getActivityThread.invoke(null);
+
+		} catch (Exception e){
+			throw new UnexpectedTestFailureException(e);
+		}
+
 		if(activityThread != null){
 			Object applicationThread = ReflectionUtil.invoke
 					(activityThread,"getApplicationThread");
@@ -526,6 +537,8 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 				} catch (Exception ex){
 					String name = ex.getClass().getSimpleName();
+					ex.printStackTrace();
+					//logger.system(name);
 					if(name.equals("SecurityException")) {
 						throw ex;
 					}

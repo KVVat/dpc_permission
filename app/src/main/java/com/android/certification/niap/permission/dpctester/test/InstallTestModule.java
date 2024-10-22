@@ -159,7 +159,8 @@ public class InstallTestModule extends PermissionTestModuleBase {
 
 	@PermissionTest(permission=ACCESS_NETWORK_STATE)
 	public void testAccessNetworkState(){
-		systemService(ConnectivityManager.class).getActiveNetwork();
+		//
+		systemService(ConnectivityManager.class).getActiveNetworkInfo();
 	}
 
 	@SuppressLint("MissingPermission")
@@ -422,8 +423,8 @@ public class InstallTestModule extends PermissionTestModuleBase {
 	public void testWakeLock(){
 		PowerManager.WakeLock wakeLock =
 				systemService(PowerManager.class).newWakeLock(
-				PowerManager.PARTIAL_WAKE_LOCK,
-				InstallTestModule.class.getSimpleName());
+					PowerManager.PARTIAL_WAKE_LOCK,
+				InstallTestModule.class.getSimpleName()+"::InstallPermissionTester");
 		wakeLock.acquire(10*60*1000L );///*10 minutes
 		wakeLock.release();
 	}

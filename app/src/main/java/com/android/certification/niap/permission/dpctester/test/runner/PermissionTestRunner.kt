@@ -23,8 +23,7 @@ class PermissionTestRunner {
         var running = false
         @JvmField
         var inverse_test_result = false
-        //var finished = 0
-        var finished: AtomicInteger = AtomicInteger(0)
+
         fun getInstance(): PermissionTestRunner {
             if(instance_ == null){
                 instance_ = PermissionTestRunner()
@@ -43,19 +42,30 @@ class PermissionTestRunner {
     }
 
 
+
+    // Memo :
+    // 1. Is the test result should be reversed?
+    //    When the test should be failure, For example no permission declared or any other reason,
+    //    We reverse a flag for evaluation results (B_SUCCESS,B_FAILURE).
+    //    In these reversed cases the api should not be succeeded or permission should be granted.
+    //    But if both api and permission are granted unexpectedly it's also a success case.
+    //    (It suggests system grants undeclared permissions automatically)
     fun newTestThread(root: PermissionTestModuleBase,testCase:Data,callback: Consumer<Result>?):Thread {
         return Thread {
+
             val is_inverse = inverse_test_result || root.inverseForPlatformTesting
             val B_SUCCESS = if(is_inverse) false else true
             val B_FAILURE = if(is_inverse) true else false
             var success=B_SUCCESS
 
-
             var throwable:Throwable? = null
             var bypassed = false
             var apisuccess = true
             var message = "(none)";// else "In this case the test should be failed."
-
+            val granted =
+                (ActivityCompat.checkSelfPermission(root.mContext,testCase.permission)==
+                        PackageManager.PERMISSION_GRANTED);
+            //StaticLogger.info("1:${testCase.permission}:${granted}")
             try {
                 try {
                     //Preliminary Conditions Check
@@ -84,6 +94,7 @@ class PermissionTestRunner {
                     }
                     //StaticLogger.debug("running=>"+testCase.methodName)
                     ReflectionUtil.invoke(root, testCase.methodName)
+
 
                 } catch (ex: ReflectionUtil.ReflectionIsTemporaryException) {
                     if (ex.cause is InvocationTargetException) {
@@ -153,6 +164,19 @@ class PermissionTestRunner {
                 apisuccess=false
                 message = if(ex.message != null) ex.message!! else ex.toString()
             }
+            //StaticLogger.info("2:${testCase.permission}:${granted}/${apisuccess}&&${granted}")
+            //healthy case
+            if(apisuccess && granted){
+                //if the result should be reversed, success case would be regarded as failure
+                if(is_inverse){
+                    success = B_FAILURE
+                } else {
+                    success = B_SUCCESS
+                }
+                message = "Target permission is granted and api successfully executed";
+                StaticLogger.info("3:${testCase.permission}:${granted}:${success}")
+
+            }
 
             val result = root.resultHook(
                 Result(
@@ -212,7 +236,6 @@ class PermissionTestRunner {
             return false;
         }
         val m:PermissionTestModuleBase = suite_.modules.get(modulePos);
-        StaticLogger.info("key="+m.key)
 
         modulePos+=1;
 
