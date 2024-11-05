@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
@@ -35,6 +36,8 @@ import androidx.core.app.ActivityCompat;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -66,6 +69,32 @@ public class TesterUtils {
             return buildCodenameUpper.compareTo(codenameUpper) >= 0;
         }
     }
+
+    /**
+     * The function to ensure that the passed in permissions are defined in manifest
+     */
+    public static boolean ensureRequiredPermissions(
+            String[] requiredPermissions, Context context) {
+        PackageInfo packageInfo;
+        try {
+            packageInfo =
+                    context
+                            .getPackageManager()
+                            .getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS);
+        } catch (PackageManager.NameNotFoundException e) {
+            StaticLogger.error( "Could not find own package.", e);
+            return false;
+        }
+        List<String> manifestPermissions = Arrays.asList(packageInfo.requestedPermissions);
+        for (String expectedPermission : requiredPermissions) {
+            if (!manifestPermissions.contains(expectedPermission)) {
+                StaticLogger.error("Missing required permission from manifest: " + expectedPermission);
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     //recursive function to search am exception in the nested stack trace
     public static boolean findCauseInStackTraceElement(Boolean resp,Throwable ex,String nameMatches)

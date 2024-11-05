@@ -23,17 +23,23 @@ playServicesVision = "20.1.3"
 preference = "1.2.1"
 robolectric = "3.0"
 runner = "1.6.1"
+runnerVersion = "1.4.0"
+uiautomator = "2.3.0"
 workRuntime = "2.9.1"
 credentials = "1.2.2"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
+androidx-core = { module = "androidx.test:core", version.ref = "runner" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-preference = { module = "androidx.preference:preference", version.ref = "preference" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "runnerVersion" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-runner-v140 = { module = "androidx.test:runner", version.ref = "runnerVersion" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 groovy-json = { module = "org.codehaus.groovy:groovy-json", version.ref = "groovyJson" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 guava-v241jre = { module = "com.google.guava:guava", version.ref = "guavaVersion" }

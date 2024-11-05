@@ -173,6 +173,11 @@ dependencies {
     implementation(libs.jackson.databind)
 
     testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.core)
+    androidTestImplementation(libs.androidx.runner.v140)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

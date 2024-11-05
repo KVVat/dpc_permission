@@ -76,7 +76,7 @@ public class InternalTestModule extends PermissionTestModuleBase {
     public InternalTestModule(@NonNull Activity activity){ super(activity);}
     @Override
     public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
-		logger.debug("Hello a test case!");
+
         return super.prepare(callback);
 
     } 
@@ -252,9 +252,7 @@ public class InternalTestModule extends PermissionTestModuleBase {
 		    Object safetyCenter = mContext.getSystemService(clazzSaftyCenter);
 			ReflectionUtil.invoke(safetyCenter,
 					"getSafetySourceData",new Class[]{String.class},"GooglePlaySystemUpdate");
-//		    invokeReflectionCall
-//		            (clazzSaftyCenter, "getSafetySourceData",
-//		                    saftyCenter, new Class[]{String.class},"GooglePlaySystemUpdate");
+
 		} catch (ClassNotFoundException e){
 		    throw new UnexpectedTestFailureException(e);
 		} catch (ReflectionUtil.ReflectionIsTemporaryException e) {
