@@ -24,6 +24,7 @@ import static android.Manifest.permission.READ_LOGS;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.app.usage.UsageEvents;
@@ -702,6 +703,19 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 
 	}
 
+	@PermissionTest(permission="MANAGE_BIOMETRIC_DIALOG", sdkMin=30,sdkMax = 32)
+	public void testManageBiometricDialog(){
+		BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
+				Transacts.STATUS_BAR_DESCRIPTOR,
+				"onBiometricHelp", "test");
+	}
+
+	@PermissionTest(permission="MANAGE_APPOPS", sdkMin=30)
+	public void testManageAppops(){
+		BinderTransaction.getInstance().invoke(Transacts.APP_OPS_SERVICE,
+				Transacts.APP_OPS_DESCRIPTOR,
+				"clearHistory");
+	}
 }
 
 

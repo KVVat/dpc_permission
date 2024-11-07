@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.preference.PreferenceScreen
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,15 +28,16 @@ import com.android.certification.niap.permission.dpctester.test.DPCTestModule
 import com.android.certification.niap.permission.dpctester.test.GmsTestModule
 import com.android.certification.niap.permission.dpctester.test.InstallTestModule
 import com.android.certification.niap.permission.dpctester.test.NonPlatformTestModule
+import com.android.certification.niap.permission.dpctester.test.RuntimeDependentTestModule
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
+import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestSuiteBase
 import com.android.certification.niap.permission.dpctester.test.suite.SignatureTestSuite
 import com.android.certification.niap.permission.dpctester.test.suite.SingleModuleTestSuite
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import java_cup.Main
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -113,8 +113,9 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         recyclerView?.getAdapter()?.notifyDataSetChanged()
     }
 
-    //Change the test modules here by resource settings
+        //Change the test modules here by resource settings
     lateinit var suites:MutableList<PermissionTestSuiteBase>
+    lateinit var mCurrentModule: PermissionTestModuleBase
     //
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,12 +159,23 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         suites =  if(resources.getBoolean(R.bool.dpc_mode)){
             mutableListOf(SingleModuleTestSuite(this,DPCTestModule(this)))
         } else {
-            mutableListOf(
+            val defaults = mutableListOf(
                 SignatureTestSuite(this),
                 SingleModuleTestSuite(this, InstallTestModule(this)),
                 SingleModuleTestSuite(this, NonPlatformTestModule(this)),
                 SingleModuleTestSuite(this, GmsTestModule(this)),
             )
+            //four setting patterns
+            //if(SignatureUtils.hasSameSigningCertificateAsPackage(this, Constants.PLATFORM_PACKAGE)){
+                //configurations.add(new ManageBiometricDialogConfiguration());
+            //}
+            val module = RuntimeDependentTestModule(this);
+            //logger.system("test"+module.checkModuleIsValid())
+            if(module.checkModuleIsValid()){
+                defaults.add(SingleModuleTestSuite(this,module))
+            }
+
+            defaults
         }
 
         //val layout = findViewById<LinearLayout>(R.id.mainLayout)
@@ -210,7 +222,6 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                             result.source.permission+
                             ": BYPASSED {message='"+result.message+"'}");
                     }
-
                     suiteTestCnt.incrementAndGet()
                     if(suiteTestCnt.get()>=suite.testCount){
                         //If all the test thread has been executed, process reach this line.
@@ -248,7 +259,8 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                     }
                 }, cbSuiteFinish_ = { info ->
                     //logger.system("Finish the test suite.")
-                }, cbModuleStart_ = {info->
+                }, cbModuleStart_ = { info->
+                    mCurrentModule = info.self!!
                     logger.system("Start ${info.title} (${info.count_tests}+${info.count_additional_tests} test)")
                 }, cbModuleFinish_ = {info->
 
@@ -369,6 +381,24 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 || super.onSupportNavigateUp()
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+        deviceId: Int
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        try {
+            //sLogger.logSystem(">"+mConfiguration.toString());
+            if (mCurrentModule != null) mCurrentModule.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+            )
+        } catch (ex: RuntimeException) {
+            logger.info("Request Permissinon Result Error=>" + ex.message)
+        }
+    }
 
 
     /********************************************

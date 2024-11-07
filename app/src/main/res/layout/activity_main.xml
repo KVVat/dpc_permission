@@ -41,7 +41,7 @@
     <LinearLayout
         android:id="@+id/mainLayout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="360dp"
         android:gravity="center_horizontal|top"
         android:background="@drawable/layer_card_background"
         android:layout_margin="10dp"

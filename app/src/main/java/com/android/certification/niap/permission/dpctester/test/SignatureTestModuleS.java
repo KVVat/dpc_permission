@@ -217,43 +217,15 @@ public class SignatureTestModuleS extends SignaturePermissionTestModuleBase {
 				List.of("com.example.app"));
 	}
 
-	@PermissionTest(permission="MANAGE_CREDENTIAL_MANAGEMENT_APP", sdkMin=31)
+	@PermissionTest(permission="MANAGE_CREDENTIAL_MANAGEMENT_APP", sdkMin=31,sdkMax=33)
 	public void testManageCredentialManagementApp(){
-
 		Intent intent = new Intent();
 		intent.setAction("android.security.IKeyChainService");
 		intent.setComponent(new ComponentName(Constants.KEY_CHAIN_PACKAGE,
 				Constants.KEY_CHAIN_PACKAGE + ".KeyChainService"));
-
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
-			//AtomicBoolean foundError = new AtomicBoolean(false);
-			Thread thread = new Thread(() -> {
-				boolean permissionGranted =
-						checkPermissionGranted("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP");
-				logger.debug("Running MANAGE_CREDENTIAL_MANAGEMENT_APP test case.");
-				try {
-					KeyChain.removeCredentialManagementApp(mContext);
-//					getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
-//							permissionGranted, true);
-				} catch (Exception ex){
-					if(ex.getClass().getSimpleName().equals("SecurityException")){
-//						getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
-//								permissionGranted, false);
-					}
-				}
-			});
-			thread.start();
-			try {
-				thread.join(500);
-				throw new BypassTestException("The test launch on the new thread, it will finish after other test cases.");
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			BinderTransaction.getInstance().invokeViaServiceFromIntent(mContext, intent,
-					Transacts.KEY_CHAIN_DESCRIPTOR,
-					"removeCredentialManagementApp");
-		}
+		BinderTransaction.getInstance().invokeViaServiceFromIntent(mContext, intent,
+				Transacts.KEY_CHAIN_DESCRIPTOR,
+				"removeCredentialManagementApp");
 	}
 
 	@PermissionTest(permission="MANAGE_GAME_MODE", sdkMin=31)

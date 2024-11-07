@@ -95,6 +95,7 @@ open class PermissionTestModuleBase(activity: Activity) {
         var count_bypassed: Int =0
         var count_additional_tests: Int =0
         var skipped=false
+        var self:PermissionTestModuleBase? = null
         val moduleLog:MutableList<LogBox> = mutableListOf();
         override fun toString(): String {
             return "title=$title count_tests=$count_tests count_errors=$count_errors count_bypassed=$count_bypassed"
@@ -147,5 +148,11 @@ open class PermissionTestModuleBase(activity: Activity) {
     }
     open fun resultHook(result:PermissionTestRunner.Result):PermissionTestRunner.Result{
         return result
+    }
+    open fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray){
+
     }
 }

@@ -51,12 +51,14 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.security.KeyChain;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
+import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
@@ -610,6 +612,40 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 		} catch(IllegalStateException ex){
 			//expected ignore
 		}
+	}
+
+
+	@PermissionTest(permission="MANAGE_CREDENTIAL_MANAGEMENT_APP", sdkMin=34)
+	public void testManageCredentialManagementApp(){
+
+		Intent intent = new Intent();
+		intent.setAction("android.security.IKeyChainService");
+		intent.setComponent(new ComponentName(Constants.KEY_CHAIN_PACKAGE,
+			Constants.KEY_CHAIN_PACKAGE + ".KeyChainService"));
+		Thread thread = new Thread(() -> {
+			boolean permissionGranted =
+					checkPermissionGranted("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP");
+			//logger.debug("Running MANAGE_CREDENTIAL_MANAGEMENT_APP test case.");
+			try {
+				KeyChain.removeCredentialManagementApp(mContext);
+//					getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
+//							permissionGranted, true);
+			} catch (Exception ex){
+				if(ex.getClass().getSimpleName().equals("SecurityException")){
+//						getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
+//								permissionGranted, false);
+					throw ex;
+				}
+			}
+		});
+		thread.start();
+		try {
+			thread.join(500);
+			throw new BypassTestException("The test launch on the new thread, it will finish after other test cases.");
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 }
 

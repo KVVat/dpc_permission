@@ -773,8 +773,13 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 		} catch (IllegalStateException ex){
 			logger.info("Expected:"+ex.getMessage());
 		}
+	}
 
-
+	@PermissionTest(permission="MANAGE_BIOMETRIC_DIALOG", sdkMin=33)
+	public void testManageBiometricDialog(){
+		BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
+				Transacts.STATUS_BAR_DESCRIPTOR,
+				"onBiometricHelp", 0, "test");
 	}
 }
 

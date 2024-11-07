@@ -24,5 +24,6 @@ annotation class PermissionTest(
     val priority:Int=-1,
     val customCase:Boolean=false,
     val requiredPermissions:Array<String> = emptyArray(),
+    val requestedPermissions:Array<String> = emptyArray(),
     val developmentProtection: Boolean =false
     )

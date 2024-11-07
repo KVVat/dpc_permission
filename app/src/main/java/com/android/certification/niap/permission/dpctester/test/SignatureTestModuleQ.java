@@ -103,18 +103,9 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 				appUid, 0, 0);
 	}
 
-	@PermissionTest(permission="MANAGE_APPOPS", sdkMin=29)
+	@PermissionTest(permission="MANAGE_APPOPS", sdkMin=29,sdkMax = 29)
 	public void testManageAppops(){
-		//TODO:need to make a variant Q? q and later?
-
-		// clearHistory was only exposed on Q devices
-		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-			ReflectionUtil.invoke(systemService(AppOpsManager.class), "clearHistory");
-		} else {
-			BinderTransaction.getInstance().invoke(Transacts.APP_OPS_SERVICE,
-					Transacts.APP_OPS_DESCRIPTOR,
-					"clearHistory");
-		}
+		ReflectionUtil.invoke(systemService(AppOpsManager.class), "clearHistory");
 	}
 
 	@PermissionTest(permission="MANAGE_TEST_NETWORKS", sdkMin=29)
@@ -459,20 +450,9 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission="MANAGE_BIOMETRIC_DIALOG", sdkMin=29,sdkMax = 29)
 	public void testManageBiometricDialog(){
 		//TODO:need to write a variant
-		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-			BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
-					Transacts.STATUS_BAR_DESCRIPTOR,
-					"hideBiometricDialog");
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
-					Transacts.STATUS_BAR_DESCRIPTOR,
-					"onBiometricHelp", 0, "test");
-		}else {
-			//R-S?
-			BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
-					Transacts.STATUS_BAR_DESCRIPTOR,
-					"onBiometricHelp", "test");
-		}
+		BinderTransaction.getInstance().invoke(Transacts.STATUS_BAR_SERVICE,
+				Transacts.STATUS_BAR_DESCRIPTOR,
+				"hideBiometricDialog");
 	}
 
 	@PermissionTest(permission="START_VIEW_PERMISSION_USAGE", sdkMin=29)

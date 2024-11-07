@@ -12,7 +12,8 @@ import com.android.certification.niap.permission.dpctester.test.log.StaticLogger
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
 import kotlinx.coroutines.sync.Mutex
 import java.lang.reflect.InvocationTargetException
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 class PermissionTestRunner {
@@ -50,6 +51,7 @@ class PermissionTestRunner {
     //    In these reversed cases the api should not be succeeded or permission should be granted.
     //    But if both api and permission are granted unexpectedly it's also a success case.
     //    (It suggests system grants undeclared permissions automatically)
+
     fun newTestThread(root: PermissionTestModuleBase,testCase:Data,callback: Consumer<Result>?):Thread {
         return Thread {
 
@@ -69,6 +71,9 @@ class PermissionTestRunner {
             try {
                 try {
                     //Preliminary Conditions Check
+
+
+
                     // Check required Permissions
                     testCase.requiredPermissions.forEach {
                         if (ActivityCompat.checkSelfPermission(root.mContext, it)
@@ -80,7 +85,7 @@ class PermissionTestRunner {
                         }
                     }
 
-                    // Check Required Services : difficult to check.
+                    // Check Required Services : *difficult to check*
                     // Check Android Version
                     if(Build.VERSION.SDK_INT<testCase.sdkMin){
                         throw BypassTestException(
@@ -92,6 +97,8 @@ class PermissionTestRunner {
                             "${testCase.permission} : SDK${Build.VERSION.SDK_INT} is not supported to run.(SDK MAX:${testCase.sdkMax})"
                         )
                     }
+
+
                     //StaticLogger.debug("running=>"+testCase.methodName)
                     ReflectionUtil.invoke(root, testCase.methodName)
 
@@ -248,6 +255,7 @@ class PermissionTestRunner {
             m.info.count_tests = prepareInfo.count_tests + testCases.size
             m.info.count_errors = prepareInfo.count_errors
             m.info.count_bypassed = prepareInfo.count_bypassed
+            m.info.self = m;
             if (prepareInfo.count_tests > 0) {
                 StaticLogger.info("there are ${prepareInfo.count_tests} pre-running testcases")
             }
@@ -322,10 +330,12 @@ class PermissionTestRunner {
         val sdkMax: Int,
         val methodName: String,
         val requiredPermissions: Array<String>,
+        val requestedPermissions: Array<String>,
         val developmentProtection: Boolean
     ){
         constructor(permission: String) : this(permission=permission,
             sdkMin = 0,sdkMax=1000, methodName = "", requiredPermissions= emptyArray(),
+            requestedPermissions = emptyArray(),
             developmentProtection=false
         )
 

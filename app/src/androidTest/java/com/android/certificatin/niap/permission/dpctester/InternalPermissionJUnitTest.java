@@ -358,7 +358,7 @@ public class InternalPermissionJUnitTest {
 
             Class<?> clazzVDPBuilder = null;
             clazzVDPBuilder = Class.forName("android.companion.virtual.VirtualDeviceParams$Builder");
-            Constructor constructor = clazzVDPBuilder.getConstructor();
+            Constructor<?> constructor = clazzVDPBuilder.getConstructor();
             Object builderObj = constructor.newInstance();
             Object vdpParams = ReflectionUtil.invoke(builderObj, "build");
 
@@ -368,7 +368,7 @@ public class InternalPermissionJUnitTest {
 			in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener,
 			in IVirtualDeviceSoundEffectListener soundEffectListener
 			*/
-            Log.d("TAG",">"+android.os.Process.myUid());
+            //Log.d("TAG",">"+android.os.Process.myUid());
             AttributionSource ats = new AttributionSource.Builder(android.os.Process.myUid())
                     .setPackageName(mActivity.getPackageName()).build();
             BinderTransaction.getInstance().invoke(Transacts.VIRTUAL_DEVICE_MANAGER_SERVICE,

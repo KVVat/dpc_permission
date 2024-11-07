@@ -185,7 +185,7 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		}
 		if (deviceNumber == null) {
 		    throw new BypassTestException(
-		            "The device number could not be obtained to verify SEND_SMS");
+		            "The device number could not be obtained to verify SEND_SMS (Check SIM)");
 		}
 		SmsManager smsManager = SmsManager.getDefault();
 		smsManager.sendTextMessage(deviceNumber, null, "Test message to verify SEND_SMS", null,
@@ -397,7 +397,8 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		systemService(SensorManager.class).unregisterListener(listener);
     }
  
-    @PermissionTest(permission=ACCESS_MEDIA_LOCATION, sdkMin=29)
+    @PermissionTest(permission=ACCESS_MEDIA_LOCATION, sdkMin=29,
+			requiredPermissions = {"android.permission.READ_MEDIA_IMAGES",READ_EXTERNAL_STORAGE})
     public void testAccessMediaLocation(){
 		String selection = MediaStore.Images.Media.MIME_TYPE + "='image/jpeg'" + " OR "
 		        + MediaStore.Images.Media.MIME_TYPE + "='image/jpg'";
