@@ -327,7 +327,8 @@ public class SignatureTestModuleR extends SignaturePermissionTestModuleBase {
 		// verify this test; since this is outside the scope of a permission test skip
 		// the test when the permission is granted.
 
-		if(checkPermissionGranted("android.permission.MARK_DEVICE_ORGANIZATION_OWNED")){
+		if(checkPermissionGranted("android.permission.MARK_DEVICE_ORGANIZATION_OWNED")
+			&& !acceptDangerousApi){
 			throw new BypassTestException(
 					"MARK_DEVICE_ORGANIZATION_OWNED. This permission requires an active admin to be set");
 		}

@@ -31,6 +31,9 @@ open class PermissionTestModuleBase(activity: Activity) {
     var prflabel = javaClass.getAnnotation(PermissionTestModule::class.java)?.prflabel?:""
 
     @JvmField
+    var acceptDangerousApi = false
+
+    @JvmField
     protected var logger: ActivityLogger
     @JvmField
     var testCases: MutableList<PermissionTestRunner.Data>

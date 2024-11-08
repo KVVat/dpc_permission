@@ -632,7 +632,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	@PermissionTest(permission = "FORCE_BACK")
 	public void testForceBack() {
 		// if the permission if granted then do not invoke this as it can interrupt the test
-		if (checkPermissionGranted("android.permission.FORCE_BACK")) {
+		if (checkPermissionGranted("android.permission.FORCE_BACK") && !acceptDangerousApi) {
 			throw new BypassTestException(
 					"The API guarded by this permission will exit this activity");
 		}
@@ -1297,7 +1297,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "REBOOT")
 	public void testReboot() {
-		if (checkPermissionGranted(Manifest.permission.REBOOT)) {
+		if (checkPermissionGranted(Manifest.permission.REBOOT) && !acceptDangerousApi ) {
 			throw new BypassTestException(
 					"Skipping this test to avoid rebooting the device and interrupting the "
 							+ "rest of the tests");
@@ -1435,8 +1435,11 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "RETRIEVE_WINDOW_CONTENT")
 	public void testRetrieveWindowContent() {
-		if (checkPermissionGranted("android.permission.RETRIEVE_WINDOW_CONTENT")) {
-			return;
+		//Skip if permission is granted(dangerous permission)
+		if (checkPermissionGranted("android.permission.RETRIEVE_WINDOW_CONTENT")
+			&& !acceptDangerousApi) {
+			throw new BypassTestException(
+					"Skip if the target permission is granted.");
 		}
 		IBinder token = getActivityToken();
 		AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
@@ -1449,8 +1452,10 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 
 	@PermissionTest(permission = "RETRIEVE_WINDOW_TOKEN")
 	public void testRetrieveWindowToken() {
-		if (checkPermissionGranted("android.permission.RETRIEVE_WINDOW_TOKEN")) {
-			return;
+		if (checkPermissionGranted("android.permission.RETRIEVE_WINDOW_TOKEN")
+			&& !acceptDangerousApi) {
+			throw new BypassTestException(
+					"Skip if the target permission is granted.");
 		}
 		BinderTransaction.getInstance().invoke(Transacts.ACCESSIBILITY_SERVICE,
 				Transacts.ACCESSIBILITY_DESCRIPTOR,
@@ -1550,7 +1555,7 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 	public void testSetPreferredApplications() {
 		// If this permission is granted then do not invoke the method; the permissions
 		// will be revoked causing the test app to immediately exit.
-		if (checkPermissionGranted(Manifest.permission.SET_PREFERRED_APPLICATIONS)) {
+		if (checkPermissionGranted(Manifest.permission.SET_PREFERRED_APPLICATIONS) && !acceptDangerousApi) {
 			throw new BypassTestException(
 					"Skipping test to prevent killing test app when permissions are "
 							+ "revoked");
