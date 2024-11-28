@@ -29,6 +29,7 @@ import com.android.certification.niap.permission.dpctester.test.GmsTestModule
 import com.android.certification.niap.permission.dpctester.test.InstallTestModule
 import com.android.certification.niap.permission.dpctester.test.NonPlatformTestModule
 import com.android.certification.niap.permission.dpctester.test.RuntimeDependentTestModule
+import com.android.certification.niap.permission.dpctester.test.SpecificDependentTestModule
 import com.android.certification.niap.permission.dpctester.test.log.ActivityLogger
 import com.android.certification.niap.permission.dpctester.test.log.Logger
 import com.android.certification.niap.permission.dpctester.test.log.LoggerFactory
@@ -156,8 +157,10 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             logger.system("Running permission tester on build " + Build.FINGERPRINT)
         }
 
-        suites =  if(resources.getBoolean(R.bool.dpc_mode)){
-            mutableListOf(SingleModuleTestSuite(this,DPCTestModule(this)))
+        suites =  if(resources.getBoolean(R.bool.dpc_mode)) {
+            mutableListOf(SingleModuleTestSuite(this, DPCTestModule(this)))
+        }else if(resources.getBoolean(R.bool.spec_perm_test_mode)){
+            mutableListOf(SingleModuleTestSuite(this, SpecificDependentTestModule(this)))
         } else {
             val defaults = mutableListOf(
                 SignatureTestSuite(this),

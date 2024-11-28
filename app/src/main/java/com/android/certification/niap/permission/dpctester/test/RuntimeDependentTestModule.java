@@ -64,9 +64,6 @@ public class RuntimeDependentTestModule extends PermissionTestModuleBase {
                     mActivity, REQUIRED_PERMISSIONS,
                     Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS
             );
-            //Log.d(TAG,"permission request required?");
-            //ActivityCompat.requestPermissions(mActivity, REQUIRED_PERMISSIONS,
-            //        Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS);
             mCountDownLatch = new CountDownLatch(1);
             try {
                 // Wait for the countdown on the latch; this will block the thread attempting to

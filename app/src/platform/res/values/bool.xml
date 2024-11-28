@@ -3,5 +3,5 @@
     <bool name="inverse_test_result">false</bool>
     <bool name="debug_mode">false</bool>
     <bool name="dpc_mode">false</bool>
-
+    <bool name="spec_perm_test_mode">false</bool>
 </resources>

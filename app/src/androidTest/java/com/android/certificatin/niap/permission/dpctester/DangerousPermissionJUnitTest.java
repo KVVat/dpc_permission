@@ -191,6 +191,18 @@ public class DangerousPermissionJUnitTest {
         signatureTestModuleR.testMarkDeviceOrganizationOwned();
     }
 
+    @Test
+    @PermissionTest(permission="FILTER_EVENTS", sdkMin=28, sdkMax=28)
+    public void testFilterEvents(){
+        /*// This causes an ANR, so skip the test if the permission is granted
+        if (checkPermissionGranted("android.permission.FILTER_EVENTS")) {
+            throw new BypassTestException(
+                    "The API guarded by this permission will cause an ANR");
+        }
+        BinderTransaction.getInstance().invoke(Transacts.ACTIVITY_SERVICE, Transacts.ACTIVITY_DESCRIPTOR,
+                "inputDispatchingTimedOut", 1, false, "Test FILTER_EVENTS");*/
+    }
+
     //need to execute it last
     @Test
     @PermissionTest(permission = "REBOOT")

@@ -82,6 +82,10 @@ android {
             dimension = "settings"
             signingConfig = signingConfigs.getByName("norm")
         }
+        create("specperm"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("platform")
+        }
         create("platform"){
             dimension = "settings"
             signingConfig = signingConfigs.getByName("platform")
