@@ -627,7 +627,8 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 					checkPermissionGranted("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP");
 			//logger.debug("Running MANAGE_CREDENTIAL_MANAGEMENT_APP test case.");
 			try {
-				KeyChain.removeCredentialManagementApp(mContext);
+				if(permissionGranted)
+					KeyChain.removeCredentialManagementApp(mContext);
 //					getAndLogTestStatus(permission.MANAGE_CREDENTIAL_MANAGEMENT_APP,
 //							permissionGranted, true);
 			} catch (Exception ex){

@@ -147,7 +147,13 @@ class PermissionTestRunner {
 
                 if(ex.message != null)
                     message = ex.message!!
+            } catch(ex:NoSuchMethodException) {
+                throwable = ex
+                success = B_FAILURE
+                apisuccess=false
 
+                if(ex.message != null)
+                    message = ex.message!!
             } catch(ex: BypassTestException){
                 throwable = ex
                 success=true //bypassed test always returns true
