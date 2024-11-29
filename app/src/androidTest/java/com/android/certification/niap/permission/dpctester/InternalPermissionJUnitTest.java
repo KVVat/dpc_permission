@@ -1,4 +1,4 @@
-package com.android.certificatin.niap.permission.dpctester;
+package com.android.certification.niap.permission.dpctester;
 
 import static android.Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE;
 import static android.Manifest.permission.MANAGE_DEVICE_LOCK_STATE;
@@ -40,7 +40,6 @@ import androidx.test.filters.SdkSuppress;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.activity.TestActivity;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.common.SignatureUtils;

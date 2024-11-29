@@ -30,8 +30,22 @@ android {
             keyAlias = "android"
         }
     }
-    val applicationName = "DPCTester"
+    val applicationName = "Tester"
     val publish = project.tasks.create("publishAll")
+    testVariants.all {
+        val variant = this
+
+        if(variant.buildType.name.equals("debug")){
+            val task = project.tasks.create("publish${variant.name.capitalize()}Test", Copy::class)
+            mkdir("$rootDir/package")
+            variant.outputs.forEach { item ->
+                task.from(item.outputFile.absolutePath)
+            }
+            task.into("$rootDir/package")
+            task.dependsOn(variant.assembleProvider)
+            publish.dependsOn(task)
+        }
+    }
     applicationVariants.all {
         val variant = this
         variant.outputs
@@ -52,8 +66,6 @@ android {
             task.into("$rootDir/package")
             task.dependsOn(variant.assembleProvider)
             publish.dependsOn(task)
-            // variant.assemble
-            //        publish.dependsOn task
         }
     }
 

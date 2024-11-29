@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.certificatin.niap.permission.dpctester;
+package com.android.certification.niap.permission.dpctester;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
@@ -42,8 +42,6 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
-import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils;
 

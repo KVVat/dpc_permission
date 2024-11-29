@@ -1,4 +1,4 @@
-package com.android.certificatin.niap.permission.dpctester;
+package com.android.certification.niap.permission.dpctester;
 
 import static org.junit.Assume.assumeTrue;
 
@@ -16,7 +16,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModule;
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleR;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;

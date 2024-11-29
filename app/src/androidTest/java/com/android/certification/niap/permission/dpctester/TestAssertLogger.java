@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.certificatin.niap.permission.dpctester;
+package com.android.certification.niap.permission.dpctester;
 
 import android.util.Log;
 

@@ -26,7 +26,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
-import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -45,26 +44,17 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.common.Constants;
-import com.android.certification.niap.permission.dpctester.common.PermissionUtils;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase;
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
-import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
-import com.android.certification.niap.permission.dpctester.test.tool.ReflectionToolJava;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 
 /**
@@ -137,7 +127,8 @@ public class SpecificDependentTestModule extends SignaturePermissionTestModuleBa
         // permission is intended to allow scans without location.
         if (checkPermissionGranted(ACCESS_COARSE_LOCATION)||checkPermissionGranted(ACCESS_FINE_LOCATION)){
             throw new BypassTestException(
-                    "This app has been granted a location permission");
+                    "Radio scan without location permission is intended to allow scans without location. " +
+                            "This app grants a location permission. so skip this test.");
         }
         boolean scanStartedSuccessfully = systemService(WifiManager.class).startScan();
         if(!scanStartedSuccessfully) {
@@ -152,14 +143,14 @@ public class SpecificDependentTestModule extends SignaturePermissionTestModuleBa
     public void testNetworkScan(){
         // Starting in Android 12 attempting a network scan with both this permission
         // as well as a location permission can cause a RuntimeException.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (checkPermissionGranted("android.permission.NETWORK_SCAN")
                     && (checkPermissionGranted(ACCESS_COARSE_LOCATION)
                     || checkPermissionGranted(ACCESS_FINE_LOCATION))) {
                 throw new BypassTestException("This test should only run when the "
                         + "location permissions are not granted");
             }
-        }
+        }*/
 
         int bands[]={0};
         ArrayList<String> PLMNIds = new ArrayList<String>(Arrays.asList("42501"));
@@ -194,8 +185,9 @@ public class SpecificDependentTestModule extends SignaturePermissionTestModuleBa
                         logger.debug("onError: " + error);
                     }
                 };
-        //need SIM? https://b.corp.google.com/issues/77976208 check
-        //if so add bypass test routine
+        //need SIM? https://b.corp.google.com/issues/77976208 check <= false
+        //SecurityException due to uncertain reason
+        //Can be test with shell identity?
         systemService(TelephonyManager.class).requestNetworkScan(request,
                 AsyncTask.SERIAL_EXECUTOR,
                 callback);
