@@ -108,18 +108,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-/////////////////////////
-//Regex for converting
-
-//permission="(.*{0})",
-//permission=""$1"",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//mTransacts.invokeTransact(
-//BinderTransaction.getInstance().invoke(
-
 @PermissionTestModule(name="Signature 33(T) Test Cases",prflabel = "Tiramisu(13)")
 public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleT(@NonNull Activity activity) {

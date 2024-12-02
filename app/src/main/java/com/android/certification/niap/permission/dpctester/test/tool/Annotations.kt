@@ -1,7 +1,5 @@
 package com.android.certification.niap.permission.dpctester.test.tool
 
-import kotlin.reflect.KClass
-
 annotation class PermissionTestSuite(
     val name:String="title",
     val label:String="suite label",

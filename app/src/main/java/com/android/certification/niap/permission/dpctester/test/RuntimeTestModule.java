@@ -84,7 +84,6 @@ import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase;
-import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;

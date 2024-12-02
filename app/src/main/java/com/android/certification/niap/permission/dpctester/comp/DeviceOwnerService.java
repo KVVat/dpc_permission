@@ -28,8 +28,6 @@ import android.util.Log;
 
 import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.common.NotificationUtil;
-//import com.afwsamples.testdpc.R;
-//import com.afwsamples.testdpc.common.NotificationUtil;
 
 public class DeviceOwnerService extends Service {
   private static final String TAG = "DeviceOwnerService";

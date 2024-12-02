@@ -69,18 +69,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
-/////////////////////////
-//Regex for converting
-
-//permission="(.*{0})",
-//permission=""$1"",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
-
 @PermissionTestModule(name="Signature 29(Q) Test Cases",prflabel = "Q(10)")
 public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 	public SignatureTestModuleQ(@NonNull Activity activity) {

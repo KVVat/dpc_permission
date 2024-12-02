@@ -32,7 +32,6 @@ import com.android.certification.niap.permission.dpctester.test.log.StaticLogger
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides utility methods to obtain the declared permissions on the device under test.

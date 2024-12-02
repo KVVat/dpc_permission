@@ -78,7 +78,6 @@ import androidx.credentials.GetCredentialRequest;
 import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.GetPublicKeyCredentialOption;
 import androidx.credentials.exceptions.GetCredentialException;
-import androidx.test.runner.screenshot.Screenshot;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.R;

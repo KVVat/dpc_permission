@@ -17,7 +17,7 @@
  * This file is auto-generated, but forcefully inserted here for testing purpose.
  */
 package android.health.connect.aidl;
-//import android.os.Parcelable;
+
 /** A callback for any error encountered by. */
 public interface IMigrationCallback extends android.os.IInterface
 {

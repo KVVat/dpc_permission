@@ -45,7 +45,6 @@ import com.android.certification.niap.permission.dpctester.test.exception.Unexpe
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner.Result;
-import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 
@@ -80,18 +79,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-/////////////////////////
-//Regex for converting
-
-//permission=(.*[A-Z_]{1}),
-//permission="$1",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
 
 @PermissionTestModule(name="Gms Permission Test Cases",label = "Run Gms Tests")
 public class GmsTestModule extends PermissionTestModuleBase {

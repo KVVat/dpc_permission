@@ -18,14 +18,9 @@ package com.android.certification.niap.permission.dpctester.test;
 
 
 import android.app.Activity;
-import android.app.KeyguardManager;
-import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.hardware.display.DisplayManager;
 import android.net.MacAddress;
 import android.os.Build;
@@ -36,7 +31,6 @@ import android.os.UserManager;
 import androidx.annotation.NonNull;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
-import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner;
@@ -45,22 +39,8 @@ import com.android.certification.niap.permission.dpctester.test.tool.BinderTrans
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
-
-/////////////////////////
-//Regex for converting
-
-//permission=(.*[A-Z_]{1}),
-//permission="$1",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
 
 @PermissionTestModule(name="Signature 28(P) Test Cases",prflabel = "Pie(9)")
 public class SignatureTestModuleP extends SignaturePermissionTestModuleBase {

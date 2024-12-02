@@ -1,5 +1,4 @@
 package com.android.certification.niap.permission.dpctester.provision;
-
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *

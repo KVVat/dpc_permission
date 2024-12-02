@@ -17,12 +17,9 @@
 package com.android.certification.niap.permission.dpctester.test;
 
 
-import static com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner.inverse_test_result;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 
 import androidx.annotation.NonNull;
@@ -41,22 +38,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-/////////////////////////
-//Regex for converting
-
-//permission=(.*[A-Z_]{1}),
-//permission="$1",
-
-//$1"$2"$3
-//$1"$2"$3
-
-//BinderTransaction.getInstance().invoke(
-//BinderTransaction.getInstance().invoke(
 
 @PermissionTestModule(name="NonPlatform Permission Test Cases",label = "Run Non Platform Test")
 public class NonPlatformTestModule extends SignaturePermissionTestModuleBase {
