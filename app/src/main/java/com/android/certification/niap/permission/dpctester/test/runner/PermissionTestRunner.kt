@@ -199,7 +199,7 @@ class PermissionTestRunner {
                     success = B_SUCCESS
                 }
                 message = "Target permission is granted and api successfully executed";
-                StaticLogger.info("3:${testCase.permission}:${granted}:${success}")
+                //StaticLogger.info("3:${testCase.permission}:${granted}:${success}")
 
             }
 
