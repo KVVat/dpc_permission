@@ -124,6 +124,10 @@ android {
             dimension = "settings"
             signingConfig = signingConfigs.getByName("platform")
         }
+        create("coretest"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("platform")
+        }
     }
 
 

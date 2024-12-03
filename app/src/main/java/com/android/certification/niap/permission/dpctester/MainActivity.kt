@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.certification.niap.permission.dpctester.activity.SettingsActivity
 import com.android.certification.niap.permission.dpctester.data.LogBox
 import com.android.certification.niap.permission.dpctester.databinding.ActivityMainBinding
+import com.android.certification.niap.permission.dpctester.test.CoreTestModule
 import com.android.certification.niap.permission.dpctester.test.DPCTestModule
 import com.android.certification.niap.permission.dpctester.test.GmsTestModule
 import com.android.certification.niap.permission.dpctester.test.InstallTestModule
@@ -173,8 +174,10 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
 
         suites =  if(resources.getBoolean(R.bool.dpc_mode)) {
             mutableListOf(SingleModuleTestSuite(this, DPCTestModule(this)))
-        }else if(resources.getBoolean(R.bool.spec_perm_test_mode)){
+        }else if(resources.getBoolean(R.bool.spec_perm_test_mode)) {
             mutableListOf(SingleModuleTestSuite(this, SpecificDependentTestModule(this)))
+        }else if(resources.getBoolean(R.bool.core_test_mode)){
+            mutableListOf(SingleModuleTestSuite(this, CoreTestModule(this)))
         } else {
             val defaults = mutableListOf(
                 SignatureTestSuite(this),
