@@ -14,12 +14,14 @@ package com.android.certification.niap.permission.dpctester;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE;
 import static android.Manifest.permission.MANAGE_DEVICE_LOCK_STATE;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE;
 import static android.content.Intent.ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 import android.annotation.SuppressLint;
@@ -58,6 +60,7 @@ import com.android.certification.niap.permission.dpctester.activity.TestActivity
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.common.SignatureUtils;
 import com.android.certification.niap.permission.dpctester.test.Transacts;
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
@@ -153,6 +156,7 @@ public class InternalPermissionJUnitTest {
     static private UiAutomation mUiAutomation;
     static private Context mContext;
     static private Activity mActivity;
+    static private Boolean nonperm = false;
 
 
     @BeforeClass
@@ -167,7 +171,15 @@ public class InternalPermissionJUnitTest {
 
         //Adopt the permission identity of the shell UID for all permissions.
         //This allows you to call APIs protected permissions which normal apps cannot hold but are granted to the shell UID.
-        mUiAutomation.adoptShellPermissionIdentity();
+        //Test Internet Permission to verify
+        if(mPackageManager.checkPermission(INTERNET,mContext.getPackageName())
+                ==PackageManager.PERMISSION_GRANTED) {
+            mUiAutomation.adoptShellPermissionIdentity();
+        }else{
+            mUiAutomation.dropShellPermissionIdentity();
+            nonperm = true;
+        }
+
         //For query contacts
         mUiAutomation.grantRuntimePermission(null,"android.permission.QUERY_ALL_PACKAGES");
     }
@@ -205,9 +217,19 @@ public class InternalPermissionJUnitTest {
         sdkNotSupported = Build.VERSION.SDK_INT < sdkMin_ || Build.VERSION.SDK_INT > sdkMax_;
         assumeTrue(!sdkNotSupported);
 
+        if(nonperm && permissionGranted){
+            Log.d("Instrumentation Setup","Permission "+targetPermission+" is unintentionally granted");
+            assumeFalse(permissionGranted);
+        }
+
+        if(!nonperm && !permissionGranted){
+            Log.d("Instrumentation Setup","Permission "+targetPermission+" can not be granted");
+            assumeTrue(permissionGranted);
+        }
+
         //label =  aModule.javaClass.getAnnotation(PermissionTestModule::class.java)?.label
-        Log.d("Method Info TAG=>",testName.getMethodName());
-        Log.d("Permission=>",targetPermission+":"+permissionGranted);
+        Log.d("Instrumentation Setup","Method Info TAG=>"+testName.getMethodName());
+        Log.d("Instrumentation Setup","Permission=>"+targetPermission+":"+permissionGranted);
     }
 
     @Test
@@ -273,6 +295,7 @@ public class InternalPermissionJUnitTest {
     @Test
     @PermissionTest(permission="ASSOCIATE_COMPANION_DEVICES", sdkMin=31)
     public void testAssociateCompanionDevices(){
+        //android.permission.ASSOCIATE_COMPANION_DEVICES:false
         Signature signature = SignatureUtils.getTestAppSigningCertificate(mContext);
         MessageDigest messageDigest;
         try {
@@ -293,20 +316,24 @@ public class InternalPermissionJUnitTest {
                     Transacts.COMPANION_DEVICE_DESCRIPTOR, "createAssociation",
                     mPackageName, "11:22:33:44:55:66", 0, certDigest);
         } catch (SecurityException ex){
-            if(permissionGranted){
-                throw ex;
-            }
+            ex.printStackTrace();
+            //if(permissionGranted){
+            throw ex;
+            //}
         }
     }
     @Test
     @PermissionTest(permission="BYPASS_ROLE_QUALIFICATION", sdkMin=31)
     public void testBypassRoleQualification(){
+        //android.permission.BYPASS_ROLE_QUALIFICATION:true
         BinderTransaction.getInstance().invoke(Transacts.ROLE_SERVICE, Transacts.ROLE_DESCRIPTOR,
                 "setBypassingRoleQualification", false);
     }
     @Test
     @PermissionTest(permission="PERFORM_IMS_SINGLE_REGISTRATION", sdkMin=31)
     public void testPerformImsSingleRegistration(){
+        //?android.permission.PERFORM_IMS_SINGLE_REGISTRATION:true
+
         BinderTransaction.getInstance().invoke(Transacts.TELEPHONY_IMS_SERVICE,
                 Transacts.TELEPHONY_IMS_DESCRIPTOR,
                 "triggerNetworkRegistration", 0,
@@ -536,12 +563,15 @@ public class InternalPermissionJUnitTest {
             mActivity.startActivity(featuresIntent);
         } else {
             logline("AppClipService doesn't exist in this device.");
+            if(nonperm && !permissionGranted) {
+                throw new SecurityException("Permission is not granted. Intended Error");
+            }
         }
 
 
     }
     @Test
-    @PermissionTest(permission=MANAGE_DEVICE_LOCK_STATE, sdkMin=34)
+    @PermissionTest(permission=MANAGE_DEVICE_LOCK_STATE, sdkMin=34,sdkMax = 34)
     public void testManageDeviceLockState(){
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(true);
@@ -556,12 +586,10 @@ public class InternalPermissionJUnitTest {
                 IIsDeviceLockedCallback callback = new IIsDeviceLockedCallback() {
                     @Override
                     public void onIsDeviceLocked(boolean locked) throws RemoteException {
-                        //logger.logSystem("onError1");
                     }
 
                     @Override
                     public void onError(ParcelableException ex) throws RemoteException {
-                        //logger.logSystem("onError");
                     }
 
                     @Override
@@ -570,16 +598,17 @@ public class InternalPermissionJUnitTest {
 
                             @Override
                             public void onIsDeviceLocked(boolean locked) throws RemoteException {
-                                //logger.logSystem("-onError2");
 
                                 latch.countDown();
                             }
 
                             @Override
                             public void onError(ParcelableException ex) throws RemoteException {
-                                //logger.logSystem("-onError");
-
+                                //Log.d("IISdevice","-onError");
+                                //ex.printStackTrace();
                                 if (ex.getException().toString().equals("java.lang.SecurityException")) {
+                                    SecurityException eex = (SecurityException) ex.getException();
+                                    eex.printStackTrace();
                                     success.set(false);
                                 }
                                 latch.countDown();
@@ -596,7 +625,8 @@ public class InternalPermissionJUnitTest {
 
                     latch.await(2000, TimeUnit.MILLISECONDS);
                     if (!success.get()) {
-                        throw new SecurityException("Found secuirty error in callback interface!");
+                        throw new SecurityException("Found secuirty error in callback interface!" +
+                                "Is device lock enabled on this device?");
                     }
                 } catch (InterruptedException e) {
                     logline(e.getMessage());
@@ -655,18 +685,19 @@ public class InternalPermissionJUnitTest {
                 }
             }
         } catch(SecurityException ex){
-            if(permissionGranted){
-                throw ex;
-            }
+            //if(permissionGranted){
+            throw ex;
+            //}
         }
     }
     @Test
     @PermissionTest(permission="QUERY_DEVICE_STOLEN_STATE", sdkMin=34)
     public void testQueryDeviceStolenState(){
+        //Permission=>: android.permission.QUERY_DEVICE_STOLEN_STATE:false
         if(!TesterUtils.getAdminFlagByName("deviceTheftImplEnabled")){
-            logline(
-                    "To run this test, deviceTheftImplEnabled system flag should be enabled.Aborted");
-            return;
+            if(nonperm && !permissionGranted)
+                throw new BypassTestException("To run this test, deviceTheftImplEnabled system flag should be enabled.Aborted");
+            else return;
         }
         BinderTransaction.getInstance().invoke(
                 Transacts.DEVICE_POLICY_SERVICE,
