@@ -279,10 +279,9 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         runtimeTestModule.testBluetoothAdvertise();
     }
 
-    @PermissionTest(permission=BLUETOOTH_PRIVILEGED, sdkMin=31)
+    @PermissionTest(permission=BLUETOOTH_PRIVILEGED, sdkMin=28)
     public void testBluetoothPrivileged(){
-        //BluetoothPrivileged? Corresponding Test is currently not available in main module
-        ReflectionUtil.invoke(mBluetoothAdapter,"clearBluetooth");
+        signatureTestModule.testBluetoothPrivileged();
     }
 
 

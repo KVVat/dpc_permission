@@ -16,6 +16,8 @@
  */
 package com.android.certification.niap.permission.dpctester.test;
 
+import static android.Manifest.permission.BLUETOOTH_PRIVILEGED;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
@@ -1881,7 +1883,10 @@ public class SignatureTestModule extends SignaturePermissionTestModuleBase {
 		mContentResolver.insert(VoicemailContract.Voicemails.CONTENT_URI, values);
 	}
 
-	
+	@PermissionTest(permission=BLUETOOTH_PRIVILEGED, sdkMin=28)
+	public void testBluetoothPrivileged(){
+		ReflectionUtil.invoke(mBluetoothAdapter,"clearBluetooth");
+	}
 }
 
 
