@@ -8,6 +8,7 @@ import static android.Manifest.permission.ANSWER_PHONE_CALLS;
 import static android.Manifest.permission.BLUETOOTH;
 import static android.Manifest.permission.BLUETOOTH_ADVERTISE;
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.BLUETOOTH_PRIVILEGED;
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.MANAGE_OWN_CALLS;
 import static android.Manifest.permission.NFC;
@@ -47,6 +48,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -277,7 +279,12 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         runtimeTestModule.testBluetoothAdvertise();
     }
 
-    //BluetoothPrivileged? Corresponding Test is currently not available
+    @PermissionTest(permission=BLUETOOTH_PRIVILEGED, sdkMin=31)
+    public void testBluetoothPrivileged(){
+        //BluetoothPrivileged? Corresponding Test is currently not available in main module
+        ReflectionUtil.invoke(mBluetoothAdapter,"clearBluetooth");
+    }
+
 
     //13.NFC
     //	Normal: android.permission.NFC or android.permission.NFC_PREFERRED_PAYMENT_INFO
