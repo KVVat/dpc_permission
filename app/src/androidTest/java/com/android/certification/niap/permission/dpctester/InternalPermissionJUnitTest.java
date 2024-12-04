@@ -567,11 +567,9 @@ public class InternalPermissionJUnitTest {
                 throw new SecurityException("Permission is not granted. Intended Error");
             }
         }
-
-
     }
     @Test
-    @PermissionTest(permission=MANAGE_DEVICE_LOCK_STATE, sdkMin=34,sdkMax = 34)
+    @PermissionTest(permission=MANAGE_DEVICE_LOCK_STATE, sdkMin=34,sdkMax = 35)
     public void testManageDeviceLockState(){
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(true);
@@ -608,7 +606,7 @@ public class InternalPermissionJUnitTest {
                                 //ex.printStackTrace();
                                 if (ex.getException().toString().equals("java.lang.SecurityException")) {
                                     SecurityException eex = (SecurityException) ex.getException();
-                                    eex.printStackTrace();
+                                    //eex.printStackTrace();
                                     success.set(false);
                                 }
                                 latch.countDown();
