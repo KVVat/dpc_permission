@@ -50,7 +50,7 @@ android {
         val variant = this
 
         if(variant.buildType.name.equals("debug")){
-            val task = project.tasks.create("publish${variant.name.capitalize()}Test", Copy::class)
+            val task = project.tasks.create("publish${variant.name.replaceFirstChar{it.uppercase()}}Test", Copy::class)
             mkdir("$rootDir/package")
             variant.outputs.forEach { item ->
                 task.from(item.outputFile.absolutePath)
@@ -72,7 +72,7 @@ android {
             }
 
         if(variant.buildType.name.equals("debug")){
-            val task = project.tasks.create("publish${variant.name.capitalize()}Apk", Copy::class)
+            val task = project.tasks.create("publish${variant.name.replaceFirstChar{it.uppercase()}}Apk", Copy::class)
             mkdir("$rootDir/package")
             variant.outputs.forEach { it->
                 task.from(it.outputFile.absolutePath)
@@ -124,9 +124,17 @@ android {
             dimension = "settings"
             signingConfig = signingConfigs.getByName("platform")
         }
-        create("coretest"){
+        create("coretest-platform"){
             dimension = "settings"
             signingConfig = signingConfigs.getByName("platform")
+        }
+        create("coretest-normal"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("norm")
+        }
+        create("coretest-noperm"){
+            dimension = "settings"
+            signingConfig = signingConfigs.getByName("norm")
         }
     }
 
