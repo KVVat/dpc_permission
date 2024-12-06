@@ -14,10 +14,14 @@ package com.android.certification.niap.permission.dpctester
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import android.content.ContentValues
 import android.content.Intent
+import android.content.LocusId
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.DropBoxManager
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -54,6 +58,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Permissio
 import com.android.certification.niap.permission.dpctester.test.suite.SignatureTestSuite
 import com.android.certification.niap.permission.dpctester.test.suite.SingleModuleTestSuite
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
@@ -361,6 +366,13 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 startActivity(intent)
                 return true
             }
+            R.id.action_test_preparation -> {
+                //port from companion app
+                prepareLocusId()
+                prepareDropBoxItem()
+                prepareLocalMedias()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -418,6 +430,151 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         } catch (ex: RuntimeException) {
             logger.info("Request Permissinon Result Error=>" + ex.message)
         }
+    }
+    /********************************************
+     * Goodies for Test Preparations
+     ********************************************/
+    private fun prepareDropBoxItem(){
+        val currTimeMs = System.currentTimeMillis()
+        val db = applicationContext.getSystemService(DROPBOX_SERVICE) as DropBoxManager
+        db.addText("test-companion-tag", "Companion:PEEK_DROPBOX_DATA test at :$currTimeMs")
+        logger.system("Put a data into the DropBox Manager for Test")
+    }
+    private fun prepareLocusId() {
+        // While locus events were introduced in Android 10 the ACCESS_LOCUS_ID_USAGE_STATS
+        // permission was introduced in Android 11.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val locusId = LocusId("ACCESS_LOCUS_ID_USAGE_STATS_test")
+            setLocusContext(locusId, null)
+            logger.system("Set Locus Context for Test")
+        }
+    }
+    private fun prepareLocalMedias():Boolean {
+
+        // Scoped storage and the ACCESS_MEDIA_LOCATION permission were introduced in Android 10.
+        var result = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            //Image 1
+            val contentResolver = application.contentResolver
+            val photoContentValues = ContentValues()
+            photoContentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "TestImage")
+            photoContentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            photoContentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/")
+            photoContentValues.put(MediaStore.Images.Media.IS_PENDING, 1)
+            var collectionUri = MediaStore.Images.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL_PRIMARY
+            )
+            val photoUri = contentResolver.insert(collectionUri!!, photoContentValues)
+
+            try {
+                resources.openRawResource(R.raw.test_image).use { inputStream ->
+                    contentResolver.openOutputStream(
+                        photoUri!!
+                    ).use { outputStream ->
+                        val bytes = ByteArray(2048)
+                        while (inputStream.read(bytes) != -1) {
+                            outputStream!!.write(bytes)
+                        }
+                        logger.system("Successfully wrote file to pictures directory")
+                    }
+                }
+            } catch (e: IOException) {
+                logger.system("Caught an exception copying file:")
+                result = false
+            }
+            photoContentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            contentResolver.update(photoUri!!, photoContentValues, null, null)
+
+            //Image 1
+            val photoContentValues2 = ContentValues()
+            photoContentValues2.put(MediaStore.Images.Media.DISPLAY_NAME, "PngImage")
+            photoContentValues2.put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            photoContentValues2.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/")
+            photoContentValues2.put(MediaStore.Images.Media.IS_PENDING, 1)
+            val collectionUri2 = MediaStore.Images.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL_PRIMARY
+            )
+            val photoUri2 = contentResolver.insert(collectionUri2, photoContentValues2)
+
+            try {
+                resources.openRawResource(R.raw.test_image2).use { inputStream ->
+                    contentResolver.openOutputStream(
+                        photoUri2!!
+                    ).use { outputStream ->
+                        val bytes = ByteArray(2048)
+                        while (inputStream.read(bytes) != -1) {
+                            outputStream!!.write(bytes)
+                        }
+                        logger.system("Successfully wrote file to pictures directory")
+                    }
+                }
+            } catch (e: IOException) {
+                logger.system("Caught an exception copying file:")
+                result = false
+            }
+            photoContentValues2.put(MediaStore.Images.Media.IS_PENDING, 0)
+            contentResolver.update(photoUri2!!, photoContentValues2, null, null)
+
+            //Audio
+            val audioContentValues = ContentValues()
+            audioContentValues.put(MediaStore.Audio.Media.DISPLAY_NAME, "TestAudio")
+            audioContentValues.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg")
+            audioContentValues.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music/")
+            audioContentValues.put(MediaStore.Audio.Media.IS_PENDING, 1)
+            collectionUri = MediaStore.Audio.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL_PRIMARY
+            )
+            val audioUri = contentResolver.insert(collectionUri, audioContentValues)
+
+            try {
+                resources.openRawResource(R.raw.test_audio).use { inputStream ->
+                    contentResolver.openOutputStream(
+                        audioUri!!
+                    ).use { outputStream ->
+                        val bytes = ByteArray(2048)
+                        while (inputStream.read(bytes) != -1) {
+                            outputStream!!.write(bytes)
+                        }
+                        logger.system("Successfully wrote file to Music directory")
+                    }
+                }
+            } catch (e: IOException) {
+                logger.system("Caught an exception copying file:")
+                result = false
+            }
+            audioContentValues.put(MediaStore.Audio.Media.IS_PENDING, 0)
+            contentResolver.update(audioUri!!, audioContentValues, null, null)
+            //Video
+            val videoContentValues = ContentValues()
+            videoContentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "TestVideo")
+            videoContentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            videoContentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/")
+            videoContentValues.put(MediaStore.Video.Media.IS_PENDING, 1)
+            collectionUri = MediaStore.Video.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL_PRIMARY
+            )
+            val videoUri = contentResolver.insert(collectionUri, videoContentValues)
+
+            try {
+                resources.openRawResource(R.raw.test_video).use { inputStream ->
+                    contentResolver.openOutputStream(
+                        videoUri!!
+                    ).use { outputStream ->
+                        val bytes = ByteArray(2048)
+                        while (inputStream.read(bytes) != -1) {
+                            outputStream!!.write(bytes)
+                        }
+                        logger.system("Successfully wrote file to Movies directory")
+                    }
+                }
+            } catch (e: IOException) {
+                logger.system("Caught an exception copying file:")
+                result = false
+            }
+            videoContentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+            contentResolver.update(videoUri!!, videoContentValues, null, null)
+        }
+        return result
     }
 
 

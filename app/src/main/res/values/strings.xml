@@ -1312,5 +1312,6 @@
     <string name="notificaton_title">POST_NOTIFICATIONS test</string>
     <string name="intent_notification_message">POST_NOTIFICATIONS works!</string>
     <string name="action_test_suite_settings">Test Suite Settings</string>
+    <string name="action_test_preparation">Put required resources</string>
 
 </resources>
