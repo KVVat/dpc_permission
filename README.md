@@ -1,4 +1,14 @@
-## DPC Permissions tests
+## Permissions tester
+
+The tool is for checking android os's permissions by vendors/labs.
+Based on the permission tester tool below, we've added some improvements and modern framework to it.
+
+https://github.com/android/security-certification-resources/tree/master/niap-cc/Permissions
+
+This new framework was starting to develop the tester for DPC related permissions.
+The tool still keep that feature, and also able to run thousands of test cases for os permissions.
+
+## DPC Permissions tester
 
 The tool is for checking android's dpc related permission which has 'MANAGE_DEVICE_POLICY_' prefixes.
 These permissions are related to DPC app, so this test apk is working as a Device policy controller.
