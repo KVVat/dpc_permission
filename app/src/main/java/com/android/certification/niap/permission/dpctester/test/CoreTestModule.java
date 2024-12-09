@@ -28,12 +28,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.provider.CallLog;
 import android.provider.VoicemailContract;
 import android.telecom.TelecomManager;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
@@ -61,9 +63,13 @@ import java.util.function.Consumer;
 public class CoreTestModule extends SignaturePermissionTestModuleBase {
 
     //Test Modules
-    SignatureTestModule signatureTestModule;// = new SignatureTestModule(mActivity);
-    SignatureTestModuleQ signatureTestModuleQ;// = new SignatureTestModule(mActivity);
-    SignatureTestModuleR signatureTestModuleR;// = new SignatureTestModule(mActivity);
+    SignatureTestModule signatureTestModule;
+    SignatureTestModuleQ signatureTestModuleQ;
+    SignatureTestModuleR signatureTestModuleR;
+    SignatureTestModuleS signatureTestModuleS;
+    SignatureTestModuleU signatureTestModuleU;
+    SignatureTestModuleV signatureTestModuleV;
+
     SignatureTestModuleBinder signatureTestModuleBinder;// = new SignatureTestModule(mActivity);
 
     RuntimeTestModule   runtimeTestModule;// = new SignatureTestModuleR(mActivity);
@@ -74,6 +80,10 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         signatureTestModule = new SignatureTestModule(activity);
         signatureTestModuleQ  = new SignatureTestModuleQ(activity);
         signatureTestModuleR  = new SignatureTestModuleR(activity);
+        signatureTestModuleS  = new SignatureTestModuleS(activity);
+        signatureTestModuleU  = new SignatureTestModuleU(activity);
+        signatureTestModuleV  = new SignatureTestModuleV(activity);
+
         signatureTestModuleBinder  = new SignatureTestModuleBinder(activity);
 
         runtimeTestModule   = new RuntimeTestModule(activity);
@@ -122,9 +132,14 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     public void testRecordAudio() {
         runtimeTestModule.testRecordAudio();
     }
-    @PermissionTest(permission="BIND_SOUND_TRIGGER_DETECTION_SERVICE")
-    public void testBindSoundTriggerDetectionService(){
-        runBindRunnable("BIND_SOUND_TRIGGER_DETECTION_SERVICE");
+//    @PermissionTest(permission="BIND_SOUND_TRIGGER_DETECTION_SERVICE")
+//    public void testBindSoundTriggerDetectionService(){
+//        runBindRunnable("BIND_SOUND_TRIGGER_DETECTION_SERVICE");
+//    }
+
+    @PermissionTest(permission="MODIFY_AUDIO_SETTINGS_PRIVILEGED", sdkMin=34)
+    public void testModifyAudioSettingsPrivileged(){
+        signatureTestModuleU.testModifyAudioSettingsPrivileged();
     }
 
     //3. Location / GPS
@@ -222,15 +237,21 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         runtimeTestModule.testSendSms();
     }
 
-    @PermissionTest(permission="BIND_CARRIER_MESSAGING_SERVICE")
-    public void testBindCarrierMessagingService(){
-        signatureTestModuleBinder.testBindCarrierMessagingService();
+    @PermissionTest(permission="ACCESS_MESSAGES_ON_ICC", sdkMin=30)
+    public void testAccessMessagesOnIcc(){
+        signatureTestModuleR.testAccessMessagesOnIcc();
     }
 
-    @PermissionTest(permission="BIND_CARRIER_MESSAGING_CLIENT_SERVICE", sdkMin=29)
-    public void testBindCarrierMessagingClientService(){
-        signatureTestModuleBinder.testBindCarrierMessagingClientService();
-    }
+//    @PermissionTest(permission="BIND_CARRIER_MESSAGING_SERVICE")
+//    public void testBindCarrierMessagingService(){
+//        signatureTestModuleBinder.testBindCarrierMessagingService();
+//    }
+
+//    @PermissionTest(permission="BIND_CARRIER_MESSAGING_CLIENT_SERVICE", sdkMin=29)
+//    public void testBindCarrierMessagingClientService(){
+//        signatureTestModuleBinder.testBindCarrierMessagingClientService();
+//    }
+
 
     //10. Telephony - If possible to run without active SIM card, that would be great
     //	Normal: android.permission.MANAGE_OWN_CALLS
@@ -258,10 +279,16 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Cellular system service
     //	Dangerous: Android does not provide any authorization at this level to access the Cellular system service
     //	Platform: android.permission.BIND_TELEPHONY_DATA_SERVICE or android.permission.BIND_TELEPHONY_NETWORK_SERVICE or android.permission.BIND_CELL_BROADCAST_SERVICE
-    @PermissionTest(permission="BIND_TELEPHONY_DATA_SERVICE")
-    public void testBindTelephonyDataService(){
-        runBindRunnable("BIND_TELEPHONY_DATA_SERVICE");
+    //@PermissionTest(permission="BIND_TELEPHONY_DATA_SERVICE")
+    //public void testBindTelephonyDataService(){
+    //    runBindRunnable("BIND_TELEPHONY_DATA_SERVICE");
+    //}
+
+    @PermissionTest(permission="ACCESS_LAST_KNOWN_CELL_ID", sdkMin=35)
+    public void testAccessLastKnownCellId(){
+        signatureTestModuleV.testAccessLastKnownCellId();
     }
+
 
     //12. Bluetooth - There were several changes built into Android 12.  We likely can assume all evaluated devices are now 12+
     //	Normal: android.permission.BLUETOOTH or android.permission.BLUETOOTH_ADMIN
@@ -293,9 +320,14 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     public void testNfc(){
         installTestModule.testNfc();
     }
-    @PermissionTest(permission="BIND_NFC_SERVICE")
-    public void testBindNfcService(){
-        runBindRunnable("BIND_NFC_SERVICE");
+
+    //@PermissionTest(permission="BIND_NFC_SERVICE")
+    //public void testBindNfcService(){
+    //    runBindRunnable("BIND_NFC_SERVICE");
+    //}
+    @PermissionTest(permission="NFC_SET_CONTROLLER_ALWAYS_ON", sdkMin=31)
+    public void testNfcSetControllerAlwaysOn(){
+        signatureTestModuleS.testNfcSetControllerAlwaysOn();
     }
 
     //14. Network Access
