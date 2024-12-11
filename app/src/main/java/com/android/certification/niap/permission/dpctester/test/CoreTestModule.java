@@ -56,7 +56,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * The test case is based on the suggestion from gossamer
+ * The test case is based on the suggestion from
  * lab for picking up core permission test case
  */
 @PermissionTestModule(name="Core Permission Test Cases",label = "Run Core Tests")
