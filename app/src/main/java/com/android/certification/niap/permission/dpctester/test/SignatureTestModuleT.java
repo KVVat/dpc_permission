@@ -143,7 +143,8 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 				"getSsidsAllowlist");
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+	@SuppressLint("MissingPermission")
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @PermissionTest(permission="MANAGE_WIFI_INTERFACES", sdkMin=33)
 	public void testManageWifiInterfaces(){
 		systemService(WifiManager.class).reportCreateInterfaceImpact(WifiManager.WIFI_INTERFACE_TYPE_STA,

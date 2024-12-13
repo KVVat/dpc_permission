@@ -406,6 +406,7 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		        new String[]{MediaStore.Images.Media.DESCRIPTION,
 		                MediaStore.Images.Media._ID}, selection, null, null);
 		if (cursor == null) {
+			//logger.system("cursor media location");
 		    throw new UnexpectedTestFailureException(
 		            "Unable to obtain an image to test ACCESS_MEDIA_LOCATION");
 		}
@@ -430,9 +431,11 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		        ExifInterface exif = new ExifInterface(inputStream);
 		        float[] latLong = new float[2];
 		        exif.getLatLong(latLong);
-		        // Not all images will have location data, ensure all images are
+
+				// Not all images will have location data, ensure all images are
 		        // tested before reporting an error.
 		        if (!(latLong[0] == 0.0f && latLong[1] == 0.0f)) {
+					//logger.system("passed!!");
 		            return;
 		        }
 		    } catch (IOException e) {

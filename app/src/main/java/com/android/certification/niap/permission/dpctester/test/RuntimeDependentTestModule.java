@@ -108,7 +108,7 @@ public class RuntimeDependentTestModule extends PermissionTestModuleBase {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            int[] grantResults) {
-        logger.system("into here!"+requestCode);
+        logger.system("onRequestPermissionResult event caught:"+requestCode);
         boolean permissionGranted = true;
         for (int grantResult : grantResults) {
             if (grantResult != PackageManager.PERMISSION_GRANTED) {

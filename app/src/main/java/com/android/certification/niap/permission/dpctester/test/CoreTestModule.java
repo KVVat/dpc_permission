@@ -10,6 +10,7 @@ import static android.Manifest.permission.BLUETOOTH_ADVERTISE;
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_PRIVILEGED;
 import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.MANAGE_OWN_CALLS;
 import static android.Manifest.permission.NFC;
 import static android.Manifest.permission.READ_CALENDAR;
@@ -40,6 +41,7 @@ import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
 import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
@@ -52,7 +54,14 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -69,7 +78,6 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     SignatureTestModuleS signatureTestModuleS;
     SignatureTestModuleU signatureTestModuleU;
     SignatureTestModuleV signatureTestModuleV;
-
     SignatureTestModuleBinder signatureTestModuleBinder;// = new SignatureTestModule(mActivity);
 
     RuntimeTestModule   runtimeTestModule;// = new SignatureTestModuleR(mActivity);
@@ -90,14 +98,90 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         installTestModule   = new InstallTestModule(activity);
     }
     BluetoothAdapter mBluetoothAdapter;
+    CountDownLatch mCountDownLatch  = null;
+
     @NonNull
     @Override
     public PrepareInfo prepare(Consumer<PermissionTestRunner.Result> callback){
+
         try {
             mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
         } catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
+
+        //1.List requested permissions
+        List<PermissionTestRunner.Data> datas =
+                ReflectionTool.Companion.checkPermissionTestMethod(this);
+        Set<String> requested = new HashSet<>();
+        for(PermissionTestRunner.Data d : datas){
+            requested.addAll(Arrays.asList(d.getRequestedPermissions()));
+        }
+        //logger.system("Requesting:"+requested);
+        //2. Check the requested permissions are granted
+        List<String> requestList = new ArrayList<>();
+        for (String permission : requested) {
+            if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                requestList.add(permission);
+            }
+        }
+        if(!requestList.isEmpty()){
+            logger.debug("Requesting Permission:"+requestList.toString());
+            ActivityCompat.requestPermissions(
+                    mActivity, requestList.toArray(new String[]{}),
+                    Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS
+            );
+            mCountDownLatch = new CountDownLatch(1);
+            try {
+                // Wait for the countdown on the latch; this will block the thread attempting to
+                // run the permission test while the user is prompted for consent to the required
+                // permissions.
+                mCountDownLatch.await(10, TimeUnit.SECONDS);
+                // If the user has not granted the required permissions then throw a bypass
+                // exception to notify the user of this requirement.
+                boolean allGranted = true;
+                for (String permission : requested) {
+                    if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                       allGranted=false;
+                    }
+                }
+                if (!allGranted) {
+                    logger.system("Some Runtime Permissions are not granted. Try again and grant all permissions");
+                }
+            } catch (InterruptedException e){
+                throw new BypassTestException("Caught an Interruption");
+            }
+        }
+        //
+
+
         return super.prepare(callback);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           int[] grantResults) {
+        logger.system("onRequestPermissionResult event caught:"+requestCode);
+        boolean permissionGranted = true;
+        for (int grantResult : grantResults) {
+            if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                permissionGranted = false;
+            }
+        }
+        //
+        switch (requestCode) {
+            case Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS:
+                if (!permissionGranted) {
+                    logger.system("Runtime Permission : The required permissions are not granted.");
+                    throw new RuntimeException("The required permissions (" + String.join(", ", permissions)
+                            + ") were not granted");
+                }
+                break;
+            default:
+                throw new RuntimeException("An unexpected request code of " + requestCode + " with permissions "
+                        + String.join(", ", permissions) + " + was received");
+        }
+        mCountDownLatch.countDown();
+    }
+
     private <T> T systemService(Class<T> clazz) {
         return Objects.requireNonNull(getService(clazz), "[npe_system_service]" + clazz.getSimpleName());
     }
@@ -106,7 +190,8 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	 Normal: Android does not provide any authorization at this level to access the Camera system service
     //	 Dangerous: android.permission.CAMERA
     //	 Platform: android.permission.CAPTURE_VIDEO_OUTPUT or android.permission.CAPTURE_SECURE_VIDEO_OUTPUT
-    @PermissionTest(permission=CAMERA)
+    @PermissionTest(permission=CAMERA,
+            requestedPermissions = {"android.permission.CAMERA"})
     public void testCamera(){
         runtimeTestModule.testCamera();
     }
@@ -128,10 +213,12 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     public void testModifyAudioSettings() {
         installTestModule.testModifyAudioSettings();
     }
-    @PermissionTest(permission = "RECORD_AUDIO")
+    @PermissionTest(permission = "RECORD_AUDIO",
+            requestedPermissions = {"android.permission.RECORD_AUDIO"})
     public void testRecordAudio() {
         runtimeTestModule.testRecordAudio();
     }
+
 //    @PermissionTest(permission="BIND_SOUND_TRIGGER_DETECTION_SERVICE")
 //    public void testBindSoundTriggerDetectionService(){
 //        runBindRunnable("BIND_SOUND_TRIGGER_DETECTION_SERVICE");
@@ -146,11 +233,13 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Location / GPS system service
     //	Dangerous: android.permission.ACCESS_FINE_LOCATION or android.permission.ACCESS_COARSE_LOCATION or android.permission.ACCESS_BACKGROUND_LOCATION
     //	Platform: android.permission.CONTROL_LOCATION_UPDATES or android.permission.LOCATION_HARDWARE
-    @PermissionTest(permission=ACCESS_COARSE_LOCATION)
+    @PermissionTest(permission=ACCESS_COARSE_LOCATION,
+            requestedPermissions = {"android.permission.ACCESS_COARSE_LOCATION"})
     public void testAccessCoarseLocation(){
         runtimeTestModule.testAccessCoarseLocation();
     }
-    @PermissionTest(permission=ACCESS_FINE_LOCATION)
+    @PermissionTest(permission=ACCESS_FINE_LOCATION,
+            requestedPermissions = {"android.permission.ACCESS_FINE_LOCATION"})
     public void testAccessFineLocation(){
         runtimeTestModule.testAccessFineLocation();
     }
@@ -163,7 +252,8 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Contacts / Address Book system service
     //	Dangerous: android.permission.READ_CONTACTS
     //	Platform: Android does not provide any authorization at this level to access the Contacts / Address Book system service
-    @PermissionTest(permission=READ_CONTACTS)
+    @PermissionTest(permission=READ_CONTACTS,
+            requestedPermissions = {"android.permission.READ_CONTACTS"})
     public void testReadContacts(){
         runtimeTestModule.testReadContacts();
     }
@@ -171,11 +261,13 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Calendar system service
     //	Dangerous: android.permission.READ/WRITE_CALENDAR
     //	Platform: Android does not provide any authorization at this level to access the Calendar system service
-    @PermissionTest(permission=READ_CALENDAR)
+    @PermissionTest(permission=READ_CALENDAR,
+            requestedPermissions = {"android.permission.READ_CALENDAR"})
     public void testReadCalendar(){
         runtimeTestModule.testReadCalendar();
     }
-    @PermissionTest(permission=WRITE_CALENDAR)
+    @PermissionTest(permission=WRITE_CALENDAR,
+            requestedPermissions = {"android.permission.WRITE_CALENDAR"})
     public void testWriteCalendar(){
        runtimeTestModule.testWriteCalendar();
     }
@@ -185,11 +277,16 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Platform: android.permission.STORAGE_INTERNAL or android.permission.MANAGE_EXTERNAL_STORAGE or android.permission.ACCESS_CACHE_FILESYSTEM or android.permission.MOUNT_UNMOUNT_FILESYSTEMS
 
     //READ_EXTERNAL_STORAGE is deprecated, READ_LOGS is not working actually.
-    @PermissionTest(permission=ACCESS_MEDIA_LOCATION, sdkMin=29,
-            requestedPermissions = {"android.permission.READ_MEDIA_IMAGES"})
-    public void testAccessMediaLocation(){
-        runtimeTestModule.testAccessMediaLocation();
-    }
+
+    //Access media location can not be test with access_media_image permission
+    //And I think it's not a storage access permission I guess.
+    //As of Android 13, there's no runtime level storage permissions. currently we can apporove it by media type.
+
+    //    @PermissionTest(permission=ACCESS_MEDIA_LOCATION, sdkMin=29,
+    //            requestedPermissions = {"android.permission.ACCESS_MEDIA_LOCATION"})
+    //    public void testAccessMediaLocation(){
+    //        runtimeTestModule.testAccessMediaLocation();
+    //    }
 
     //INTERNAL_DELETE_CACHE_FILES is a signature level permission
     @PermissionTest(permission = "INTERNAL_DELETE_CACHE_FILES")
@@ -201,7 +298,8 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Photos Access system service
     //	Dangerous: android.permission.READ_MEDIA_IMAGES
     //	Platform: Android does not provide any authorization at this level to access the Photos Access system service
-    @PermissionTest(permission=READ_MEDIA_IMAGES, sdkMin=33)
+    @PermissionTest(permission=READ_MEDIA_IMAGES, sdkMin=33,
+            requestedPermissions = {"android.permission.READ_MEDIA_IMAGES"})
     public void testReadMediaImages(){
         runtimeTestModule.testReadMediaImages();
     }
@@ -227,17 +325,19 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //	Normal: Android does not provide any authorization at this level to access the Text Messages system service
     //	Dangerous: android.permission.READ_SMS or android.permission.SEND_SMS
     //	Platform: android.permission.BIND_CARRIER_MESSAGING_SERVICE or android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE
-    @PermissionTest(permission=READ_SMS)
+    @PermissionTest(permission=READ_SMS,
+            requestedPermissions = {"android.permission.READ_SMS"})
     public void testReadSms(){
         runtimeTestModule.testReadSms();
     }
 
-    @PermissionTest(permission=SEND_SMS)
+    @PermissionTest(permission=SEND_SMS,
+            requestedPermissions = {"android.permission.SEND_SMS"})
     public void testSendSms(){
         runtimeTestModule.testSendSms();
     }
 
-    @PermissionTest(permission="ACCESS_MESSAGES_ON_ICC", sdkMin=30)
+    @PermissionTest(permission="ACCESS_MESSAGES_ON_ICC", sdkMin=30,requestedPermissions = "android.permission.RECEIVE_SMS")
     public void testAccessMessagesOnIcc(){
         signatureTestModuleR.testAccessMessagesOnIcc();
     }
@@ -261,17 +361,19 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     public void testManageOwnCalls(){
         installTestModule.testManageOwnCalls();
     }
-    @PermissionTest(permission=ANSWER_PHONE_CALLS)
+    @PermissionTest(permission=ANSWER_PHONE_CALLS,
+            requestedPermissions = {"android.permission.ANSWER_PHONE_CALLS"})
     public void testAnswerPhoneCalls(){
         runtimeTestModule.testAnswerPhoneCalls();
     }
 
-    @PermissionTest(permission="READ_VOICEMAIL")
+    @PermissionTest(permission="com.android.voicemail.permission.READ_VOICEMAIL",requestedPermissions = "android.permission.READ_CALL_LOG")
     public void testReadVoicemail(){
         signatureTestModule.testReadVoicemail();
     }
 
-    @PermissionTest(permission="WRITE_VOICEMAIL")
+    @PermissionTest(permission="com.android.voicemail.permission.WRITE_VOICEMAIL",
+            requestedPermissions = "com.android.voicemail.permission.ADD_VOICEMAIL")
     public void testWriteVoicemail(){
         signatureTestModule.testWriteVoicemail();
     }
@@ -301,7 +403,8 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         installTestModule.testBluetooth();
     }
 
-    @PermissionTest(permission=BLUETOOTH_ADVERTISE, sdkMin=31)
+    @PermissionTest(permission=BLUETOOTH_ADVERTISE, sdkMin=31,
+            requestedPermissions = {"android.permission.BLUETOOTH_ADVERTISE"})
     public void testBluetoothAdvertise(){
         runtimeTestModule.testBluetoothAdvertise();
     }
@@ -335,10 +438,15 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     //
     //	Dangerous: Android does not provide any authorization at this level to access the Network Access system service
     //	Platform: android.permission.NETWORK_AIRPLANE_MODE or android.permission.READ_NETWORK_USAGE_HISTORY or android.permission.MANAGE_NETWORK_POLICY or android.permission.CONFIGURE_WIFI_DISPLAY or android.permission.NETWORK_FACTORY or android.permission.NETWORK_MANAGED_PROVISIONING or android.permission.NETWORK_SCAN or android.permission.NETWORK_SETTINGS or android.permission.NETWORK_STACK or android.permission.NETWORK_STATS_PROVIDER or android.permission.OBSERVE_NETWORK_POLICY or android.permission.OVERRIDE_WIFI_CONFIG or android.permission.WIFI_SET_DEVICE_MOBILITY_STATE or android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE or android.permission.RADIO_SCAN_WITHOUT_LOCAION
-    @PermissionTest(permission=ACCESS_NETWORK_STATE)
+    //@PermissionTest(permission=ACCESS_NETWORK_STATE)
+    //public void testAccessNetworkState(){
+    //    installTestModule.testAccessNetworkState();
+    //
+    @PermissionTest(permission=INTERNET)
     public void testAccessNetworkState(){
-        installTestModule.testAccessNetworkState();
+        installTestModule.testInternet();
     }
+
     @PermissionTest(permission="NETWORK_AIRPLANE_MODE", sdkMin=30)
     public void testNetworkAirplaneMode(){
         signatureTestModuleR.testNetworkAirplaneMode();
