@@ -77,6 +77,7 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     SignatureTestModuleQ signatureTestModuleQ;
     SignatureTestModuleR signatureTestModuleR;
     SignatureTestModuleS signatureTestModuleS;
+    SignatureTestModuleT signatureTestModuleT;
     SignatureTestModuleU signatureTestModuleU;
     SignatureTestModuleV signatureTestModuleV;
     SignatureTestModuleBinder signatureTestModuleBinder;// = new SignatureTestModule(mActivity);
@@ -90,6 +91,7 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         signatureTestModuleQ  = new SignatureTestModuleQ(activity);
         signatureTestModuleR  = new SignatureTestModuleR(activity);
         signatureTestModuleS  = new SignatureTestModuleS(activity);
+        signatureTestModuleT  = new SignatureTestModuleT(activity);
         signatureTestModuleU  = new SignatureTestModuleU(activity);
         signatureTestModuleV  = new SignatureTestModuleV(activity);
 
@@ -248,6 +250,10 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     @PermissionTest(permission = "CONTROL_LOCATION_UPDATES")
     public void testControlLocationUpdates() {
         signatureTestModule.testControlLocationUpdates();
+    }
+    @PermissionTest(permission = "LOCATION_HARDWARE")
+    public void testLocationHardware() {
+        signatureTestModuleT.testLocationHardware();
     }
 
     //4. Contacts / Address Book
