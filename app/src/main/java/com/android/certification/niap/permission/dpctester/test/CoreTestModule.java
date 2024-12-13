@@ -43,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
+import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.common.Constants;
 import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
@@ -107,47 +108,48 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         try {
             mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
         } catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
-
-        //1.List requested permissions
-        List<PermissionTestRunner.Data> datas =
-                ReflectionTool.Companion.checkPermissionTestMethod(this);
-        Set<String> requested = new HashSet<>();
-        for(PermissionTestRunner.Data d : datas){
-            requested.addAll(Arrays.asList(d.getRequestedPermissions()));
-        }
-        //logger.system("Requesting:"+requested);
-        //2. Check the requested permissions are granted
-        List<String> requestList = new ArrayList<>();
-        for (String permission : requested) {
-            if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                requestList.add(permission);
+        if(!mContext.getResources().getBoolean(R.bool.inverse_test_result)) {
+            //1.List requested permissions
+            List<PermissionTestRunner.Data> datas =
+                    ReflectionTool.Companion.checkPermissionTestMethod(this);
+            Set<String> requested = new HashSet<>();
+            for (PermissionTestRunner.Data d : datas) {
+                requested.addAll(Arrays.asList(d.getRequestedPermissions()));
             }
-        }
-        if(!requestList.isEmpty()){
-            logger.debug("Requesting Permission:"+requestList.toString());
-            ActivityCompat.requestPermissions(
-                    mActivity, requestList.toArray(new String[]{}),
-                    Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS
-            );
-            mCountDownLatch = new CountDownLatch(1);
-            try {
-                // Wait for the countdown on the latch; this will block the thread attempting to
-                // run the permission test while the user is prompted for consent to the required
-                // permissions.
-                mCountDownLatch.await(10, TimeUnit.SECONDS);
-                // If the user has not granted the required permissions then throw a bypass
-                // exception to notify the user of this requirement.
-                boolean allGranted = true;
-                for (String permission : requested) {
-                    if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                       allGranted=false;
+            //logger.system("Requesting:"+requested);
+            //2. Check the requested permissions are granted
+            List<String> requestList = new ArrayList<>();
+            for (String permission : requested) {
+                if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                    requestList.add(permission);
+                }
+            }
+            if (!requestList.isEmpty()) {
+                logger.debug("Requesting Permission:" + requestList.toString());
+                ActivityCompat.requestPermissions(
+                        mActivity, requestList.toArray(new String[]{}),
+                        Constants.PERMISSION_CODE_RUNTIME_DEPENDENT_PERMISSIONS
+                );
+                mCountDownLatch = new CountDownLatch(1);
+                try {
+                    // Wait for the countdown on the latch; this will block the thread attempting to
+                    // run the permission test while the user is prompted for consent to the required
+                    // permissions.
+                    mCountDownLatch.await(10, TimeUnit.SECONDS);
+                    // If the user has not granted the required permissions then throw a bypass
+                    // exception to notify the user of this requirement.
+                    boolean allGranted = true;
+                    for (String permission : requested) {
+                        if (mActivity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                            allGranted = false;
+                        }
                     }
+                    if (!allGranted) {
+                        logger.system("Some Runtime Permissions are not granted. Try again and grant all permissions");
+                    }
+                } catch (InterruptedException e) {
+                    throw new BypassTestException("Caught an Interruption");
                 }
-                if (!allGranted) {
-                    logger.system("Some Runtime Permissions are not granted. Try again and grant all permissions");
-                }
-            } catch (InterruptedException e){
-                throw new BypassTestException("Caught an Interruption");
             }
         }
         //
