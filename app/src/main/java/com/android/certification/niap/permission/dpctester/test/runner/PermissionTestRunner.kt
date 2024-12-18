@@ -189,6 +189,7 @@ class PermissionTestRunner {
                 apisuccess=false
                 message = if(ex.message != null) ex.message!! else ex.toString()
             }
+
             //StaticLogger.info("2:${testCase.permission}:${granted}/${apisuccess}&&${granted}")
             //healthy case
             if(apisuccess && granted){
@@ -200,7 +201,6 @@ class PermissionTestRunner {
                 }
                 message = "Target permission is granted and api successfully executed";
                 //StaticLogger.info("3:${testCase.permission}:${granted}:${success}")
-
             }
 
             val result = root.resultHook(

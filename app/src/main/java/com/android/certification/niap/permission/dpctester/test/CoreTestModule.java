@@ -419,7 +419,8 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
 
     @PermissionTest(permission=BLUETOOTH_PRIVILEGED, sdkMin=28)
     public void testBluetoothPrivileged(){
-        signatureTestModule.testBluetoothPrivileged();
+        ReflectionUtil.invoke(mBluetoothAdapter,"clearBluetooth");
+        //signatureTestModule.testBluetoothPrivileged();
     }
 
 
