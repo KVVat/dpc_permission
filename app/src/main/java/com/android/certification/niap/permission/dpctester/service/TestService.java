@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.android.certification.niap.permission.dpctester.MainActivity;
 import com.android.certification.niap.permission.dpctester.R;
@@ -94,7 +95,7 @@ public class TestService extends Service {
             sLogger.debug("Caught a SecurityException invoking the test: ", e);
             sLogger.info(permission+ permissionGranted);//, false);
         } catch (Throwable t) {
-            sLogger.error(permission, t);
+            Log.e("TestService>",">"+permission+":"+t.getMessage());
         }
         return Service.START_NOT_STICKY;
     }
