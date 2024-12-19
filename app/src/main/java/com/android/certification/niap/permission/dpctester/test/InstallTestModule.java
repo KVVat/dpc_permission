@@ -809,25 +809,25 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		);
 	}
 
-	@PermissionTest(permission=ACCESS_HIDDEN_PROFILES, sdkMin=34,sdkMax = 34)
-	public void testAccessHiddenProfiles(){
-		//We can't access space setting intent by normal signature as of sdk35.
-		//So we exec same test on signature permission tester. Ignore this result.
-		LauncherApps launcherApps = systemService(LauncherApps.class);
-		// If the caller cannot access hidden profiles the method returns null
-		// see also. areHiddenApisChecksEnabled() in LauncherAppService
-
-        Object intent = null;
-        try {
-            intent = ReflectionUtil.invoke(launcherApps,"getPrivateSpaceSettingsIntent");
-        } catch (ReflectionUtil.ReflectionIsTemporaryException e) {
-            throw new RuntimeException(e);
-        }
-
-        if(intent == null){
-			throw new SecurityException("Caller cannot access hidden profiles");
-		}
-	}
+//	@PermissionTest(permission=ACCESS_HIDDEN_PROFILES, sdkMin=34,sdkMax = 34)
+//	public void testAccessHiddenProfiles(){
+//		//We can't access space setting intent by normal signature as of sdk35.
+//		//So we exec same test on signature permission tester. Ignore this result.
+//		LauncherApps launcherApps = systemService(LauncherApps.class);
+//		// If the caller cannot access hidden profiles the method returns null
+//		// see also. areHiddenApisChecksEnabled() in LauncherAppService
+//
+//        Object intent = null;
+//        try {
+//            intent = ReflectionUtil.invoke(launcherApps,"getPrivateSpaceSettingsIntent");
+//        } catch (ReflectionUtil.ReflectionIsTemporaryException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        if(intent == null){
+//			throw new SecurityException("Caller cannot access hidden profiles");
+//		}
+//	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	//Fore-ground Service Test Cases

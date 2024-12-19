@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.android.certification.niap.permission.dpctester.test.log.StaticLogger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,7 +58,11 @@ public class BinderTransactsDict {
         try {
             AssetManager am = mContext.getResources().getAssets();
             //Change suffix depends on system version
-            InputStream is = am.open("binderdb-35.json");
+            String filename = String.format(Locale.getDefault(),"binderdb-%d.json",
+                    android.os.Build.VERSION.SDK_INT);
+            StaticLogger.debug("Binder Transaction filename:"+filename);
+
+            InputStream is = am.open(filename);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String allText = br.lines().collect(Collectors.joining());
 
