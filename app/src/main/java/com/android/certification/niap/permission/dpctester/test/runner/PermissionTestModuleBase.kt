@@ -88,8 +88,11 @@ open class PermissionTestModuleBase(activity: Activity) {
             info.count_additional_tests = value
         }
 
+    var prefList:MutableList<Pair<String,String> > = mutableListOf();
+
     init {
         testCases = ReflectionTool.checkPermissionTestMethod(this)
+        prefList  = ReflectionTool.checkPermissionTestPref(this)
         logger = LoggerFactory.createActivityLogger(
             title!!,
             activity as ActivityLogger.LogListAdaptable

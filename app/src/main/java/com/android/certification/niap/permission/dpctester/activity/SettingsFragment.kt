@@ -55,8 +55,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     pref1.setDefaultValue(true)
                 }
                 root.addPreference(pref1);
+            } else if(pair.first=="bool") {
+                val pref1 = CheckBoxPreference(c)
+                var values = pair.second.split(":");
+                if(values.size>=2) {
+                    pref1.title = values[0]
+                    pref1.key = values[1]
+                    pref1.isIconSpaceReserved = false
+                    pref1.setDefaultValue(false)
+                }
+                root.addPreference(pref1);
             }
-        }
+            }
+
         return root
     }
 

@@ -29,12 +29,17 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.GpsSatellite;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.os.Build;
 import android.provider.CallLog;
 import android.provider.VoicemailContract;
+import android.service.vr.VrListenerService;
 import android.telecom.TelecomManager;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -42,6 +47,7 @@ import android.telephony.TelephonyManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 
 import com.android.certification.niap.permission.dpctester.R;
 import com.android.certification.niap.permission.dpctester.common.Constants;
@@ -53,6 +59,7 @@ import com.android.certification.niap.permission.dpctester.test.runner.Signature
 import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.PreferenceBool;
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
 import java.util.ArrayList;
@@ -71,6 +78,10 @@ import java.util.function.Consumer;
  */
 @PermissionTestModule(name="Core Permission Test Cases",label = "Run Core Tests")
 public class CoreTestModule extends SignaturePermissionTestModuleBase {
+
+    @PreferenceBool(label="Enable Runtime Confirmation",
+            prflabel = "core_enable_runtime", defaultValue=false)
+    public boolean enableRuntimeConfirmation=false;
 
     //Test Modules
     SignatureTestModule signatureTestModule;
@@ -110,7 +121,12 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
         try {
             mBluetoothAdapter = systemService(BluetoothManager.class).getAdapter();
         } catch (NullPointerException e) { /*Leave bluetoothAdapter as null, if manager isn't available*/ }
-        if(!mContext.getResources().getBoolean(R.bool.inverse_test_result)) {
+
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        enableRuntimeConfirmation = sp.getBoolean("core_enable_runtime",false);
+
+        if(!mContext.getResources().getBoolean(R.bool.inverse_test_result) && enableRuntimeConfirmation) {
             //1.List requested permissions
             List<PermissionTestRunner.Data> datas =
                     ReflectionTool.Companion.checkPermissionTestMethod(this);
@@ -187,7 +203,11 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     }
 
     private <T> T systemService(Class<T> clazz) {
-        return Objects.requireNonNull(getService(clazz), "[npe_system_service]" + clazz.getSimpleName());
+        T service = getService(clazz);
+        if(service == null){
+            throw new NullPointerException("[npe_system_service]" + clazz.getSimpleName());
+        }
+        return service;
     }
 
     //1. Camera
@@ -203,6 +223,7 @@ public class CoreTestModule extends SignaturePermissionTestModuleBase {
     public void testCaptureSecureVideoOutput() {
         signatureTestModule.testCaptureSecureVideoOutput();
     }
+
 
     @PermissionTest(permission = "CAPTURE_VIDEO_OUTPUT")
     public void testCaptureVideoOutput() {

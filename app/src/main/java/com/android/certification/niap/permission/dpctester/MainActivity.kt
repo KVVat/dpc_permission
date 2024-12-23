@@ -353,8 +353,13 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 val l = ArrayList<Pair<String,String>>() // we can't use kotlin map for this purpose
                 //TODO: generate preference data from actual data
                 for(s in suites){
+                    //s.add()
                     if(s is SingleModuleTestSuite){
                         l.add(Pair("suite",s.key!!))
+                        s.modules.get(0).prefList.forEach{
+                            l.add(it)
+                        }
+
                     } else if(s is SignatureTestSuite){
                         l.add(Pair("suite",s.key!!))
                         for(mm in s.modules){
@@ -370,7 +375,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                 //port from companion app
                 prepareLocusId()
                 prepareDropBoxItem()
-                prepareLocalMedias()
+                //prepareLocalMedias()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
@@ -449,6 +454,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             logger.system("Set Locus Context for Test")
         }
     }
+    /*
     private fun prepareLocalMedias():Boolean {
 
         // Scoped storage and the ACCESS_MEDIA_LOCATION permission were introduced in Android 10.
@@ -575,7 +581,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
             contentResolver.update(videoUri!!, videoContentValues, null, null)
         }
         return result
-    }
+    }*/
 
 
     /********************************************

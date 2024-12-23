@@ -116,16 +116,20 @@ class PermissionTestRunner {
 
 
                 } catch (ex: ReflectionUtil.ReflectionIsTemporaryException) {
+                    ex.printStackTrace();
+
                     if (ex.cause is InvocationTargetException) {
                         val exi = ex.cause
                         throwable = exi?.cause
                     } else {
                         throwable = ex.cause
                     }
-                    //StaticLogger.info(">>>"+throwable?.message)
+
+                    //StaticLogger.info(">>"+testCase.permission+">>>"+throwable?.message)
                     throw throwable!! //rethrow
                 }
             } catch(ex:NullPointerException){
+
                 //Is intended null pointer exception? (missing system service=>bypass)
                 if(ex.message !=null && ex.message!!.startsWith("[npe_system_service]")) {
                     throwable = ex

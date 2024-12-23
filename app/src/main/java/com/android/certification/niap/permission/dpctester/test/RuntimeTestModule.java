@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -607,10 +608,24 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		if (cursor == null) {
 		    throw new UnexpectedTestFailureException(
 		            "Unable to obtain an image to test READ_MEDIA_IMAGES");
-		} else if (!cursor.moveToFirst()) {
+		}
+		if (!cursor.moveToFirst()) {
 		    throw new SecurityException("Failed to load media files:READ_MEDIA_IMAGES." +
 		            "Pleaes ensure to execute the companion app before testing.");
 		}
+		int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+		Long id = cursor.getLong(fieldIndex);
+		//String path = cursor.get(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+
+		Uri bmpUri = ContentUris.withAppendedId(
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+        try {
+            Bitmap bmp = MediaStore.Images.Media
+                    .getBitmap(mContentResolver,bmpUri);// bmpUri);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        cursor.close();
     }
  
     @PermissionTest(permission=READ_MEDIA_VIDEO, sdkMin=33)

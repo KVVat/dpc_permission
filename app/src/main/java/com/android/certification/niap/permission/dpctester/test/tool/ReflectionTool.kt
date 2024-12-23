@@ -16,6 +16,7 @@ package com.android.certification.niap.permission.dpctester.test.tool
  */
 import android.util.Log
 import com.android.certification.niap.permission.dpctester.test.runner.PermissionTestRunner
+import com.google.common.base.CaseFormat
 import java.util.stream.Collectors
 
 class ReflectionTool {
@@ -131,6 +132,24 @@ class ReflectionTool {
                     filter!!
                 )
             }.collect(Collectors.toList())
+        }
+
+        fun checkPermissionTestPref(target: Any): MutableList<Pair<String,String> >{
+            val a: MutableList<Pair<String,String> > = ArrayList()
+            val clazz: Class<*> = target.javaClass
+            val fields = clazz.declaredFields
+            //Take all methods that has PermissionTest annotation
+            for (m in fields) {
+                val ann = m.getAnnotation(PreferenceBool::class.java)
+                if (ann == null) continue;
+                //val className = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, javaClass.simpleName)
+                val container:Pair<String,String> = Pair("bool", ann.label+":"+ann.prflabel);
+                 //   PermissionTestRunner.Data(ann.permission, ann.sdkMin, ann.sdkMax,
+                 //  m.name,ann.requiredPermissions,ann.requestedPermissions,ann.developmentProtection);//ann.requiredPermissions,ann.requiredServices)
+                 //Log.d("TAG",container.toString())
+                a.add(container)
+            }
+            return a;
         }
 
         fun checkPermissionTestMethod(target: Any): MutableList<PermissionTestRunner.Data> {

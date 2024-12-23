@@ -15,6 +15,12 @@ annotation class PermissionTestModule(
     val sync:Boolean=false,
 )
 
+annotation class PreferenceBool(
+    val label:String="module label",
+    val prflabel:String="prflabel",
+    val defaultValue:Boolean,
+)
+
 annotation class PermissionTest(
     val permission:String="title",
     val sdkMin:Int=0,
