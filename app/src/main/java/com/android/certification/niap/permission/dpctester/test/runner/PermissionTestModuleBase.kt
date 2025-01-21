@@ -79,6 +79,11 @@ open class PermissionTestModuleBase(activity: Activity) {
             Constants.PLATFORM_PACKAGE,
             mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509
         );
+    // An app should only have access to the GMS signature permissions if it is signed with the
+    // GMS signing key or the platform signing key.
+    val gmsSignatureMatch:Boolean =
+        mPackageManager.hasSigningCertificate(Constants.GMS_PACKAGE_NAME,
+        mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509)
 
     @JvmField
     val info = Info();

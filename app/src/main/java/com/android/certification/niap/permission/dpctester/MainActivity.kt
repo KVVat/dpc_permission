@@ -236,8 +236,8 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
                                 ": $res{" +
                                 "permission_granted:${result.granted}" +
                                 ",api_successful:${result.api_successful}" +
-                                ",signature_match:false" +
-                                ",platform_signature_match:false" +
+                                ",platform_signature_match:${result.platform_signature_match}" +
+                                ",gms_signature_match:${result.gms_signature_match}" +
                                 ",message='${result.message}'"+
                                 "}"
 

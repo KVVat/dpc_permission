@@ -192,8 +192,7 @@ public class GmsTestModule extends PermissionTestModuleBase {
 
 		// An app should only have access to the GMS signature permissions if it is signed with the
 		// GMS signing key or the platform signing key.
-		gmsSignatureMatch = mPackageManager.hasSigningCertificate(Constants.GMS_PACKAGE_NAME,
-				mAppSignature.toByteArray(), PackageManager.CERT_INPUT_RAW_X509);
+
 
 		//evaluate gms permissions separately
 		List<String> gmsDeclaredPermissions = getAllGmsDeclaredSignaturePermissions();

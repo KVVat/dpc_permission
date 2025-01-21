@@ -217,7 +217,7 @@ class PermissionTestRunner {
                             == PackageManager.PERMISSION_GRANTED,
                     api_successful=apisuccess,
                     platform_signature_match = root.isPlatformSignatureMatch,
-                    gms_signature_match = false,
+                    gms_signature_match = root.gmsSignatureMatch,
                     developmentProtection = testCase.developmentProtection,
                     isInverse = is_inverse,
                     message=message)

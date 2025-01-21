@@ -611,7 +611,8 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 		}
 		if (!cursor.moveToFirst()) {
 		    throw new SecurityException("Failed to load media files:READ_MEDIA_IMAGES." +
-		            "Pleaes ensure to execute the companion app before testing.");
+		            "If the permission is allowed, " +
+					"Please ensure to execute the companion app before testing.");
 		}
 		int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
 		Long id = cursor.getLong(fieldIndex);
