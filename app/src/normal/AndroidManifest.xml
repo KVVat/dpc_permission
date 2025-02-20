@@ -1148,6 +1148,67 @@
     <uses-permission android:name="android.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE" />
     <uses-permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER" />
 
+    <!-- New install permissions as of Android 36 -->
+    <uses-permission android:name="android.permission.APPLY_PICTURE_PROFILE" />
+    <uses-permission android:name="android.permission.READ_COLOR_ZONES" />
+    <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
+    <uses-permission android:name="android.permission.TV_IMPLICIT_ENTER_PIP" />
+    <uses-permission android:name="android.permission.XR_TRACKING_IN_BACKGROUND" />
+    <!-- New runtime permissions as of Android 36 -->
+    <uses-permission android:name="android.permission.RANGING" />
+    <uses-permission android:name="android.permission.EYE_TRACKING_COARSE" />
+    <uses-permission android:name="android.permission.FACE_TRACKING" />
+    <uses-permission android:name="android.permission.HAND_TRACKING" />
+    <uses-permission android:name="android.permission.SCENE_UNDERSTANDING_COARSE" />
+    <uses-permission android:name="android.permission.EYE_TRACKING_FINE" />
+    <uses-permission android:name="android.permission.HEAD_TRACKING" />
+    <uses-permission android:name="android.permission.SCENE_UNDERSTANDING_FINE" />
+    <!-- New internal permissions as of Android 36 -->
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS" />
+    <uses-permission android:name="android.permission.ADD_MIRROR_DISPLAY" />
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS" />
+    <!-- New signature permissions as of Android 36 -->
+    <uses-permission android:name="android.permission.OBSERVE_PICTURE_PROFILES" />
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE" />
+    <uses-permission android:name="android.permission.THREAD_NETWORK_TESTING" />
+    <uses-permission android:name="android.permission.REMOVE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.COPY_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS" />
+    <uses-permission android:name="android.permission.START_VIBRATION_SESSIONS" />
+    <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE" />
+    <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
+    <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING" />
+    <uses-permission android:name="android.permission.BIND_RKP_SERVICE" />
+    <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
+    <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
+    <uses-permission android:name="android.permission.EYE_CALIBRATION" />
+    <uses-permission android:name="android.permission.FACE_TRACKING_CALIBRATION" />
+    <uses-permission android:name="android.permission.IMPORT_XR_ANCHOR" />
+    <uses-permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT" />
+    <uses-permission android:name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_POWER_MONITORS" />
+    <uses-permission android:name="android.permission.READ_SUBSCRIPTION_PLANS" />
+    <uses-permission android:name="android.permission.BIND_DEPENDENCY_INSTALLER" />
+    <uses-permission android:name="android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES" />
+    <uses-permission android:name="android.permission.BIND_APP_FUNCTION_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_KEY_GESTURES" />
+    <uses-permission android:name="android.permission.LISTEN_FOR_KEY_ACTIVITY" />
+    <uses-permission android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS" />
+    <uses-permission android:name="android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS" />
+    <uses-permission android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT" />
+    <uses-permission android:name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
+    <uses-permission android:name="android.permission.ENTER_TRADE_IN_MODE" />
+    <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
+    <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
+    <uses-permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE" />
+    <uses-permission android:name="android.permission.SINGLE_USER_TIS_ACCESS" />
+    <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE" />
+
+
     <!-- TODO: Additional signature permissions that are declared by the packages preinstalled on
          the device under test should be added here. -->
 

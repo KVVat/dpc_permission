@@ -1,6 +1,6 @@
 [versions]
 activityKtx = "1.9.2"
-agp = "8.5.0-alpha08"
+agp = "8.8.0"
 fragment = "1.8.4"
 groovyJson = "3.0.17"
 guava = "32.1.2-jre"

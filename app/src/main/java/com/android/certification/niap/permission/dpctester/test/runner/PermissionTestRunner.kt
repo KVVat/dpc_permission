@@ -24,6 +24,7 @@ import com.android.certification.niap.permission.dpctester.test.exception.Bypass
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException
 import com.android.certification.niap.permission.dpctester.test.log.StaticLogger
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool
+import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils
 import kotlinx.coroutines.sync.Mutex
 import java.lang.reflect.InvocationTargetException
 import java.util.function.Consumer
@@ -99,14 +100,20 @@ class PermissionTestRunner {
 
                     // Check Required Services : *difficult to check*
                     // Check Android Version
-                    if(Build.VERSION.SDK_INT<testCase.sdkMin){
+
+                    var SDK_INT = Build.VERSION.SDK_INT
+                    if(TesterUtils.isAtLeastBaklava()){
+                        SDK_INT = 36
+                    }
+
+                    if(SDK_INT<testCase.sdkMin){
                         throw BypassTestException(
-                            "${testCase.permission} : SDK${Build.VERSION.SDK_INT} is not supported to run.(SDK MIN:${testCase.sdkMin})"
+                            "${testCase.permission} : SDK${SDK_INT} is not supported to run.(SDK MIN:${testCase.sdkMin})"
                         )
                     }
-                    if(Build.VERSION.SDK_INT>testCase.sdkMax){
+                    if(SDK_INT>testCase.sdkMax){
                         throw BypassTestException(
-                            "${testCase.permission} : SDK${Build.VERSION.SDK_INT} is not supported to run.(SDK MAX:${testCase.sdkMax})"
+                            "${testCase.permission} : SDK${SDK_INT} is not supported to run.(SDK MAX:${testCase.sdkMax})"
                         )
                     }
 

@@ -510,4 +510,19 @@ public class InternalTestModule extends PermissionTestModuleBase {
 		        "isDevicePotentiallyStolen",mContext.getPackageName());
 		
     }
+
+	//**** method template for target internal SDK36
+	@PermissionTest(permission="MANAGE_DEVICE_POLICY_APP_FUNCTIONS",sdkMin=36)
+	public void testAppFunctions(){
+		logger.debug("The test for android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS is not implemented yet");
+	}
+	@PermissionTest(permission="ADD_MIRROR_DISPLAY",sdkMin=36)
+	public void testAddMirrorDisplay(){
+		logger.debug("The test for android.permission.ADD_MIRROR_DISPLAY is not implemented yet");
+	}
+	@PermissionTest(permission="EXECUTE_APP_FUNCTIONS",sdkMin=36)
+	public void testExecuteAppFunctions(){
+		logger.debug("The test for android.permission.EXECUTE_APP_FUNCTIONS is not implemented yet");
+	}
+
 }

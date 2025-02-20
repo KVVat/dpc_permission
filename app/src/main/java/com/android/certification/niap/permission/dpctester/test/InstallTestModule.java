@@ -168,7 +168,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		systemService(WifiManager.class).getConfiguredNetworks();
 	}
 
-	@SuppressLint("HardwareIds")
+	@SuppressLint({"HardwareIds", "MissingPermission"})
     @PermissionTest(permission=BLUETOOTH, sdkMin=28, sdkMax=30 ,requiredPermissions = {BLUETOOTH_CONNECT})
 	public void testBluetooth(){
 		if (mBluetoothAdapter == null) {
@@ -328,7 +328,7 @@ public class InstallTestModule extends PermissionTestModuleBase {
 		// NFC     : could not retrieve NFC service
 		NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
 		if (adapter == null) {
-			throw new BypassTestException("An NFC adapter is not available to run this test");
+			throw new BypassTestException("A NFC adapter is not available to run this test");
 		}
 		//:TODO setNdefPushMesssage is obsolated?
 		//adapter.setNdefPushMessage(null, mActivity);
@@ -994,6 +994,30 @@ public class InstallTestModule extends PermissionTestModuleBase {
 			throw t;
 		}
 	}
+
+	//**** method template for target install SDK36
+	@PermissionTest(permission="APPLY_PICTURE_PROFILE",sdkMin=36)
+	public void testApplyPictureProfile(){
+		logger.debug("The test for android.permission.APPLY_PICTURE_PROFILE is not implemented yet");
+	}
+	@PermissionTest(permission="READ_COLOR_ZONES",sdkMin=36)
+	public void testReadColorZones(){
+		logger.debug("The test for android.permission.READ_COLOR_ZONES is not implemented yet");
+	}
+	@PermissionTest(permission="QUERY_ADVANCED_PROTECTION_MODE",sdkMin=36)
+	public void testQueryAdvancedProtectionMode(){
+		logger.debug("The test for android.permission.QUERY_ADVANCED_PROTECTION_MODE is not implemented yet");
+	}
+	@PermissionTest(permission="TV_IMPLICIT_ENTER_PIP",sdkMin=36)
+	public void testTvImplicitEnterPip(){
+		logger.debug("The test for android.permission.TV_IMPLICIT_ENTER_PIP is not implemented yet");
+	}
+	@PermissionTest(permission="XR_TRACKING_IN_BACKGROUND",sdkMin=36)
+	public void testXrTrackingInBackground(){
+		logger.debug("The test for android.permission.XR_TRACKING_IN_BACKGROUND is not implemented yet");
+	}
+
+
 	@RequiresApi(api = Build.VERSION_CODES.Q)
     public void tryBindingForegroundService(Intent serviceIntent){
 		FgServiceConnection serviceConnection = new FgServiceConnection();

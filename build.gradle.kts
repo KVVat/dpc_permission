@@ -46,13 +46,16 @@ fun jsonToPlaceHolder(json:JsonElement,version:String,target:String){
         if(category.equals(version)){
             list.jsonObject.toMutableMap().forEach { (item, list) ->
                 if(item.equals(target)){
+                    println("//**** method template for target $target SDK$version")
                     (list as JsonArray).forEach {
-                        var permission = it.toString().replace("\"","")
-                        var process = permission.replace("MANAGE_DEVICE_POLICY_","")
+                        val permission = it.toString().replace("\"","")
+                        val parts = permission.split(".");
+                        val permissionShort = parts.last()
+                        val process = permissionShort.replace("MANAGE_DEVICE_POLICY_","")
                         println("""
-                            @PermissionTest($permission,34,35)
-                            fun test${process.caseFormat(UPPER_UNDERSCORE,UPPER_CAMEL)}(){
-                                println("The test for $permission is not implemented yet")
+                            @PermissionTest(permission="$permissionShort",sdkMin=$version)
+                            public void test${process.caseFormat(UPPER_UNDERSCORE,UPPER_CAMEL)}(){
+                                logger.debug("The test for $permission is not implemented yet");
                             }
                         """.trimIndent())
                     }
@@ -61,11 +64,58 @@ fun jsonToPlaceHolder(json:JsonElement,version:String,target:String){
         }
     }
 }
-tasks.register("testCamel"){
+
+fun jsonToManifestTags(json:JsonElement,version:String,target:String){
+    json.jsonObject.toMutableMap().forEach { (category, list) ->
+        if(category.equals(version)){
+            list.jsonObject.toMutableMap().forEach { (item, list) ->
+                if(item.equals(target)){
+                    println("<!-- New $target permissions as of Android $version -->")
+                    (list as JsonArray).forEach {
+                        val permission = it.toString().replace("\"","")
+                        val parts = permission.split(".");
+                        val permissionShort = parts.last()
+                        //val process = permissionShort.replace("MANAGE_DEVICE_POLICY_","")
+                        println("<uses-permission android:name=\"$permission\" />".trimIndent())
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+//./gradlew -Pversion=36 methodTemplate
+tasks.register("methodTemplate"){
     doLast {
         //println( "HELLO_WORLD".caseFormat(UPPER_UNDERSCORE,UPPER_CAMEL))
-        val input = File("codegen-permissions.json").readText()
+        val input = File("permissions.json").readText()
         val json = Json.parseToJsonElement(input)
-        jsonToPlaceHolder(json,"U","internal")
+        println(version)
+
+        jsonToPlaceHolder(json,"36","install")
+        jsonToPlaceHolder(json,"36","runtime")
+        jsonToPlaceHolder(json,"36","internal")
+        jsonToPlaceHolder(json,"36","signature")
+
+        jsonToManifestTags(json,"36","install")
+        jsonToManifestTags(json,"36","runtime")
+        jsonToManifestTags(json,"36","internal")
+        jsonToManifestTags(json,"36","signature")
+
+    }
+}
+
+tasks.register("manifestTemplate"){
+    doLast {
+        //println( "HELLO_WORLD".caseFormat(UPPER_UNDERSCORE,UPPER_CAMEL))
+        val input = File("permissions.json").readText()
+        val json = Json.parseToJsonElement(input)
+
+        jsonToManifestTags(json,"36","install")
+        jsonToManifestTags(json,"36","runtime")
+        jsonToManifestTags(json,"36","internal")
+        jsonToManifestTags(json,"36","signature")
+
     }
 }

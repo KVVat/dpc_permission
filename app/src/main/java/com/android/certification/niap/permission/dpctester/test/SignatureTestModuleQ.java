@@ -86,6 +86,7 @@ public class SignatureTestModuleQ extends SignaturePermissionTestModuleBase {
 		// installExistingPackageAsUser - checks both INSTALL_PACKAGES and
 		// INSTALL_EXISTING_PACKAGES, but SecurityException only reports
 		// INSTALL_PACKAGES.
+		// deprecated since api 36?
 		BinderTransaction.getInstance().invoke(Transacts.PACKAGE_SERVICE, Transacts.PACKAGE_DESCRIPTOR,
 				"installExistingPackageAsUser", Constants.COMPANION_PACKAGE,
 				appUid, 0, 0);

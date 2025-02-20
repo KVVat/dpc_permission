@@ -17,6 +17,7 @@ package com.android.certification.niap.permission.dpctester.test.suite
 import android.app.Activity
 import com.android.certification.niap.permission.dpctester.test.RuntimeTestModule
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModule
+import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleBaklava
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleBinder
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleP
 import com.android.certification.niap.permission.dpctester.test.SignatureTestModuleQ
@@ -42,6 +43,7 @@ class SignatureTestSuite(activity: Activity): PermissionTestSuiteBase(
     SignatureTestModuleT(activity),
     SignatureTestModuleU(activity),
     SignatureTestModuleV(activity),
+    SignatureTestModuleBaklava(activity),
     SignatureTestModuleBinder(activity)
         )
 ){
