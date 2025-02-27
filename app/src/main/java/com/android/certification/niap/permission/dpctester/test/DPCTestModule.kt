@@ -553,6 +553,11 @@ class DPCTestModule(val ctx: Activity): PermissionTestModuleBase(ctx){
         checkUserRestriction(UserManager.DISALLOW_THREAD_NETWORK);
     }*/
 
+    @PermissionTest("MANAGE_DEVICE_POLICY_APP_FUNCTIONS",36)
+    fun testAppFunctions(){
+        dpm.setAppFunctionPolicy(0)//not controlled
+    }
+
     ////////////////////////////////////////////////////////////
     // Local Scope Tools Section
     private fun clearUserRestriction(aRestriction:String){

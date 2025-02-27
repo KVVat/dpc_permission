@@ -49,6 +49,8 @@ import android.hardware.ConsumerIrManager;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
+import android.media.quality.AmbientBacklightEvent;
+import android.media.quality.MediaQualityManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
@@ -62,6 +64,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.security.advancedprotection.AdvancedProtectionManager;
 import android.service.notification.StatusBarNotification;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -998,22 +1001,51 @@ public class InstallTestModule extends PermissionTestModuleBase {
 	//**** method template for target install SDK36
 	@PermissionTest(permission="APPLY_PICTURE_PROFILE",sdkMin=36)
 	public void testApplyPictureProfile(){
+		//the permission requires android.media.tv.flags.apply_picture_profiles to run
+		//or leanback?
+		if(!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+			throw new BypassTestException(
+					"This permission requires feature "
+							+ PackageManager.FEATURE_LEANBACK);
+		}
 		logger.debug("The test for android.permission.APPLY_PICTURE_PROFILE is not implemented yet");
 	}
+
+	//@RequiresApi(36)
 	@PermissionTest(permission="READ_COLOR_ZONES",sdkMin=36)
 	public void testReadColorZones(){
-		logger.debug("The test for android.permission.READ_COLOR_ZONES is not implemented yet");
+		//For the leanback devices (control backlight of the televison)
+		//if we use phone device MediaQualityManager should be null
+		systemService(MediaQualityManager.class).registerAmbientBacklightCallback(mExecutor,
+				new MediaQualityManager.AmbientBacklightCallback(){
+					@Override
+					public void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent ambientBacklightEvent) {
+						//logger.system("ambient callback"+ambientBacklightEvent.toString());
+					}
+				});
 	}
 	@PermissionTest(permission="QUERY_ADVANCED_PROTECTION_MODE",sdkMin=36)
 	public void testQueryAdvancedProtectionMode(){
-		logger.debug("The test for android.permission.QUERY_ADVANCED_PROTECTION_MODE is not implemented yet");
+		systemService(AdvancedProtectionManager.class).isAdvancedProtectionEnabled();
 	}
 	@PermissionTest(permission="TV_IMPLICIT_ENTER_PIP",sdkMin=36)
 	public void testTvImplicitEnterPip(){
+		if(!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+			throw new BypassTestException(
+					"This permission requires feature "
+							+ PackageManager.FEATURE_LEANBACK);
+		}
+		//PIP = Picture in Picture, it uses on the leanback devcies
 		logger.debug("The test for android.permission.TV_IMPLICIT_ENTER_PIP is not implemented yet");
 	}
 	@PermissionTest(permission="XR_TRACKING_IN_BACKGROUND",sdkMin=36)
 	public void testXrTrackingInBackground(){
+		//For Android XR Device
+		if(!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)){
+			throw new BypassTestException(
+					"This permission requires feature "
+							+ PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE);
+		}
 		logger.debug("The test for android.permission.XR_TRACKING_IN_BACKGROUND is not implemented yet");
 	}
 

@@ -18,6 +18,7 @@ package com.android.certification.niap.permission.dpctester.test;
 
 
 import android.app.Activity;
+import android.media.quality.MediaQualityManager;
 
 import androidx.annotation.NonNull;
 
@@ -44,34 +45,43 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	}
 	@PermissionTest(permission="MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE",sdkMin=36)
 	public void testManageGlobalPictureQualityService(){
+		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:cts/tests/tests/mediaquality/src/android/media/mediaquality/cts/MediaQualityTest.java;l=97?q=getPictureProfilesByPackage&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+		//getService(MediaQualityManager.class).getPictureProfilesByPackage(
 		logger.debug("The test for android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE is not implemented yet");
 	}
 	@PermissionTest(permission="MANAGE_GLOBAL_SOUND_QUALITY_SERVICE",sdkMin=36)
 	public void testManageGlobalSoundQualityService(){
+		//MediaQualityManager.getSoundProfilePackageNames()
 		logger.debug("The test for android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE is not implemented yet");
-	}
-	@PermissionTest(permission="BIND_POPULATION_DENSITY_PROVIDER_SERVICE",sdkMin=36)
-	public void testBindPopulationDensityProviderService(){
-		logger.debug("The test for android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE is not implemented yet");
 	}
 	@PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=36)
 	public void testThreadNetworkTesting(){
+		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+		//  runShellCommand("force-country-code", "enabled", "US");?
 		logger.debug("The test for android.permission.THREAD_NETWORK_TESTING is not implemented yet");
 	}
 	@PermissionTest(permission="REMOVE_ACCOUNTS",sdkMin=36)
 	public void testRemoveAccounts(){
+		//AccountManagerService.removeAccountAsUser(IAccountManagerResponse response, Account account,
+		//            boolean expectActivityLaunch, int userId)
 		logger.debug("The test for android.permission.REMOVE_ACCOUNTS is not implemented yet");
 	}
 	@PermissionTest(permission="COPY_ACCOUNTS",sdkMin=36)
 	public void testCopyAccounts(){
+		//AccountManagerService.copyAccountToUser(IAccountManagerResponse response, Account account,
+		//            boolean expectActivityLaunch, int userId)
 		logger.debug("The test for android.permission.COPY_ACCOUNTS is not implemented yet");
 	}
 	@PermissionTest(permission="VIBRATE_VENDOR_EFFECTS",sdkMin=36)
 	public void testVibrateVendorEffects(){
+		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:frameworks/base/tests/permission/src/com/android/framework/permission/tests/VibratorManagerServicePermissionTest.java;l=147?q=VIBRATE_VENDOR_EFFECTS&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+		//mVibratorService.startVendorVibrationSession(Process.myUid(), DEVICE_ID, PACKAGE_NAME,
+		//		new int[] { 1 }, ATTRS, "testVibrate", null);
 		logger.debug("The test for android.permission.VIBRATE_VENDOR_EFFECTS is not implemented yet");
 	}
 	@PermissionTest(permission="START_VIBRATION_SESSIONS",sdkMin=36)
 	public void testStartVibrationSessions(){
+		//Same as above?
 		logger.debug("The test for android.permission.START_VIBRATION_SESSIONS is not implemented yet");
 	}
 	@PermissionTest(permission="MANAGE_ADVANCED_PROTECTION_MODE",sdkMin=36)
@@ -86,18 +96,16 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	public void testManageIntrusionDetectionState(){
 		logger.debug("The test for android.permission.MANAGE_INTRUSION_DETECTION_STATE is not implemented yet");
 	}
-	@PermissionTest(permission="BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE",sdkMin=36)
-	public void testBindIntrusionDetectionEventTransportService(){
-		logger.debug("The test for android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE is not implemented yet");
+	@PermissionTest(permission="BIND_DEPENDENCY_INSTALLER",sdkMin=36)
+	public void testBindDependencyInstaller(){
+		logger.debug("The test for android.permission.BIND_DEPENDENCY_INSTALLER is not implemented yet");
 	}
+
 	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING",sdkMin=36)
 	public void testRequestCompanionProfileSensorDeviceStreaming(){
 		logger.debug("The test for android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING is not implemented yet");
 	}
-	@PermissionTest(permission="BIND_RKP_SERVICE",sdkMin=36)
-	public void testBindRkpService(){
-		logger.debug("The test for android.permission.BIND_RKP_SERVICE is not implemented yet");
-	}
+
 	@PermissionTest(permission="READ_SYSTEM_PREFERENCES",sdkMin=36)
 	public void testReadSystemPreferences(){
 		logger.debug("The test for android.permission.READ_SYSTEM_PREFERENCES is not implemented yet");
@@ -134,18 +142,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	public void testReadSubscriptionPlans(){
 		logger.debug("The test for android.permission.READ_SUBSCRIPTION_PLANS is not implemented yet");
 	}
-	@PermissionTest(permission="BIND_DEPENDENCY_INSTALLER",sdkMin=36)
-	public void testBindDependencyInstaller(){
-		logger.debug("The test for android.permission.BIND_DEPENDENCY_INSTALLER is not implemented yet");
-	}
+
 	@PermissionTest(permission="INSTALL_DEPENDENCY_SHARED_LIBRARIES",sdkMin=36)
 	public void testInstallDependencySharedLibraries(){
 		logger.debug("The test for android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES is not implemented yet");
 	}
-	@PermissionTest(permission="BIND_APP_FUNCTION_SERVICE",sdkMin=36)
-	public void testBindAppFunctionService(){
-		logger.debug("The test for android.permission.BIND_APP_FUNCTION_SERVICE is not implemented yet");
-	}
+
 	@PermissionTest(permission="MANAGE_KEY_GESTURES",sdkMin=36)
 	public void testManageKeyGestures(){
 		logger.debug("The test for android.permission.MANAGE_KEY_GESTURES is not implemented yet");

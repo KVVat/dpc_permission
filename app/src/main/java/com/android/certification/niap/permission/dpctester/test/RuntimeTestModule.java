@@ -33,6 +33,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.AttributionSource;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -70,6 +71,11 @@ import android.provider.OpenableColumns;
 import android.provider.VoicemailContract.Voicemails;
 
 import android.provider.Telephony;
+import android.ranging.RangingCapabilities;
+import android.ranging.RangingData;
+import android.ranging.RangingDevice;
+import android.ranging.RangingManager;
+import android.ranging.RangingSession;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.telephony.SmsManager;
@@ -90,6 +96,7 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.tool.TesterUtils;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import android.provider.CalendarContract.Events;
 
@@ -101,6 +108,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @PermissionTestModule(name="Runtime Test Cases",prflabel = "Runtime Permissions")
@@ -751,10 +761,31 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 	}
 
 	//**** method template for target runtime SDK36
+	@RequiresApi(35)
 	@PermissionTest(permission="RANGING",sdkMin=36)
 	public void testRanging(){
-		logger.debug("The test for android.permission.RANGING is not implemented yet");
+
+		//adb shell aflags list
+		//@RequiresFlagsEnabled("com.android.ranging.flags.ranging_stack_enabled")
+		RangingSession session = systemService(RangingManager.class).createRangingSession(mContext.getMainExecutor(),
+				new RangingSession.Callback() {
+			@Override
+			public void onClosed(int i) {}
+			@Override
+			public void onOpenFailed(int i) {}
+			@Override
+			public void onOpened() {}
+			@Override
+			public void onResults(@NonNull RangingDevice rangingDevice, @NonNull RangingData rangingData) {}
+			@Override
+			public void onStarted(@NonNull RangingDevice rangingDevice, int i) {}
+			@Override
+			public void onStopped(@NonNull RangingDevice rangingDevice, int i) {}
+		});
+		session.stop();
+		//reconfigureRangingInterval(100); <= this method crashes device
 	}
+	/* Could not find implementations...
 	@PermissionTest(permission="EYE_TRACKING_COARSE",sdkMin=36)
 	public void testEyeTrackingCoarse(){
 		logger.debug("The test for android.permission.EYE_TRACKING_COARSE is not implemented yet");
@@ -783,5 +814,5 @@ public class RuntimeTestModule extends PermissionTestModuleBase {
 	public void testSceneUnderstandingFine(){
 		logger.debug("The test for android.permission.SCENE_UNDERSTANDING_FINE is not implemented yet");
 	}
-
+	*/
 }

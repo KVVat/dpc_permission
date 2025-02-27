@@ -16,6 +16,7 @@ package com.android.certification.niap.permission.dpctester.common;
  */
 import static com.android.certification.niap.permission.dpctester.common.Util.isAtLeastT;
 
+import android.annotation.SuppressLint;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.NetworkEvent;
@@ -1528,6 +1529,12 @@ public final class DevicePolicyManagerGatewayImpl implements DevicePolicyManager
     public void setTrustAgentConfiguration(ComponentName target, PersistableBundle configuration)
     {
         getDevicePolicyManager().setTrustAgentConfiguration(getAdmin(),target,configuration);
+    }
+
+    @SuppressLint("NewApi")
+    @Override
+    public void setAppFunctionPolicy(int i) {
+        getDevicePolicyManager().setAppFunctionsPolicy(i);
     }
 
     @Override

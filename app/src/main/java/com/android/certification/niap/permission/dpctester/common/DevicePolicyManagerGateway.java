@@ -109,6 +109,8 @@ public interface DevicePolicyManagerGateway {
 
     void setTrustAgentConfiguration(ComponentName target, PersistableBundle configuration);
 
+    void setAppFunctionPolicy(int i);
+
     enum DeviceOwnerLevel {
         DPS_DISABLED(0),
         DPS_ACTIVE_ADMIN_APP(1),

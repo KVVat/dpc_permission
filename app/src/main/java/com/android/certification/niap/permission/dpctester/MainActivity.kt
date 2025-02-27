@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), ActivityLogger.LogListAdaptable {
         recyclerView?.getAdapter()?.notifyDataSetChanged()
     }
 
-        //Change the test modules here by resource settings
+    //Change the test modules here by resource settings
     lateinit var suites:MutableList<PermissionTestSuiteBase>
     lateinit var mCurrentModule: PermissionTestModuleBase
     //

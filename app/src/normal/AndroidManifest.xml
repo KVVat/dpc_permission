@@ -1172,6 +1172,9 @@
     <uses-permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE" />
     <uses-permission android:name="android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_RKP_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_APP_FUNCTION_SERVICE" />
     <uses-permission android:name="android.permission.THREAD_NETWORK_TESTING" />
     <uses-permission android:name="android.permission.REMOVE_ACCOUNTS" />
     <uses-permission android:name="android.permission.COPY_ACCOUNTS" />
@@ -1180,9 +1183,7 @@
     <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE" />
     <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE" />
     <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
-    <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING" />
-    <uses-permission android:name="android.permission.BIND_RKP_SERVICE" />
     <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
     <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
     <uses-permission android:name="android.permission.EYE_CALIBRATION" />
@@ -1194,7 +1195,6 @@
     <uses-permission android:name="android.permission.READ_SUBSCRIPTION_PLANS" />
     <uses-permission android:name="android.permission.BIND_DEPENDENCY_INSTALLER" />
     <uses-permission android:name="android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES" />
-    <uses-permission android:name="android.permission.BIND_APP_FUNCTION_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_KEY_GESTURES" />
     <uses-permission android:name="android.permission.LISTEN_FOR_KEY_ACTIVITY" />
     <uses-permission android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS" />

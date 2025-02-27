@@ -511,4 +511,29 @@ public class SignatureTestModuleBinder extends SignaturePermissionTestModuleBase
         runBindRunnable("BIND_DOMAIN_SELECTION_SERVICE");
     }
 
+    @PermissionTest(permission="BIND_POPULATION_DENSITY_PROVIDER_SERVICE",sdkMin=36)
+    public void testBindPopulationDensityProviderService(){
+        runBindRunnable("BIND_POPULATION_DENSITY_PROVIDER_SERVICE");
+        //logger.debug("The test for android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE is not implemented yet");
+    }
+    @PermissionTest(permission="BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE",sdkMin=36)
+    public void testBindIntrusionDetectionEventTransportService(){
+        runBindRunnable("BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE");
+        //logger.debug("The test for android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE is not implemented yet");
+    }
+    @PermissionTest(permission="BIND_RKP_SERVICE",sdkMin=36)
+    public void testBindRkpService(){
+        runBindRunnable("BIND_RKP_SERVICE");
+        //logger.debug("The test for android.permission.BIND_RKP_SERVICE is not implemented yet");
+    }
+    @PermissionTest(permission="BIND_DEPENDENCY_INSTALLER",sdkMin=36)
+    public void testBindDependencyInstaller(){
+        runBindRunnable("BIND_DEPENDENCY_INSTALLER");
+        //logger.debug("The test for android.permission.BIND_DEPENDENCY_INSTALLER is not implemented yet");
+    }
+    @PermissionTest(permission="BIND_APP_FUNCTION_SERVICE",sdkMin=36)
+    public void testBindAppFunctionService(){
+        runBindRunnable("BIND_APP_FUNCTION_SERVICE");
+        //logger.debug("The test for android.permission.BIND_APP_FUNCTION_SERVICE is not implemented yet");
+    }
 }
