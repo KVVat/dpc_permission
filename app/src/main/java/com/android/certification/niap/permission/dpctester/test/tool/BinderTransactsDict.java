@@ -16,6 +16,7 @@ package com.android.certification.niap.permission.dpctester.test.tool;
  */
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Build;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,8 +59,14 @@ public class BinderTransactsDict {
         try {
             AssetManager am = mContext.getResources().getAssets();
             //Change suffix depends on system version
+
+            var SDK_INT = Build.VERSION.SDK_INT;
+            if(TesterUtils.isAtLeastBaklava()){
+                SDK_INT = 36;
+            }
+
             String filename = String.format(Locale.getDefault(),"binderdb-%d.json",
-                    android.os.Build.VERSION.SDK_INT);
+                    SDK_INT);
             StaticLogger.debug("Binder Transaction filename:"+filename);
 
             InputStream is = am.open(filename);

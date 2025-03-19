@@ -85,6 +85,9 @@ import org.junit.rules.ErrorCollector;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -285,6 +288,46 @@ public class InternalPermissionBaklavaTest {
         }
         Log.d("Execute App Function","result = "+result.get());
     }
+    @Test
+    @PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=35)
+    public void testThreadNetworkTesting(){
+        //https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+        //  runShellCommand("force-country-code", "enabled", "US");?
+        //The command related to network requires root access , so we can't test it on normal app
+        int shellRet  = runShellCommand("cmd wifi help");//wifi get-country-code");
+        //Log.d("Shell",">"+shellRet);
+    }
 
+    protected int runShellCommand(String command) {
+        try {
+            Log.d("shell","Attempting to run command " + command);
+            java.lang.Process process = Runtime.getRuntime().exec(command);//.exec("su");
+            //DataOutputStream outputStream = new DataOutputStream(process.getOutputStream());
+            //outputStream.writeBytes(command);
+            //outputStream.flush();
+            process.waitFor();
+            //command);
+            int returnCode = process.waitFor();
+            BufferedReader stdout = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+            BufferedReader stderr = new BufferedReader(
+                    new InputStreamReader(process.getErrorStream()));
+            StringBuilder stdoutBuilder = new StringBuilder();
+            String line;
+            while ((line = stdout.readLine()) != null) {
+                stdoutBuilder.append(line + "\n");
+            }
 
+            StringBuilder stderrBuilder = new StringBuilder();
+            while ((line = stderr.readLine()) != null) {
+                stderrBuilder.append(line + "\n");
+            }
+            Log.d("shell","Process return code: " + returnCode);
+            Log.d("shell","Process stdout: " + stdoutBuilder.toString());
+            Log.d("shell","Process stderr: " + stderrBuilder.toString());
+            return returnCode;
+        } catch (Throwable e) {
+            throw new UnexpectedTestFailureException(e);
+        }
+    }
 }

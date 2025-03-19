@@ -33,6 +33,11 @@
     "android.media.musicrecognition.IMusicRecognitionManager": {
       "beginRecognition": 1
     },
+    "android.security.intrusiondetection.IIntrusionDetectionService": {
+      "enable": 3,
+      "disable": 4,
+      "addStateCallback": 1
+    },
     "android.os.IPowerManager": {
       "reboot": 52,
       "isAmbientDisplaySuppressedForTokenByApp": 70,
@@ -118,8 +123,10 @@
     "android.health.connect.aidl.IHealthConnectService": {
       "updateDataDownloadState": 32,
       "deleteAllStagedRemoteData": 31,
+      "canRestore": 57,
       "startMigration": 24,
-      "getHealthConnectDataState": 33
+      "getHealthConnectDataState": 33,
+      "getChangesForBackup": 54
     },
     "android.app.cloudsearch.ICloudSearchManager": {},
     "android.companion.virtual.IVirtualDeviceManager": {
@@ -226,6 +233,7 @@
       "enableInputDevice": 4,
       "registerKeyboardBacklightListener": 61,
       "getModifierKeyRemapping": 23,
+      "registerKeyGestureEventListener": 67,
       "unregisterStickyModifierStateListener": 65,
       "tryPointerSpeed": 10,
       "removePortAssociation": 40
@@ -273,6 +281,10 @@
     "com.android.internal.app.IBatteryStats": {
       "noteStartAudio": 5,
       "getAwakeTimeBattery": 77
+    },
+    "android.os.ITradeInMode": {
+      "start": 1,
+      "enterEvaluationMode": 3
     },
     "android.content.pm.IShortcutService": {
       "onApplicationActive": 16
@@ -492,6 +504,9 @@
       "requestAvailability": 10,
       "triggerNetworkRegistration": 19
     },
+    "android.os.IVibratorManagerService": {
+      "startVendorVibrationSession": 12
+    },
     "android.media.session.ISessionManager": {
       "setOnMediaKeyListener": 22,
       "setOnVolumeKeyLongPressListener": 21
@@ -520,12 +535,14 @@
     "MUSIC_RECOGNITION_DESCRIPTOR": "android.media.musicrecognition.IMusicRecognitionManager",
     "WINDOW_DESCRIPTOR": "android.view.IWindowManager",
     "android.app.IGameManagerService": "android.app.IGameManagerService",
+    "android.security.intrusiondetection.IIntrusionDetectionService": "android.security.intrusiondetection.IIntrusionDetectionService",
     "ROLLBACK_DESCRIPTOR": "android.content.rollback.IRollbackManager",
     "DEVICELOCK_DESCRIPTOR": "android.devicelock.IDeviceLockService",
     "NETWORK_STATS_DESCRIPTOR": "android.net.INetworkStatsService",
     "android.app.ILocaleManager": "android.app.ILocaleManager",
     "android.app.IWallpaperManager": "android.app.IWallpaperManager",
     "DOMAIN_VERIFICATION_DESCRIPTOR": "android.content.pm.verify.domain.IDomainVerificationManager",
+    "INTRUSION_DETECTION_DESCRIPTOR": "android.security.intrusiondetection.IIntrusionDetectionService",
     "NETWORK_MANAGEMENT_DESCRIPTOR": "android.os.INetworkManagementService",
     "ALARM_DESCRIPTOR": "android.app.IAlarmManager",
     "android.os.IVibratorService": "android.os.IVibratorService",
@@ -590,6 +607,7 @@
     "VR_DESCRIPTOR": "android.service.vr.IVrManager",
     "CLOUDSEARCH_DESCRIPTOR": "android.app.cloudsearch.ICloudSearchManager",
     "android.app.IActivityManager": "android.app.IActivityManager",
+    "TRADE_IN_MODE_DESCRIPTOR": "android.os.ITradeInMode",
     "android.app.IUiModeManager": "android.app.IUiModeManager",
     "com.android.internal.app.IAppOpsService": "com.android.internal.app.IAppOpsService",
     "android.app.ondeviceintelligence.IOnDeviceIntelligenceManager": "android.app.ondeviceintelligence.IOnDeviceIntelligenceManager",
@@ -685,8 +703,10 @@
     "android.hardware.biometrics.IAuthService": "android.hardware.biometrics.IAuthService",
     "TELEPHONY_DESCRIPTOR": "com.android.internal.telephony.ITelephony",
     "com.android.internal.app.IBatteryStats": "com.android.internal.app.IBatteryStats",
+    "android.os.ITradeInMode": "android.os.ITradeInMode",
     "NET_POLICY_DESCRIPTOR": "android.net.INetworkPolicyManager",
     "com.android.internal.telephony.ISub": "com.android.internal.telephony.ISub",
+    "VIBRATOR_MANAGER_DESCRIPTOR": "android.os.IVibratorManagerService",
     "EUICC_CONTROLLER_DESCRIPTOR": "com.android.internal.telephony.euicc.IEuiccController",
     "android.app.people.IPeopleManager": "android.app.people.IPeopleManager",
     "BIOMETRIC_DESCRIPTOR": "android.hardware.biometrics.IBiometricService",
@@ -714,6 +734,7 @@
     "android.net.IVpnManager": "android.net.IVpnManager",
     "android.app.wearable.IWearableSensingManager": "android.app.wearable.IWearableSensingManager",
     "android.telephony.ims.aidl.IImsRcsController": "android.telephony.ims.aidl.IImsRcsController",
+    "android.os.IVibratorManagerService": "android.os.IVibratorManagerService",
     "MEDIA_SESSION_DESCRIPTOR": "android.media.session.ISessionManager",
     "com.android.internal.statusbar.IStatusBarService": "com.android.internal.statusbar.IStatusBarService",
     "MEDIA_ROUTER_DESCRIPTOR": "android.media.IMediaRouterService"

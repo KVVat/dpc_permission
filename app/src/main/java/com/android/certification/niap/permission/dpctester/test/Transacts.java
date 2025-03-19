@@ -218,4 +218,33 @@ public class Transacts {
     public static final String PLATFORM_COMPAT_DESCRIPTOR = "com.android.internal.compat.IPlatformCompat";
     public static final String MEDIA_SESSION_DESCRIPTOR = "android.media.session.ISessionManager";
     public static final String MEDIA_ROUTER_DESCRIPTOR = "android.media.IMediaRouterService";
+
+
+    /* For Android 36*/
+    public static final String INTRUSION_DETECTION_DESCRIPTOR =
+            "android.security.intrusiondetection.IIntrusionDetectionService";
+    public static final String INTRUSION_DETECTION_SERVICE = "intrusion_detection";
+    public static final String enable = "enable";
+    public static final String disable  = "disable";
+    public static final String addStateCallback  = "addStateCallback";
+
+    /* For IInputManger */
+
+    public static final String registerKeyGestureEventListener  = "registerKeyGestureEventListener";
+    public static final String registerKeyEventActivityListener = "registerKeyEventActivityListener";
+    public static final String unregisterKeyEventActivityListener = "unregisterKeyEventActivityListener";
+    /*For IHealthConnectService */
+    public static final String getChangesForBackup  = "getChangesForBackup";
+    public static final String canRestore  = "canRestore";
+    public static final String restoreChanges  = "restoreChanges";
+
+    /*For IHealthConnectService */
+    public static final String TRADE_IN_MODE_DESCRIPTOR = "android.os.ITradeInMode";
+    public static final String TRADE_IN_MODE_SERVICE = "tradeinmode";
+    public static final String start = "start";
+    public static final String enterEvaluationMode = "enterEvaluationMode";
+
+    public static final String VIBRATOR_MANAGER_DESCRIPTOR = "android.os.IVibratorManagerService";
+    public static final String startVendorVibrationSession="startVendorVibrationSession";
+
 }

@@ -17,16 +17,80 @@
 package com.android.certification.niap.permission.dpctester.test;
 
 
+import static android.content.Context.ADVANCED_PROTECTION_SERVICE;
+import static android.content.Context.INPUT_SERVICE;
+import static android.content.Context.USER_SERVICE;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
+import android.hardware.input.AidlKeyGestureEvent;
+import android.hardware.input.IKeyEventActivityListener;
+import android.hardware.input.IKeyGestureEventListener;
+import android.hardware.input.InputManager;
+import android.health.connect.HealthConnectManager;
+import android.health.connect.aidl.HealthConnectExceptionParcel;
+import android.health.connect.aidl.IGetChangesForBackupResponseCallback;
+import android.health.connect.backuprestore.GetChangesForBackupResponse;
 import android.media.quality.MediaQualityManager;
+import android.net.Uri;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.OutcomeReceiver;
+import android.os.PowerManager;
+import android.os.PowerMonitor;
+import android.os.PowerMonitorReadings;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.VibrationAttributes;
+import android.os.VibratorManager;
+import android.os.health.SystemHealthManager;
+import android.provider.ContactsContract;
+import android.security.advancedprotection.AdvancedProtectionManager;
+import android.security.intrusiondetection.IIntrusionDetectionServiceCommandCallback;
+import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallback;
+import android.service.settings.preferences.MetadataRequest;
+import android.service.settings.preferences.MetadataResult;
+import android.service.settings.preferences.SettingsPreferenceService;
+import android.service.settings.preferences.SettingsPreferenceServiceClient;
+import android.view.SurfaceControl;
+import android.view.textclassifier.TextClassificationManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.work.PeriodicWorkRequest;
 
+import com.android.certification.niap.permission.dpctester.common.ReflectionUtil;
+import com.android.certification.niap.permission.dpctester.test.exception.BypassTestException;
 import com.android.certification.niap.permission.dpctester.test.runner.SignaturePermissionTestModuleBase;
+import com.android.certification.niap.permission.dpctester.test.tool.BinderTransaction;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTest;
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
+import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @PermissionTestModule(name="Signature 36(Baklava) Test Cases",prflabel="Baklava(16)")
 public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBase {
@@ -41,64 +105,177 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	//**** method template for target signature SDK36
 	@PermissionTest(permission="OBSERVE_PICTURE_PROFILES",sdkMin=36)
 	public void testObservePictureProfiles(){
+
 		logger.debug("The test for android.permission.OBSERVE_PICTURE_PROFILES is not implemented yet");
 	}
-	@PermissionTest(permission="MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE",sdkMin=36)
+	@SuppressLint("NewApi")
+    @PermissionTest(permission="MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE",sdkMin=36)
 	public void testManageGlobalPictureQualityService(){
 		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:cts/tests/tests/mediaquality/src/android/media/mediaquality/cts/MediaQualityTest.java;l=97?q=getPictureProfilesByPackage&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
-		//getService(MediaQualityManager.class).getPictureProfilesByPackage(
-		logger.debug("The test for android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE is not implemented yet");
+		//MediaQUalityManger.getPictureProfilesByPackage may work for the test
+		MediaQualityManager manager = systemService(MediaQualityManager.class);
+		//but we can not find corresponding service as of now
+		List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(manager, "get");
+
+		logger.system(methods.toString());
 	}
 	@PermissionTest(permission="MANAGE_GLOBAL_SOUND_QUALITY_SERVICE",sdkMin=36)
 	public void testManageGlobalSoundQualityService(){
 		//MediaQualityManager.getSoundProfilePackageNames()
-		logger.debug("The test for android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE is not implemented yet");
+		MediaQualityManager manager = systemService(MediaQualityManager.class);
+		//but we can not find corresponding service as of now
+		List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(manager, "get");
+
+		logger.system(methods.toString());
 	}
 	@PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=36)
 	public void testThreadNetworkTesting(){
 		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
 		//  runShellCommand("force-country-code", "enabled", "US");?
-		logger.debug("The test for android.permission.THREAD_NETWORK_TESTING is not implemented yet");
+		//  It doesn't work work except the system app
+		int shellRet  = runShellCommand("cmd thread_network get-country-code");
+		logger.system(">"+shellRet);
 	}
-	@PermissionTest(permission="REMOVE_ACCOUNTS",sdkMin=36)
+
+
+	@PermissionTest(permission="REMOVE_ACCOUNTS",sdkMin=35)
 	public void testRemoveAccounts(){
-		//AccountManagerService.removeAccountAsUser(IAccountManagerResponse response, Account account,
-		//            boolean expectActivityLaunch, int userId)
-		logger.debug("The test for android.permission.REMOVE_ACCOUNTS is not implemented yet");
+
+		Account account = new Account("dpctester.stub@gmail.com", "com.google");
+		//account = accounts[0];
+		systemService(AccountManager.class).removeAccount(account, mActivity, new AccountManagerCallback<Bundle>() {
+			@Override
+			public void run(AccountManagerFuture<Bundle> future) {
+				//logger.info("account remove api");
+			}
+		},null);
 	}
+
+
 	@PermissionTest(permission="COPY_ACCOUNTS",sdkMin=36)
 	public void testCopyAccounts(){
-		//AccountManagerService.copyAccountToUser(IAccountManagerResponse response, Account account,
-		//            boolean expectActivityLaunch, int userId)
-		logger.debug("The test for android.permission.COPY_ACCOUNTS is not implemented yet");
-	}
+
+		UserHandle handle = UserHandle.getUserHandleForUid(appUid);
+		int count = systemService(UserManager.class).getUserCount();
+		if(count>=2) {
+			UserManager umanager = systemService(UserManager.class);
+			List<UserInfo> users = ReflectionUtil.invoke(umanager, "getUsers");
+			AccountManager manager = systemService(AccountManager.class);
+			Account account = new Account("dpctester.stub@gmail.com", "com.google");
+
+			//account = accounts[0];
+
+			//https://stackoverflow.com/questions/47027382/cant-find-getusers-method-in-class-usermanager
+			//adb shell pm remove-user dummy2
+
+			//Need some prerequisete to test
+			//Create other user and switch to it
+			//*disable* INTERACT_ACROSS_USERS_FULL permission for app. It's automaticaaly enabled
+
+			//logger.system("UserAll = -1 SYSTEM_UID=1000 "+ Binder.getCallingUid());
+			final Handler handler = new Handler(Looper.getMainLooper());
+			//ReflectionUtil.in
+			ReflectionUtil.invoke(manager, "copyAccountToUser",
+					new Class[]{Account.class, UserHandle.class, UserHandle.class,
+							Handler.class, AccountManagerCallback.class},
+					account, users.get(1).getUserHandle(), users.get(0).getUserHandle(), handler, new AccountManagerCallback<Bundle>() {
+						@Override
+						public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+
+						}
+					});
+		} else {
+			throw new BypassTestException("Need multiuser environment to run this test suit");
+		}
+	}@RequiresApi(34)
+
 	@PermissionTest(permission="VIBRATE_VENDOR_EFFECTS",sdkMin=36)
 	public void testVibrateVendorEffects(){
 		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:frameworks/base/tests/permission/src/com/android/framework/permission/tests/VibratorManagerServicePermissionTest.java;l=147?q=VIBRATE_VENDOR_EFFECTS&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
-		//mVibratorService.startVendorVibrationSession(Process.myUid(), DEVICE_ID, PACKAGE_NAME,
-		//		new int[] { 1 }, ATTRS, "testVibrate", null);
-		logger.debug("The test for android.permission.VIBRATE_VENDOR_EFFECTS is not implemented yet");
+
+		VibrationAttributes ATTRS = new VibrationAttributes.Builder()
+				.setUsage(VibrationAttributes.USAGE_ALARM)
+				.build();
+
+		BinderTransaction.getInstance().invoke(Context.VIBRATOR_MANAGER_SERVICE,
+				Transacts.VIBRATOR_MANAGER_DESCRIPTOR,
+				"startVendorVibrationSession",appUid,
+				mContext.getDeviceId(),mContext.getPackageName(),new int[]{1},ATTRS,"testVibrate",null);
+
 	}
+	@RequiresApi(34)
 	@PermissionTest(permission="START_VIBRATION_SESSIONS",sdkMin=36)
 	public void testStartVibrationSessions(){
-		//Same as above?
-		logger.debug("The test for android.permission.START_VIBRATION_SESSIONS is not implemented yet");
-	}
+		VibrationAttributes ATTRS = new VibrationAttributes.Builder()
+				.setUsage(VibrationAttributes.USAGE_ALARM)
+				.build();
+
+		BinderTransaction.getInstance().invoke(Context.VIBRATOR_MANAGER_SERVICE,
+				Transacts.VIBRATOR_MANAGER_DESCRIPTOR,
+				"startVendorVibrationSession",appUid,
+				mContext.getDeviceId(),mContext.getPackageName(),new int[]{1},ATTRS,"testVibrate",null);	}
 	@PermissionTest(permission="MANAGE_ADVANCED_PROTECTION_MODE",sdkMin=36)
 	public void testManageAdvancedProtectionMode(){
-		logger.debug("The test for android.permission.MANAGE_ADVANCED_PROTECTION_MODE is not implemented yet");
+		AdvancedProtectionManager manager = getService(AdvancedProtectionManager.class);
+		ReflectionUtil.invoke(manager, "setAdvancedProtectionEnabled",
+				new Class[]{boolean.class},true);
 	}
 	@PermissionTest(permission="READ_INTRUSION_DETECTION_STATE",sdkMin=36)
 	public void testReadIntrusionDetectionState(){
+
+		if(checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")){
+			throw new BypassTestException("MANAGE_INTRUSION_DETECTION_STATE test will crash system," +
+					"when the target permission is allowed. So let us bypass it");
+		}
+
+		IIntrusionDetectionServiceStateCallback callback = new IIntrusionDetectionServiceStateCallback() {
+			@Override
+			public void onStateChange(byte state) throws RemoteException {
+
+			}
+
+			@Override
+			public IBinder asBinder() {
+				return null;
+			}
+		};
+		//new In
+		//public void addStateCallback(IIntrusionDetectionServiceStateCallback callback)
+		BinderTransaction.getInstance().invoke(Transacts.INTRUSION_DETECTION_SERVICE,
+				Transacts.INTRUSION_DETECTION_DESCRIPTOR,
+				"addStateCallback",callback);
 		logger.debug("The test for android.permission.READ_INTRUSION_DETECTION_STATE is not implemented yet");
 	}
 	@PermissionTest(permission="MANAGE_INTRUSION_DETECTION_STATE",sdkMin=36)
 	public void testManageIntrusionDetectionState(){
-		logger.debug("The test for android.permission.MANAGE_INTRUSION_DETECTION_STATE is not implemented yet");
-	}
-	@PermissionTest(permission="BIND_DEPENDENCY_INSTALLER",sdkMin=36)
-	public void testBindDependencyInstaller(){
-		logger.debug("The test for android.permission.BIND_DEPENDENCY_INSTALLER is not implemented yet");
+
+		if(checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")){
+			throw new BypassTestException("MANAGE_INTRUSION_DETECTION_STATE test will crash system," +
+					"when the target permission is allowed. So let us bypass it");
+		}
+
+		IIntrusionDetectionServiceCommandCallback callback = new IIntrusionDetectionServiceCommandCallback() {
+			@Override
+			public void onSuccess() throws RemoteException {
+
+			}
+
+			@Override
+			public void onFailure(byte error) throws RemoteException {
+
+			}
+
+			@Override
+			public IBinder asBinder() {
+				return null;
+			}
+		};
+		//MANAGE_INTRUSION_DETECTION_STATE
+		//public void enable(IIntrusionDetectionServiceCommandCallback callback)
+		BinderTransaction.getInstance().invoke(Transacts.INTRUSION_DETECTION_SERVICE,
+				Transacts.INTRUSION_DETECTION_DESCRIPTOR,
+				"disable",callback);
+		//logger.debug("The test for android.permission.MANAGE_INTRUSION_DETECTION_STATE is not implemented yet");
 	}
 
 	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING",sdkMin=36)
@@ -106,14 +283,65 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		logger.debug("The test for android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING is not implemented yet");
 	}
 
+	@RequiresApi(31)
 	@PermissionTest(permission="READ_SYSTEM_PREFERENCES",sdkMin=36)
 	public void testReadSystemPreferences(){
-		logger.debug("The test for android.permission.READ_SYSTEM_PREFERENCES is not implemented yet");
+		//Prepare client and read from service.
+		CountDownLatch bindingLatch = new CountDownLatch(1);
+		CountDownLatch metadataLatch = new CountDownLatch(1);
+		SettingsPreferenceServiceClient client =
+				new SettingsPreferenceServiceClient(
+						mContext,"com.android.settings",mExecutor,
+						new OutcomeReceiver<SettingsPreferenceServiceClient,Exception>(){
+							@Override
+							public void onError(@NonNull Exception error) {
+								OutcomeReceiver.super.onError(error);
+								throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
+							}
+							@Override
+							public void onResult(SettingsPreferenceServiceClient settingsPreferenceServiceClient) {
+								bindingLatch.countDown();
+							}
+						});
+        try {
+            if(!bindingLatch.await(5, TimeUnit.SECONDS)){
+				throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Timeout");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Failed");
+        }
+		client.getAllPreferenceMetadata(
+				new MetadataRequest.Builder().build(),mExecutor,
+				new OutcomeReceiver<MetadataResult,Exception>(){
+					@Override
+					public void onError(@NonNull Exception error) {
+						OutcomeReceiver.super.onError(error);
+						throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
+					}
+
+					@Override
+					public void onResult(MetadataResult result) {
+						if (result.getResultCode() != MetadataResult.RESULT_OK ||
+								result.getMetadataList().isEmpty()) {
+							throw new RuntimeException("READ_SYSTEM_PREFERENCE:No metadata");
+						}
+						//logger.debug(result.getMetadataList().toString());
+						metadataLatch.countDown();
+					}
+				});
+		try {
+			if(!metadataLatch.await(10, TimeUnit.SECONDS)){
+				throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Timeout");
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Failed");
+		}
 	}
 	@PermissionTest(permission="WRITE_SYSTEM_PREFERENCES",sdkMin=36)
 	public void testWriteSystemPreferences(){
 		logger.debug("The test for android.permission.WRITE_SYSTEM_PREFERENCES is not implemented yet");
 	}
+	/*
 	@PermissionTest(permission="EYE_CALIBRATION",sdkMin=36)
 	public void testEyeCalibration(){
 		logger.debug("The test for android.permission.EYE_CALIBRATION is not implemented yet");
@@ -125,7 +353,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	@PermissionTest(permission="IMPORT_XR_ANCHOR",sdkMin=36)
 	public void testImportXrAnchor(){
 		logger.debug("The test for android.permission.IMPORT_XR_ANCHOR is not implemented yet");
-	}
+	}*/
 	@PermissionTest(permission="ALWAYS_BOUND_TV_INPUT",sdkMin=36)
 	public void testAlwaysBoundTvInput(){
 		logger.debug("The test for android.permission.ALWAYS_BOUND_TV_INPUT is not implemented yet");
@@ -134,14 +362,58 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	public void testBypassConcurrentRecordAudioRestriction(){
 		logger.debug("The test for android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION is not implemented yet");
 	}
+	@RequiresApi(35)
 	@PermissionTest(permission="ACCESS_FINE_POWER_MONITORS",sdkMin=36)
 	public void testAccessFinePowerMonitors(){
-		logger.debug("The test for android.permission.ACCESS_FINE_POWER_MONITORS is not implemented yet");
+		SystemHealthManager shm = systemService(SystemHealthManager.class);
+		final List<PowerMonitor>[] mPowerMonitorInfo = new List[1];
+		ConditionVariable done = new ConditionVariable();
+		shm.getSupportedPowerMonitors(null, new Consumer<List<PowerMonitor>>() {
+			@Override
+			public void accept(List<PowerMonitor> powerMonitors) {
+				mPowerMonitorInfo[0] = powerMonitors;
+				done.open();
+			}
+		});
+		done.block();
+		if(!mPowerMonitorInfo[0].isEmpty()){
+			PowerMonitor consumerMonitor = null;
+			PowerMonitor measurementMonitor = null;
+			//PowerMonitor fineMonitor = null;
+			for (PowerMonitor pmi : mPowerMonitorInfo[0]) {
+				if (pmi.getType() == PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT) {
+					measurementMonitor = pmi;
+				} else {
+					consumerMonitor = pmi;
+				}
+			}
+			List<PowerMonitor> selectedMonitors = new ArrayList<>();
+			if (consumerMonitor != null) {
+				selectedMonitors.add(consumerMonitor);
+			}
+			if (measurementMonitor != null) {
+				selectedMonitors.add(measurementMonitor);
+			}
+			shm.getPowerMonitorReadings(selectedMonitors,null, new OutcomeReceiver<>(){
+				@Override
+				public void onError(@NonNull RuntimeException error) {
+					OutcomeReceiver.super.onError(error);
+					throw new RuntimeException("Error Reading:"+error.getMessage());
+				}
+
+				@Override
+				public void onResult(PowerMonitorReadings powerMonitorReadings) {
+					logger.system(powerMonitorReadings.toString());
+					done.open();
+				}
+			});
+			done.block();
+		}
 	}
-	@PermissionTest(permission="READ_SUBSCRIPTION_PLANS",sdkMin=36)
-	public void testReadSubscriptionPlans(){
-		logger.debug("The test for android.permission.READ_SUBSCRIPTION_PLANS is not implemented yet");
-	}
+//	@PermissionTest(permission="READ_SUBSCRIPTION_PLANS",sdkMin=36)
+//	public void testReadSubscriptionPlans(){
+//		logger.debug("The test for android.permission.READ_SUBSCRIPTION_PLANS is not implemented yet");
+//	}
 
 	@PermissionTest(permission="INSTALL_DEPENDENCY_SHARED_LIBRARIES",sdkMin=36)
 	public void testInstallDependencySharedLibraries(){
@@ -150,14 +422,92 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 	@PermissionTest(permission="MANAGE_KEY_GESTURES",sdkMin=36)
 	public void testManageKeyGestures(){
-		logger.debug("The test for android.permission.MANAGE_KEY_GESTURES is not implemented yet");
+		//android.hardware.input.InputManager$KeyGestureEventListener
+		//need hidden prototype
+		IKeyGestureEventListener listener=new IKeyGestureEventListener(){
+
+			@Override
+			public IBinder asBinder() {
+				return getActivityToken();
+			}
+
+			@Override
+			public void onKeyGestureEvent(AidlKeyGestureEvent event) throws RemoteException {
+
+			}
+		};
+		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
+						"registerKeyGestureEventListener",
+						mExecutor,listener);
 	}
 	@PermissionTest(permission="LISTEN_FOR_KEY_ACTIVITY",sdkMin=36)
 	public void testListenForKeyActivity(){
+		IKeyEventActivityListener listener=new IKeyEventActivityListener(){
+			@Override
+			public IBinder asBinder() {
+				return null;
+			}
+
+			@Override
+			public void onKeyEventActivity() throws RemoteException {
+
+			}
+		};
+		//require binder transction to ignore type
 		logger.debug("The test for android.permission.LISTEN_FOR_KEY_ACTIVITY is not implemented yet");
 	}
+
+
+	@RequiresApi(31)
 	@PermissionTest(permission="BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
 	public void testBackupHealthConnectDataAndSettings(){
+		//GetChagesForBackupResponse
+//		/HealthConnectManager hm = systemService(HealthConnectManager.class);
+		//List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(hm, "get");
+//		//getChangesForBackup
+		//ReflectionUtil.invoke(hm, "getChangesForBackup",
+	//			new Class[]{String.class, Executor.class, OutcomeReceiver.class}, "test", mExecutor, new OutcomeReceiver<Void>() {
+		//		});
+		//logger.system(">"+methods.toString());
+		IGetChangesForBackupResponseCallback callback = new IGetChangesForBackupResponseCallback() {
+			@Override
+			public void onResult(GetChangesForBackupResponse parcel) throws RemoteException {
+
+			}
+
+			@Override
+			public void onError(HealthConnectExceptionParcel exception) throws RemoteException {
+
+			}
+
+			@Override
+			public IBinder asBinder() {
+				return null;
+			}
+		};
+
+
+		ConditionVariable done = new ConditionVariable();
+		BinderTransaction.getInstance().invoke(Context.HEALTHCONNECT_SERVICE,
+				Transacts.HEALTH_CONNECT_DESCRIPTOR,
+				"getChangesForBackup", "foobar", callback);/* {
+					@Override
+					public void onError(@NonNull Throwable error) {
+						OutcomeReceiver.super.onError(error);
+						logger.system("health connect outcome error");
+						done.open();
+						//throw new RuntimeException("Health connect outcome error");
+					}
+
+					@Override
+					public void onResult(Object o) {
+						logger.system("health connect outcome success");
+						done.open();
+					}
+				});
+		done.block();*/
+
+		//getChangesForBackup
 		logger.debug("The test for android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS is not implemented yet");
 	}
 	@PermissionTest(permission="RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
@@ -170,23 +520,48 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	}
 	@PermissionTest(permission="MANAGE_SECURE_LOCK_DEVICE",sdkMin=36)
 	public void testManageSecureLockDevice(){
+		//systemService(AuthenticationP)
 		logger.debug("The test for android.permission.MANAGE_SECURE_LOCK_DEVICE is not implemented yet");
 	}
 	@PermissionTest(permission="ENTER_TRADE_IN_MODE",sdkMin=36)
 	public void testEnterTradeInMode(){
+		BinderTransaction.getInstance().invoke(Transacts.TRADE_IN_MODE_SERVICE,
+				Transacts.TRADE_IN_MODE_DESCRIPTOR,
+				"start");
 		logger.debug("The test for android.permission.ENTER_TRADE_IN_MODE is not implemented yet");
 	}
 	@PermissionTest(permission="DYNAMIC_INSTRUMENTATION",sdkMin=36)
 	public void testDynamicInstrumentation(){
 		logger.debug("The test for android.permission.DYNAMIC_INSTRUMENTATION is not implemented yet");
 	}
+	@RequiresApi(33)
 	@PermissionTest(permission="RESOLVE_COMPONENT_FOR_UID",sdkMin=36)
 	public void testResolveComponentForUid(){
-		logger.debug("The test for android.permission.RESOLVE_COMPONENT_FOR_UID is not implemented yet");
+		if(!checkPermissionGranted("android.permission.RESOLVE_COMPONENT_FOR_UID")){
+			throw new BypassTestException("RESOLVE_COMPONENT_FOR_UID was not detected by package manager." +
+					"So let us bypass it");
+		}
+		//This permission is not recognized by the package manager. so let me check if it's enabled...
+		//mPackageManager.checkPermission("android.manifest.permission.RESOLVE_COMPONENT_FOR_UID")
+
+		ReflectionUtil.invoke(mPackageManager,
+				"resolveContentProviderForUid", new Class[]{String.class,
+						PackageManager.ComponentInfoFlags.class,int.class},
+				"android.packageinstaller.multiusercontentprovider",
+						PackageManager.ComponentInfoFlags.of(0),-1);
 	}
 	@PermissionTest(permission="RESERVED_FOR_TESTING_SIGNATURE",sdkMin=36)
 	public void testReservedForTestingSignature(){
-		logger.debug("The test for android.permission.RESERVED_FOR_TESTING_SIGNATURE is not implemented yet");
+		int r = mPackageManager.checkPermission(
+				"android.Manifest.permission.RESERVED_FOR_TESTING_SIGNATURE",
+				mContext.getPackageName());
+		if(r == PackageManager.PERMISSION_GRANTED){
+			logger.system("testing signature:true");
+		} else {
+			logger.system("testing signature:fales");
+		}
+
+		//logger.debug("The test for android.permission.RESERVED_FOR_TESTING_SIGNATURE is not implemented yet");
 	}
 	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
 	public void testSingleUserTisAccess(){
@@ -194,7 +569,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	}
 	@PermissionTest(permission="ACCESS_TEXT_CLASSIFIER_BY_TYPE",sdkMin=36)
 	public void testAccessTextClassifierByType(){
-		logger.debug("The test for android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE is not implemented yet");
+		//only get Classifier is blocking by this permission.
+		TextClassificationManager tcm = systemService(TextClassificationManager.class);
+		List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(tcm, "get");
+
+		ReflectionUtil.invoke(tcm, "getClassifier", new Class[]{int.class}, 0);
 	}
 
 }
