@@ -75,10 +75,9 @@
       "clearInteractAcrossProfilesAppOps": 10
     },
     "android.app.INotificationManager": {
-      "getActiveNotifications": 67,
-      "getZenRules": 136,
-      "isNotificationPolicyAccessGrantedForPackage": 130,
-      "getEnabledNotificationListeners": 116,
+      "getActiveNotifications": 68,
+      "isNotificationPolicyAccessGrantedForPackage": 131,
+      "getEnabledNotificationListeners": 117,
       "setToastRateLimitingEnabled": 158
     },
     "android.media.projection.IMediaProjectionManager": {
@@ -133,8 +132,8 @@
       "createVirtualDevice": 1
     },
     "android.security.IFileIntegrityService": {
-      "setupFsverity": 3,
-      "createAuthToken": 2
+      "setupFsverity": 2,
+      "createAuthToken": 1
     },
     "android.os.IStatsManagerService": {
       "removeRestrictedMetricsChangedOperation": 16,
@@ -217,6 +216,10 @@
     "android.permission.IPermissionChecker": {
       "checkPermission": 1
     },
+    "android.security.authenticationpolicy.IAuthenticationPolicyService": {
+      "enableSecureLockDevice": 1,
+      "disableSecureLockDevice": 2
+    },
     "android.hardware.biometrics.IBiometricService": {
       "hasEnrolledBiometrics": 7
     },
@@ -225,18 +228,23 @@
       "forceUpdate": 8
     },
     "android.hardware.input.IInputManager": {
-      "setTouchCalibrationForInputDevice": 15,
-      "registerStickyModifierStateListener": 64,
-      "setKeyboardLayoutForInputDevice": 19,
-      "isInTabletMode": 25,
-      "monitorGestureInput": 38,
+      "isInTabletMode": 26,
       "enableInputDevice": 4,
-      "registerKeyboardBacklightListener": 61,
-      "getModifierKeyRemapping": 23,
-      "registerKeyGestureEventListener": 67,
-      "unregisterStickyModifierStateListener": 65,
+      "registerKeyEventActivityListener": 60,
+      "setTouchCalibrationForInputDevice": 15,
+      "registerStickyModifierStateListener": 67,
+      "setKeyboardLayoutForInputDevice": 20,
+      "monitorGestureInput": 39,
+      "registerKeyboardBacklightListener": 64,
+      "getModifierKeyRemapping": 24,
+      "registerKeyGestureEventListener": 70,
+      "unregisterStickyModifierStateListener": 68,
+      "unregisterKeyEventActivityListener": 61,
       "tryPointerSpeed": 10,
-      "removePortAssociation": 40
+      "removePortAssociation": 41
+    },
+    "android.media.IAudioPolicyService": {
+      "getInputForAttr": 13
     },
     "com.android.internal.app.IVoiceInteractionManagerService": {
       "updateState": 35,
@@ -254,8 +262,8 @@
       "clearOverridesForTest": 18
     },
     "android.hardware.ICameraService": {
-      "notifySystemEvent": 20,
-      "injectCamera": 16
+      "notifySystemEvent": 19,
+      "injectCamera": 15
     },
     "android.credentials.ICredentialManager": {
       "getCredentialProviderServices": 10
@@ -273,10 +281,10 @@
     "android.media.IAudioService": {
       "setRingtonePlayer": 85,
       "getRingtonePlayer": 86,
-      "isAudioServerRunning": 147,
+      "isAudioServerRunning": 145,
       "forceRemoteSubmixFullVolume": 20,
       "setVolumeGroupVolumeIndex": 27,
-      "getDeviceVolumeBehavior": 172
+      "getDeviceVolumeBehavior": 170
     },
     "com.android.internal.app.IBatteryStats": {
       "noteStartAudio": 5,
@@ -317,7 +325,7 @@
       "resetApplicationPreferences": 56
     },
     "android.app.contextualsearch.IContextualSearchManager": {
-      "startContextualSearch": 1
+      "startContextualSearch": 2
     },
     "android.net.INetworkPolicyManager": {
       "getSubscriptionPlans": 20,
@@ -335,9 +343,9 @@
     },
     "android.app.IActivityTaskManager": {
       "getFrontActivityScreenCompatMode": 18,
-      "getAssistContextExtras": 56,
+      "getAssistContextExtras": 58,
       "setFrontActivityScreenCompatMode": 19,
-      "getWindowOrganizerController": 63,
+      "getWindowOrganizerController": 65,
       "startActivityFromGameSession": 11,
       "startActivityAsCaller": 13,
       "getActivityClientController": 17
@@ -430,7 +438,7 @@
       "restartWifiSubsystem": 159
     },
     "android.hardware.usb.IUsbManager": {
-      "getControlFd": 36
+      "getControlFd": 37
     },
     "android.permission.IPermissionManager": {
       "isAutoRevokeExempted": 26,
@@ -572,6 +580,7 @@
     "SUBSCRIPTION_DESCRIPTOR": "com.android.internal.telephony.ISub",
     "FILE_INTEGRITY_DESCRIPTOR": "android.security.IFileIntegrityService",
     "HEALTH_CONNECT_DESCRIPTOR": "android.health.connect.aidl.IHealthConnectService",
+    "android.security.authenticationpolicy.IAuthenticationPolicyService": "android.security.authenticationpolicy.IAuthenticationPolicyService",
     "ROLE_DESCRIPTOR": "android.app.role.IRoleManager",
     "INPUTMETHOD_DESCRIPTOR": "com.android.internal.view.IInputMethodManager",
     "com.android.internal.app.IVoiceInteractionManagerService": "com.android.internal.app.IVoiceInteractionManagerService",
@@ -600,6 +609,7 @@
     "APPWIDGET_DESCRIPTOR": "com.android.internal.appwidget.IAppWidgetService",
     "ACCESSIBILITY_DESCRIPTOR": "android.view.accessibility.IAccessibilityManager",
     "android.app.IAlarmManager": "android.app.IAlarmManager",
+    "AUDIO_POLICY_SERVICE_DESCRIPTOR": "android.media.IAudioPolicyService",
     "android.media.IResourceManagerService": "android.media.IResourceManagerService",
     "android.app.timedetector.ITimeDetectorService": "android.app.timedetector.ITimeDetectorService",
     "android.scheduling.IRebootReadinessManager": "android.scheduling.IRebootReadinessManager",
@@ -646,6 +656,7 @@
     "NOTIFICATION_DESCRIPTOR": "android.app.INotificationManager",
     "android.media.IResourceObserverService": "android.media.IResourceObserverService",
     "android.app.wallpapereffectsgeneration.IWallpaperEffectsGenerationManager": "android.app.wallpapereffectsgeneration.IWallpaperEffectsGenerationManager",
+    "AUTHENTICATION_POLICY_SERVICE_DESCRIPTOR": "android.security.authenticationpolicy.IAuthenticationPolicyService",
     "android.app.smartspace.ISmartspaceManager": "android.app.smartspace.ISmartspaceManager",
     "android.content.IClipboard": "android.content.IClipboard",
     "android.content.pm.ICrossProfileApps": "android.content.pm.ICrossProfileApps",
@@ -692,6 +703,7 @@
     "android.net.INetworkStatsService": "android.net.INetworkStatsService",
     "android.hardware.input.IInputManager": "android.hardware.input.IInputManager",
     "VPN_DESCRIPTOR": "android.net.IVpnManager",
+    "android.media.IAudioPolicyService": "android.media.IAudioPolicyService",
     "GAME_DESCRIPTOR": "android.app.IGameManagerService",
     "DEVICE_POLICY_DESCRIPTOR": "android.app.admin.IDevicePolicyManager",
     "FONT_DESCRIPTOR": "com.android.internal.graphics.fonts.IFontManager",

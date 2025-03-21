@@ -143,14 +143,14 @@ android {
     buildFeatures {
         aidl = true
     }
-    compileSdkPreview = "Baklava"
-    //compileSdk = 35
+    //compileSdkPreview = "Baklava"
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.android.certification.niap.permission.dpctester"
         minSdk = 28
-        //targetSdk = 35
-        targetSdkPreview = "Baklava"
+        targetSdk = 36
+        //targetSdkPreview = "Baklava"
         versionCode = 1
         versionName = "1.1"
 

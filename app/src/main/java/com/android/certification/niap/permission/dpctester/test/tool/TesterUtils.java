@@ -60,10 +60,10 @@ public class TesterUtils {
         );*/ //temporary
     }
     public static boolean isAtLeastV() {
-        return Build.VERSION.SDK_INT >= 34 && isAtLeastPreReleaseCodename("VanillaIceCream", Build.VERSION.CODENAME);
+        return Build.VERSION.SDK_INT >= 34 && !isAtLeastPreReleaseCodename("VanillaIceCream", Build.VERSION.CODENAME);
     }
     public static boolean isAtLeastBaklava() {
-        return Build.VERSION.SDK_INT >= 35 && isAtLeastPreReleaseCodename("Baklava", Build.VERSION.CODENAME);
+        return Build.VERSION.SDK_INT >= 35 && !isAtLeastPreReleaseCodename("Baklava", Build.VERSION.CODENAME);
     }
 
     protected static boolean isAtLeastPreReleaseCodename(@NonNull String codename, @NonNull String buildCodename) {

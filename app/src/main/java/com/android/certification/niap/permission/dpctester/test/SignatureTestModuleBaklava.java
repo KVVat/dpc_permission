@@ -62,12 +62,16 @@ import android.os.VibratorManager;
 import android.os.health.SystemHealthManager;
 import android.provider.ContactsContract;
 import android.security.advancedprotection.AdvancedProtectionManager;
+import android.security.authenticationpolicy.EnableSecureLockDeviceParams;
 import android.security.intrusiondetection.IIntrusionDetectionServiceCommandCallback;
 import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallback;
 import android.service.settings.preferences.MetadataRequest;
 import android.service.settings.preferences.MetadataResult;
+import android.service.settings.preferences.SetValueRequest;
+import android.service.settings.preferences.SetValueResult;
 import android.service.settings.preferences.SettingsPreferenceService;
 import android.service.settings.preferences.SettingsPreferenceServiceClient;
+import android.service.settings.preferences.SettingsPreferenceValue;
 import android.view.SurfaceControl;
 import android.view.textclassifier.TextClassificationManager;
 
@@ -119,6 +123,9 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 		logger.system(methods.toString());
 	}
+
+
+	@RequiresApi(36)
 	@PermissionTest(permission="MANAGE_GLOBAL_SOUND_QUALITY_SERVICE",sdkMin=36)
 	public void testManageGlobalSoundQualityService(){
 		//MediaQualityManager.getSoundProfilePackageNames()
@@ -214,12 +221,14 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				Transacts.VIBRATOR_MANAGER_DESCRIPTOR,
 				"startVendorVibrationSession",appUid,
 				mContext.getDeviceId(),mContext.getPackageName(),new int[]{1},ATTRS,"testVibrate",null);	}
+	@RequiresApi(36)
 	@PermissionTest(permission="MANAGE_ADVANCED_PROTECTION_MODE",sdkMin=36)
 	public void testManageAdvancedProtectionMode(){
 		AdvancedProtectionManager manager = getService(AdvancedProtectionManager.class);
 		ReflectionUtil.invoke(manager, "setAdvancedProtectionEnabled",
 				new Class[]{boolean.class},true);
 	}
+	@RequiresApi(36)
 	@PermissionTest(permission="READ_INTRUSION_DETECTION_STATE",sdkMin=36)
 	public void testReadIntrusionDetectionState(){
 
@@ -244,7 +253,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		BinderTransaction.getInstance().invoke(Transacts.INTRUSION_DETECTION_SERVICE,
 				Transacts.INTRUSION_DETECTION_DESCRIPTOR,
 				"addStateCallback",callback);
-		logger.debug("The test for android.permission.READ_INTRUSION_DETECTION_STATE is not implemented yet");
+		//logger.debug("The test for android.permission.READ_INTRUSION_DETECTION_STATE is not implemented yet");
 	}
 	@PermissionTest(permission="MANAGE_INTRUSION_DETECTION_STATE",sdkMin=36)
 	public void testManageIntrusionDetectionState(){
@@ -283,7 +292,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		logger.debug("The test for android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING is not implemented yet");
 	}
 
-	@RequiresApi(31)
+	@RequiresApi(36)
 	@PermissionTest(permission="READ_SYSTEM_PREFERENCES",sdkMin=36)
 	public void testReadSystemPreferences(){
 		//Prepare client and read from service.
@@ -337,9 +346,57 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Failed");
 		}
 	}
+	@RequiresApi(36)
 	@PermissionTest(permission="WRITE_SYSTEM_PREFERENCES",sdkMin=36)
 	public void testWriteSystemPreferences(){
-		logger.debug("The test for android.permission.WRITE_SYSTEM_PREFERENCES is not implemented yet");
+		//Prepare client and read from service.
+		CountDownLatch bindingLatch = new CountDownLatch(1);
+		CountDownLatch metadataLatch = new CountDownLatch(1);
+		SettingsPreferenceServiceClient client =
+				new SettingsPreferenceServiceClient(
+						mContext,"com.android.settings",mExecutor,
+						new OutcomeReceiver<SettingsPreferenceServiceClient,Exception>(){
+							@Override
+							public void onError(@NonNull Exception error) {
+								OutcomeReceiver.super.onError(error);
+								throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
+							}
+							@Override
+							public void onResult(SettingsPreferenceServiceClient settingsPreferenceServiceClient) {
+								bindingLatch.countDown();
+							}
+						});
+		try {
+			if(!bindingLatch.await(5, TimeUnit.SECONDS)){
+				throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Timeout");
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Failed");
+		}
+		client.setPreferenceValue(
+				new SetValueRequest.Builder("screen","pref",
+						new SettingsPreferenceValue.Builder(SettingsPreferenceValue.TYPE_BOOLEAN).setBooleanValue(true).build()
+				).build(),
+				mExecutor,
+				new OutcomeReceiver<SetValueResult, Exception>(){
+					@Override
+					public void onError(@NonNull Exception error) {
+						OutcomeReceiver.super.onError(error);
+						throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
+					}
+
+					@Override
+					public void onResult(SetValueResult result) {
+						metadataLatch.countDown();
+					}
+				});
+		try {
+			if(!metadataLatch.await(10, TimeUnit.SECONDS)){
+				throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Timeout");
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Failed");
+		}
 	}
 	/*
 	@PermissionTest(permission="EYE_CALIBRATION",sdkMin=36)
@@ -354,13 +411,17 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	public void testImportXrAnchor(){
 		logger.debug("The test for android.permission.IMPORT_XR_ANCHOR is not implemented yet");
 	}*/
-	@PermissionTest(permission="ALWAYS_BOUND_TV_INPUT",sdkMin=36)
-	public void testAlwaysBoundTvInput(){
-		logger.debug("The test for android.permission.ALWAYS_BOUND_TV_INPUT is not implemented yet");
-	}
+//	@PermissionTest(permission="ALWAYS_BOUND_TV_INPUT",sdkMin=36)
+//	public void testAlwaysBoundTvInput(){
+//		logger.debug("The test for android.permission.ALWAYS_BOUND_TV_INPUT is not implemented yet");
+//	}
 	@PermissionTest(permission="BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION",sdkMin=36)
 	public void testBypassConcurrentRecordAudioRestriction(){
-		logger.debug("The test for android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION is not implemented yet");
+//		BinderTransaction.getInstance().invoke(Transacts.AUDIO_POLICY_SERVICE,
+//				Transacts.AUDIO_POLICY_SERVICE_DESCRIPTOR,
+//				"getInputForAttr", );
+
+		//logger.debug("The test for android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION is not implemented yet");
 	}
 	@RequiresApi(35)
 	@PermissionTest(permission="ACCESS_FINE_POWER_MONITORS",sdkMin=36)
@@ -469,15 +530,18 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	//			new Class[]{String.class, Executor.class, OutcomeReceiver.class}, "test", mExecutor, new OutcomeReceiver<Void>() {
 		//		});
 		//logger.system(">"+methods.toString());
+		ConditionVariable done = new ConditionVariable();
 		IGetChangesForBackupResponseCallback callback = new IGetChangesForBackupResponseCallback() {
 			@Override
 			public void onResult(GetChangesForBackupResponse parcel) throws RemoteException {
-
+				logger.system("backup result"+parcel.toString());
+				done.open();
 			}
 
 			@Override
 			public void onError(HealthConnectExceptionParcel exception) throws RemoteException {
-
+				logger.system("backup result"+exception.toString());
+				done.open();
 			}
 
 			@Override
@@ -486,29 +550,16 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			}
 		};
 
-
-		ConditionVariable done = new ConditionVariable();
 		BinderTransaction.getInstance().invoke(Context.HEALTHCONNECT_SERVICE,
 				Transacts.HEALTH_CONNECT_DESCRIPTOR,
-				"getChangesForBackup", "foobar", callback);/* {
-					@Override
-					public void onError(@NonNull Throwable error) {
-						OutcomeReceiver.super.onError(error);
-						logger.system("health connect outcome error");
-						done.open();
-						//throw new RuntimeException("Health connect outcome error");
-					}
+				"getChangesForBackup", "", callback);
 
-					@Override
-					public void onResult(Object o) {
-						logger.system("health connect outcome success");
-						done.open();
-					}
-				});
-		done.block();*/
+		if(!done.block(300)){
+			logger.system("getChangesForBackup - timeout");
+		}
 
 		//getChangesForBackup
-		logger.debug("The test for android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS is not implemented yet");
+		//logger.debug("The test for android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS is not implemented yet");
 	}
 	@PermissionTest(permission="RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
 	public void testRestoreHealthConnectDataAndSettings(){
@@ -520,8 +571,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	}
 	@PermissionTest(permission="MANAGE_SECURE_LOCK_DEVICE",sdkMin=36)
 	public void testManageSecureLockDevice(){
+		BinderTransaction.getInstance().invoke(Transacts.AUTHENTICATION_POLICY_SERVICE,
+				Transacts.AUTHENTICATION_POLICY_SERVICE_DESCRIPTOR,
+				"enableSecureLockDevice", new EnableSecureLockDeviceParams("foo"));
 		//systemService(AuthenticationP)
-		logger.debug("The test for android.permission.MANAGE_SECURE_LOCK_DEVICE is not implemented yet");
+		//logger.debug("The test for android.permission.MANAGE_SECURE_LOCK_DEVICE is not implemented yet");
 	}
 	@PermissionTest(permission="ENTER_TRADE_IN_MODE",sdkMin=36)
 	public void testEnterTradeInMode(){

@@ -247,4 +247,16 @@ public class Transacts {
     public static final String VIBRATOR_MANAGER_DESCRIPTOR = "android.os.IVibratorManagerService";
     public static final String startVendorVibrationSession="startVendorVibrationSession";
 
+    public static final String AUDIO_POLICY_SERVICE_DESCRIPTOR = "android.media.IAudioPolicyService";
+    public static final String AUDIO_POLICY_SERVICE  = "audio_policy";
+    public static final String getInputForAttr = "getInputForAttr";
+
+    public static final String AUTHENTICATION_POLICY_SERVICE = "authentication_policy";
+    public static final String AUTHENTICATION_POLICY_SERVICE_DESCRIPTOR
+            = "android.security.authenticationpolicy.IAuthenticationPolicyService";
+
+    public static final String enableSecureLockDevice = "enableSecureLockDevice";//
+    public static final String disableSecureLockDevice = "disableSecureLockDevice";//
+
+
 }
