@@ -465,7 +465,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 				@Override
 				public void onResult(PowerMonitorReadings powerMonitorReadings) {
-					logger.system(powerMonitorReadings.toString());
+					//logger.system(powerMonitorReadings.toString());
 					done.open();
 				}
 			});
@@ -485,8 +485,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 	@PermissionTest(permission="MANAGE_KEY_GESTURES",sdkMin=36)
 	public void testManageKeyGestures(){
-		//android.hardware.input.InputManager$KeyGestureEventListener
-		//need hidden prototype
+		//Need hidden prototype to test.
 		IKeyGestureEventListener listener=new IKeyGestureEventListener(){
 
 			@Override
@@ -499,9 +498,15 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 			}
 		};
+		//The test would be executed appropriately only once in a session.
 		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
 						"registerKeyGestureEventListener",
 						mExecutor,listener);
+
+//		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
+//				"unregisterKeyGestureEventListener",
+//				mExecutor,listener);
+
 	}
 	@PermissionTest(permission="LISTEN_FOR_KEY_ACTIVITY",sdkMin=36,ignore=true)
 	public void testListenForKeyActivity(){
@@ -534,13 +539,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		IGetChangesForBackupResponseCallback callback = new IGetChangesForBackupResponseCallback() {
 			@Override
 			public void onResult(GetChangesForBackupResponse parcel) throws RemoteException {
-				logger.system("backup result"+parcel.toString());
 				done.open();
 			}
 
 			@Override
 			public void onError(HealthConnectExceptionParcel exception) throws RemoteException {
-				logger.system("backup result"+exception.toString());
 				done.open();
 			}
 
@@ -555,7 +558,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				"getChangesForBackup", "", callback);
 
 		if(!done.block(300)){
-			logger.system("getChangesForBackup - timeout");
+			logger.debug("getChangesForBackup - timeout");
 		}
 
 		//getChangesForBackup
@@ -602,16 +605,18 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 						PackageManager.ComponentInfoFlags.of(0),-1);
 	}
 	@PermissionTest(permission="RESERVED_FOR_TESTING_SIGNATURE",sdkMin=36)
-	public void testReservedForTestingSignature(){
+	public void testReservedForTestingSignature() {
 		int r = mPackageManager.checkPermission(
 				"android.permission.RESERVED_FOR_TESTING_SIGNATURE",
 				mContext.getPackageName());
 		//Check if the Package Manager detect this permission correctly in normal app//
 
-		if(r == PackageManager.PERMISSION_GRANTED){
-			logger.system("testing signature:true");
-		} else {
-			logger.system("testing signature:false");
+		if (isPlatformSignatureMatch) {
+			if (r == PackageManager.PERMISSION_GRANTED) {
+				logger.debug("Testing RESERVED_FOR_TESTING_SIGNATURE:true");
+			} else {
+				throw new SecurityException("RESERVED_FOR_TESTING_SIGNATURE was not enabled in this system.");
+			}
 		}
 	}
 //	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
