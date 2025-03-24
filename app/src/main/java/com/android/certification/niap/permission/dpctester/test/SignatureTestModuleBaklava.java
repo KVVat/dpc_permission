@@ -109,30 +109,25 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
 	}
 
+//	@PermissionTest(permission="OBSERVE_PICTURE_PROFILES",sdkMin=36)
+//	public void testObservePictureProfiles(){
+//
+//		//Can not instantiate this object.
+//		//Object listener = ReflectionToolJava.stubHiddenObjectSub
+//		//		("android.view.SurfaceControlActivePictureListener");
+//		//listener.startListening();
+//	}
 
-	//**** method template for target signature SDK36
-	@PermissionTest(permission="OBSERVE_PICTURE_PROFILES",sdkMin=36)
-	public void testObservePictureProfiles(){
-
-		//Can not instantiate this object.
-
-		//Object listener = ReflectionToolJava.stubHiddenObjectSub
-		//		("android.view.SurfaceControlActivePictureListener");
-		//listener.startListening();
-	}
-
-    @RequiresApi(api = 36)
-    @PermissionTest(permission="MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE",sdkMin=36)
-	public void testManageGlobalPictureQualityService(){
-		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:cts/tests/tests/mediaquality/src/android/media/mediaquality/cts/MediaQualityTest.java;l=97?q=getPictureProfilesByPackage&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
-
-		//MediaQualityManager is not implemented yet?
-
-		//MediaQUalityManger.getPictureProfilesByPackage may work for the test
-		//MediaQualityManager manager = systemService(MediaQualityManager.class);
-		//but we can not find corresponding service as of now
-		//List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(manager, "get");
-	}
+//    @RequiresApi(api = 36)
+//    @PermissionTest(permission="MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE",sdkMin=36)
+//	public void testManageGlobalPictureQualityService(){
+//		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:cts/tests/tests/mediaquality/src/android/media/mediaquality/cts/MediaQualityTest.java;l=97?q=getPictureProfilesByPackage&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+//		//MediaQualityManager is not implemented yet?
+//		//MediaQUalityManger.getPictureProfilesByPackage may work for the test
+//		//MediaQualityManager manager = systemService(MediaQualityManager.class);
+//		//but we can not find corresponding service as of now
+//		//List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(manager, "get");
+//	}
 
 	@RequiresApi(36)
 	@PermissionTest(permission="MANAGE_GLOBAL_SOUND_QUALITY_SERVICE",sdkMin=36)
@@ -145,14 +140,17 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		logger.system(methods.toString());
 	}
 
-//	@PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=36)
-//	public void testThreadNetworkTesting(){
-//		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
-//		//  runShellCommand("force-country-code", "enabled", "US");?
-//		//  It doesn't work work except the system app
-//		int shellRet  = runShellCommand("cmd thread_network get-country-code");
-//	}
+	@PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=36,ignore = true)
+	public void testThreadNetworkTesting(){
 
+		//*** REASON FOR IGNORE ***
+		//*** Below shell command can be only executed by the rooted system
+
+		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
+		//  runShellCommand("force-country-code", "enabled", "US");?
+		//  It doesn't work work except the system app
+		int shellRet  = runShellCommand("cmd thread_network get-country-code");
+	}
 
 	@PermissionTest(permission="REMOVE_ACCOUNTS",sdkMin=35)
 	public void testRemoveAccounts(){
@@ -288,10 +286,8 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				"disable",callback);
 	}
 
-	/*
-	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING",sdkMin=36)
-	public void testRequestCompanionProfileSensorDeviceStreaming(){}
-	*/
+//	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING",sdkMin=36)
+//	public void testRequestCompanionProfileSensorDeviceStreaming(){}
 
 	@RequiresApi(36)
 	@PermissionTest(permission="READ_SYSTEM_PREFERENCES",sdkMin=36)
@@ -419,14 +415,14 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 	}
 	*/
 
-	@PermissionTest(permission="BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION",sdkMin=36)
-	public void testBypassConcurrentRecordAudioRestriction(){
-//		BinderTransaction.getInstance().invoke(Transacts.AUDIO_POLICY_SERVICE,
-//				Transacts.AUDIO_POLICY_SERVICE_DESCRIPTOR,
-//				"getInputForAttr", );
-
-		//logger.debug("The test for android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION is not implemented yet");
-	}
+//	@PermissionTest(permission="BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION",sdkMin=36)
+//	public void testBypassConcurrentRecordAudioRestriction(){
+//	//		BinderTransaction.getInstance().invoke(Transacts.AUDIO_POLICY_SERVICE,
+//	//		Transacts.AUDIO_POLICY_SERVICE_DESCRIPTOR,
+//	//      "getInputForAttr", );
+//
+//		//logger.debug("The test for android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION is not implemented yet");
+//	}
 
 	@RequiresApi(35)
 	@PermissionTest(permission="ACCESS_FINE_POWER_MONITORS",sdkMin=36)
@@ -477,15 +473,15 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		}
 	}
 
-	@PermissionTest(permission="READ_SUBSCRIPTION_PLANS",sdkMin=36)
-	public void testReadSubscriptionPlans(){
-		//Found no implementations let us skip it.
-	}
+//	@PermissionTest(permission="READ_SUBSCRIPTION_PLANS",sdkMin=36)
+//	public void testReadSubscriptionPlans(){
+//		//Found no implementations let us skip it.
+//	}
 
-	@PermissionTest(permission="INSTALL_DEPENDENCY_SHARED_LIBRARIES",sdkMin=36)
-	public void testInstallDependencySharedLibraries(){
-		logger.debug("The test for android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES is not implemented yet");
-	}
+//	@PermissionTest(permission="INSTALL_DEPENDENCY_SHARED_LIBRARIES",sdkMin=36)
+//	public void testInstallDependencySharedLibraries(){
+//		logger.debug("The test for android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES is not implemented yet");
+//	}
 
 	@PermissionTest(permission="MANAGE_KEY_GESTURES",sdkMin=36)
 	public void testManageKeyGestures(){
@@ -507,8 +503,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 						"registerKeyGestureEventListener",
 						mExecutor,listener);
 	}
-	@PermissionTest(permission="LISTEN_FOR_KEY_ACTIVITY",sdkMin=36)
+	@PermissionTest(permission="LISTEN_FOR_KEY_ACTIVITY",sdkMin=36,ignore=true)
 	public void testListenForKeyActivity(){
+		//*** REASON FOR IGNORE ***
+		//*** This Permission is not managed by the system package manager ***
+
 		IKeyEventActivityListener listener=new IKeyEventActivityListener(){
 			@Override
 			public IBinder asBinder() {
@@ -525,18 +524,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				mExecutor,listener);
 	}
 
-
 	@RequiresApi(31)
-	@PermissionTest(permission="BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
+	@PermissionTest(permission="BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36,ignore = true)
 	public void testBackupHealthConnectDataAndSettings(){
-		//GetChagesForBackupResponse
-//		/HealthConnectManager hm = systemService(HealthConnectManager.class);
-		//List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(hm, "get");
-//		//getChangesForBackup
-		//ReflectionUtil.invoke(hm, "getChangesForBackup",
-	//			new Class[]{String.class, Executor.class, OutcomeReceiver.class}, "test", mExecutor, new OutcomeReceiver<Void>() {
-		//		});
-		//logger.system(">"+methods.toString());
+		//*** REASON FOR IGNORE ***
+		//*** HealthConnect Service is not responding.
+
 		ConditionVariable done = new ConditionVariable();
 		IGetChangesForBackupResponseCallback callback = new IGetChangesForBackupResponseCallback() {
 			@Override
@@ -566,35 +559,33 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		}
 
 		//getChangesForBackup
-		//logger.debug("The test for android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS is not implemented yet");
 	}
-	@PermissionTest(permission="RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
-	public void testRestoreHealthConnectDataAndSettings(){
-		logger.debug("The test for android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS is not implemented yet");
-	}
-	@PermissionTest(permission="CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT",sdkMin=36)
-	public void testCaptureConsentlessBugreportDelegatedConsent(){
-		logger.debug("The test for android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT is not implemented yet");
-	}
-	@PermissionTest(permission="MANAGE_SECURE_LOCK_DEVICE",sdkMin=36)
+
+	//	@PermissionTest(permission="RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36)
+//	public void testRestoreHealthConnectDataAndSettings(){
+//	}
+
+//	@PermissionTest(permission="CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT",sdkMin=36)
+//	public void testCaptureConsentlessBugreportDelegatedConsent(){
+//	}
+	@PermissionTest(permission="MANAGE_SECURE_LOCK_DEVICE",sdkMin=36,ignore = true)
 	public void testManageSecureLockDevice(){
+		//*** REASON FOR IGNORE ***
+		//*** This Permission is not managed by the system package manager ***
+
 		BinderTransaction.getInstance().invoke(Transacts.AUTHENTICATION_POLICY_SERVICE,
 				Transacts.AUTHENTICATION_POLICY_SERVICE_DESCRIPTOR,
 				"enableSecureLockDevice", new EnableSecureLockDeviceParams("foo"));
-		//systemService(AuthenticationP)
-		//logger.debug("The test for android.permission.MANAGE_SECURE_LOCK_DEVICE is not implemented yet");
 	}
 	@PermissionTest(permission="ENTER_TRADE_IN_MODE",sdkMin=36)
 	public void testEnterTradeInMode(){
 		BinderTransaction.getInstance().invoke(Transacts.TRADE_IN_MODE_SERVICE,
 				Transacts.TRADE_IN_MODE_DESCRIPTOR,
 				"start");
-		logger.debug("The test for android.permission.ENTER_TRADE_IN_MODE is not implemented yet");
 	}
-	@PermissionTest(permission="DYNAMIC_INSTRUMENTATION",sdkMin=36)
-	public void testDynamicInstrumentation(){
-		logger.debug("The test for android.permission.DYNAMIC_INSTRUMENTATION is not implemented yet");
-	}
+//	@PermissionTest(permission="DYNAMIC_INSTRUMENTATION",sdkMin=36)
+//	public void testDynamicInstrumentation(){
+//	}
 	@RequiresApi(33)
 	@PermissionTest(permission="RESOLVE_COMPONENT_FOR_UID",sdkMin=36)
 	public void testResolveComponentForUid(){
@@ -604,7 +595,6 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		}
 		//This permission is not recognized by the package manager. so let me check if it's enabled...
 		//mPackageManager.checkPermission("android.manifest.permission.RESOLVE_COMPONENT_FOR_UID")
-
 		ReflectionUtil.invoke(mPackageManager,
 				"resolveContentProviderForUid", new Class[]{String.class,
 						PackageManager.ComponentInfoFlags.class,int.class},
@@ -623,13 +613,10 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		} else {
 			logger.system("testing signature:false");
 		}
-
-		//logger.debug("The test for android.permission.RESERVED_FOR_TESTING_SIGNATURE is not implemented yet");
 	}
-	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
-	public void testSingleUserTisAccess(){
-		logger.debug("The test for android.permission.SINGLE_USER_TIS_ACCESS is not implemented yet");
-	}
+//	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
+//	public void testSingleUserTisAccess(){
+//	}
 	@PermissionTest(permission="ACCESS_TEXT_CLASSIFIER_BY_TYPE",sdkMin=36)
 	public void testAccessTextClassifierByType(){
 		//only get Classifier is blocking by this permission.

@@ -116,7 +116,11 @@ class PermissionTestRunner {
                             "${testCase.permission} : SDK${SDK_INT} is not supported to run.(SDK MAX:${testCase.sdkMax})"
                         )
                     }
-
+                    if(testCase.ignore){
+                        throw BypassTestException(
+                            "${testCase.permission} is set to be ignored for some reasons. Please. Check source code."
+                        )
+                    }
 
                     //StaticLogger.debug("running=>"+testCase.methodName)
                     ReflectionUtil.invoke(root, testCase.methodName)
@@ -360,12 +364,13 @@ class PermissionTestRunner {
         val methodName: String,
         val requiredPermissions: Array<String>,
         val requestedPermissions: Array<String>,
-        val developmentProtection: Boolean
+        val developmentProtection: Boolean,
+        val ignore:Boolean
     ){
         constructor(permission: String) : this(permission=permission,
             sdkMin = 0,sdkMax=1000, methodName = "", requiredPermissions= emptyArray(),
             requestedPermissions = emptyArray(),
-            developmentProtection=false
+            developmentProtection=false,ignore=false,
         )
 
         init {
