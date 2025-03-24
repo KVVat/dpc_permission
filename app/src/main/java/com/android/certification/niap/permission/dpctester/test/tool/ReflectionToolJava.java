@@ -17,6 +17,7 @@ package com.android.certification.niap.permission.dpctester.test.tool;
 import com.android.certification.niap.permission.dpctester.test.exception.UnexpectedTestFailureException;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -49,6 +50,21 @@ public class ReflectionToolJava {
             return null;
         }
     }
+
+    public static Object stubHiddenObjectSub(String classname)  {
+        try {
+
+            Class<?> remoteCallbackClass = Class.forName(classname);
+            Constructor<?> remoteCallbackConstructor = remoteCallbackClass.getConstructor();
+            return remoteCallbackClass.asSubclass(remoteCallbackClass).newInstance();
+            //remoteCallbackConstructor.newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InstantiationException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Object stubHiddenObject(String classname,Class<?>[] parameters,Object... args)  {
         try {
             Class<?> remoteCallbackClass = Class.forName(classname);
