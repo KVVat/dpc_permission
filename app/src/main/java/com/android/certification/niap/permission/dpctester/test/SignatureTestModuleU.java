@@ -349,7 +349,7 @@ public class SignatureTestModuleU extends SignaturePermissionTestModuleBase {
 
 	}
 
-	@PermissionTest(permission="SATELLITE_COMMUNICATION", sdkMin=34)
+	@PermissionTest(permission="SATELLITE_COMMUNICATION", sdkMin=34,sdkMax = 35)
 	public void testSatelliteCommunication(){
 		BinderTransaction.getInstance().invoke(
 				Context.TELEPHONY_SERVICE,

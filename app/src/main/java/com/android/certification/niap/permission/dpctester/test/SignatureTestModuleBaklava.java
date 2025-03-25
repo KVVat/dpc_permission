@@ -87,6 +87,8 @@ import com.android.certification.niap.permission.dpctester.test.tool.PermissionT
 import com.android.certification.niap.permission.dpctester.test.tool.PermissionTestModule;
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionTool;
 import com.android.certification.niap.permission.dpctester.test.tool.ReflectionToolJava;
+import com.google.android.satellite.aidl.IBooleanConsumer;
+import com.google.android.satellite.aidl.IIntegerConsumer;
 
 import org.junit.Ignore;
 
@@ -105,8 +107,8 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		super(activity);
 	}
 
-	private <T> T systemService(Class<T> clazz){
-		return Objects.requireNonNull(getService(clazz),"[npe_system_service]"+clazz.getSimpleName());
+	private <T> T systemService(Class<T> clazz) {
+		return Objects.requireNonNull(getService(clazz), "[npe_system_service]" + clazz.getSimpleName());
 	}
 
 //	@PermissionTest(permission="OBSERVE_PICTURE_PROFILES",sdkMin=36)
@@ -130,8 +132,8 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 //	}
 
 	@RequiresApi(36)
-	@PermissionTest(permission="MANAGE_GLOBAL_SOUND_QUALITY_SERVICE",sdkMin=36)
-	public void testManageGlobalSoundQualityService(){
+	@PermissionTest(permission = "MANAGE_GLOBAL_SOUND_QUALITY_SERVICE", sdkMin = 36)
+	public void testManageGlobalSoundQualityService() {
 		//MediaQualityManager.getSoundProfilePackageNames()
 		MediaQualityManager manager = systemService(MediaQualityManager.class);
 		//but we can not find corresponding service as of now
@@ -140,8 +142,8 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		logger.system(methods.toString());
 	}
 
-	@PermissionTest(permission="THREAD_NETWORK_TESTING",sdkMin=36,ignore = true)
-	public void testThreadNetworkTesting(){
+	@PermissionTest(permission = "THREAD_NETWORK_TESTING", sdkMin = 36, ignore = true)
+	public void testThreadNetworkTesting() {
 
 		//*** REASON FOR IGNORE ***
 		//*** Below shell command can be only executed by the rooted system
@@ -149,11 +151,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:packages/modules/Connectivity/thread/tests/unit/src/com/android/server/thread/ThreadNetworkShellCommandTest.java;l=103?q=THREAD_NETWORK_TESTING&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
 		//  runShellCommand("force-country-code", "enabled", "US");?
 		//  It doesn't work work except the system app
-		int shellRet  = runShellCommand("cmd thread_network get-country-code");
+		int shellRet = runShellCommand("cmd thread_network get-country-code");
 	}
 
-	@PermissionTest(permission="REMOVE_ACCOUNTS",sdkMin=35)
-	public void testRemoveAccounts(){
+	@PermissionTest(permission = "REMOVE_ACCOUNTS", sdkMin = 35)
+	public void testRemoveAccounts() {
 
 		Account account = new Account("dpctester.stub@gmail.com", "com.google");
 		//account = accounts[0];
@@ -162,15 +164,15 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			public void run(AccountManagerFuture<Bundle> future) {
 				//logger.info("account remove api");
 			}
-		},null);
+		}, null);
 	}
 
 
-	@PermissionTest(permission="COPY_ACCOUNTS",sdkMin=36)
-	public void testCopyAccounts(){
+	@PermissionTest(permission = "COPY_ACCOUNTS", sdkMin = 36)
+	public void testCopyAccounts() {
 
 		int count = systemService(UserManager.class).getUserCount();
-		if(count>=2) {
+		if (count >= 2) {
 			UserManager umanager = systemService(UserManager.class);
 			List<UserInfo> users = ReflectionUtil.invoke(umanager, "getUsers");
 			AccountManager manager = systemService(AccountManager.class);
@@ -201,9 +203,10 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			throw new BypassTestException("Requires a multi user environment to run this test.");
 		}
 	}
+
 	@RequiresApi(34)
-	@PermissionTest(permission="VIBRATE_VENDOR_EFFECTS",sdkMin=36)
-	public void testVibrateVendorEffects(){
+	@PermissionTest(permission = "VIBRATE_VENDOR_EFFECTS", sdkMin = 36)
+	public void testVibrateVendorEffects() {
 		//https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:frameworks/base/tests/permission/src/com/android/framework/permission/tests/VibratorManagerServicePermissionTest.java;l=147?q=VIBRATE_VENDOR_EFFECTS&sq=repo:googleplex-android%2Fplatform%2Fsuperproject%2Fmain%20branch:main
 
 		VibrationAttributes ATTRS = new VibrationAttributes.Builder()
@@ -212,33 +215,37 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 
 		BinderTransaction.getInstance().invoke(Context.VIBRATOR_MANAGER_SERVICE,
 				Transacts.VIBRATOR_MANAGER_DESCRIPTOR,
-				"startVendorVibrationSession",appUid,
-				mContext.getDeviceId(),mContext.getPackageName(),new int[]{1},ATTRS,"testVibrate",null);
+				"startVendorVibrationSession", appUid,
+				mContext.getDeviceId(), mContext.getPackageName(), new int[]{1}, ATTRS, "testVibrate", null);
 
 	}
+
 	@RequiresApi(36)
-	@PermissionTest(permission="START_VIBRATION_SESSIONS",sdkMin=36)
-	public void testStartVibrationSessions(){
+	@PermissionTest(permission = "START_VIBRATION_SESSIONS", sdkMin = 36)
+	public void testStartVibrationSessions() {
 		VibrationAttributes ATTRS = new VibrationAttributes.Builder()
 				.setUsage(VibrationAttributes.USAGE_ALARM)
 				.build();
 
 		BinderTransaction.getInstance().invoke(Context.VIBRATOR_MANAGER_SERVICE,
 				Transacts.VIBRATOR_MANAGER_DESCRIPTOR,
-				"startVendorVibrationSession",appUid,
-				mContext.getDeviceId(),mContext.getPackageName(),new int[]{1},ATTRS,"testVibrate",null);	}
+				"startVendorVibrationSession", appUid,
+				mContext.getDeviceId(), mContext.getPackageName(), new int[]{1}, ATTRS, "testVibrate", null);
+	}
+
 	@RequiresApi(36)
-	@PermissionTest(permission="MANAGE_ADVANCED_PROTECTION_MODE",sdkMin=36)
-	public void testManageAdvancedProtectionMode(){
+	@PermissionTest(permission = "MANAGE_ADVANCED_PROTECTION_MODE", sdkMin = 36)
+	public void testManageAdvancedProtectionMode() {
 		AdvancedProtectionManager manager = getService(AdvancedProtectionManager.class);
 		ReflectionUtil.invoke(manager, "setAdvancedProtectionEnabled",
-				new Class[]{boolean.class},true);
+				new Class[]{boolean.class}, true);
 	}
-	@RequiresApi(36)
-	@PermissionTest(permission="READ_INTRUSION_DETECTION_STATE",sdkMin=36)
-	public void testReadIntrusionDetectionState(){
 
-		if(checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")){
+	@RequiresApi(36)
+	@PermissionTest(permission = "READ_INTRUSION_DETECTION_STATE", sdkMin = 36)
+	public void testReadIntrusionDetectionState() {
+
+		if (checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")) {
 			throw new BypassTestException("MANAGE_INTRUSION_DETECTION_STATE test will crash system," +
 					"when the target permission is allowed. So let us bypass it");
 		}
@@ -256,12 +263,13 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		};
 		BinderTransaction.getInstance().invoke(Transacts.INTRUSION_DETECTION_SERVICE,
 				Transacts.INTRUSION_DETECTION_DESCRIPTOR,
-				"addStateCallback",callback);
+				"addStateCallback", callback);
 	}
-	@PermissionTest(permission="MANAGE_INTRUSION_DETECTION_STATE",sdkMin=36)
-	public void testManageIntrusionDetectionState(){
 
-		if(checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")){
+	@PermissionTest(permission = "MANAGE_INTRUSION_DETECTION_STATE", sdkMin = 36)
+	public void testManageIntrusionDetectionState() {
+
+		if (checkPermissionGranted("android.permission.MANAGE_INTRUSION_DETECTION_STATE")) {
 			throw new BypassTestException("MANAGE_INTRUSION_DETECTION_STATE test will crash system," +
 					"when the target permission is allowed. So let us bypass it");
 		}
@@ -271,10 +279,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			public void onSuccess() throws RemoteException {
 
 			}
+
 			@Override
 			public void onFailure(byte error) throws RemoteException {
 
 			}
+
 			@Override
 			public IBinder asBinder() {
 				return null;
@@ -283,42 +293,43 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		//MANAGE_INTRUSION_DETECTION_STATE
 		BinderTransaction.getInstance().invoke(Transacts.INTRUSION_DETECTION_SERVICE,
 				Transacts.INTRUSION_DETECTION_DESCRIPTOR,
-				"disable",callback);
+				"disable", callback);
 	}
 
 //	@PermissionTest(permission="REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING",sdkMin=36)
 //	public void testRequestCompanionProfileSensorDeviceStreaming(){}
 
 	@RequiresApi(36)
-	@PermissionTest(permission="READ_SYSTEM_PREFERENCES",sdkMin=36)
-	public void testReadSystemPreferences(){
+	@PermissionTest(permission = "READ_SYSTEM_PREFERENCES", sdkMin = 36)
+	public void testReadSystemPreferences() {
 		//Prepare client and read from service.
 		CountDownLatch bindingLatch = new CountDownLatch(1);
 		CountDownLatch metadataLatch = new CountDownLatch(1);
 		SettingsPreferenceServiceClient client =
 				new SettingsPreferenceServiceClient(
-						mContext,"com.android.settings",mExecutor,
-						new OutcomeReceiver<SettingsPreferenceServiceClient,Exception>(){
+						mContext, "com.android.settings", mExecutor,
+						new OutcomeReceiver<SettingsPreferenceServiceClient, Exception>() {
 							@Override
 							public void onError(@NonNull Exception error) {
 								OutcomeReceiver.super.onError(error);
 								throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
 							}
+
 							@Override
 							public void onResult(SettingsPreferenceServiceClient settingsPreferenceServiceClient) {
 								bindingLatch.countDown();
 							}
 						});
-        try {
-            if(!bindingLatch.await(5, TimeUnit.SECONDS)){
+		try {
+			if (!bindingLatch.await(5, TimeUnit.SECONDS)) {
 				throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Timeout");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Failed");
-        }
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Failed");
+		}
 		client.getAllPreferenceMetadata(
-				new MetadataRequest.Builder().build(),mExecutor,
-				new OutcomeReceiver<MetadataResult,Exception>(){
+				new MetadataRequest.Builder().build(), mExecutor,
+				new OutcomeReceiver<MetadataResult, Exception>() {
 					@Override
 					public void onError(@NonNull Exception error) {
 						OutcomeReceiver.super.onError(error);
@@ -336,46 +347,48 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 					}
 				});
 		try {
-			if(!metadataLatch.await(10, TimeUnit.SECONDS)){
+			if (!metadataLatch.await(10, TimeUnit.SECONDS)) {
 				throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Timeout");
 			}
 		} catch (InterruptedException e) {
 			throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Failed");
 		}
 	}
+
 	@RequiresApi(36)
-	@PermissionTest(permission="WRITE_SYSTEM_PREFERENCES",sdkMin=36)
-	public void testWriteSystemPreferences(){
+	@PermissionTest(permission = "WRITE_SYSTEM_PREFERENCES", sdkMin = 36)
+	public void testWriteSystemPreferences() {
 		//Prepare client and read from service.
 		CountDownLatch bindingLatch = new CountDownLatch(1);
 		CountDownLatch metadataLatch = new CountDownLatch(1);
 		SettingsPreferenceServiceClient client =
 				new SettingsPreferenceServiceClient(
-						mContext,"com.android.settings",mExecutor,
-						new OutcomeReceiver<SettingsPreferenceServiceClient,Exception>(){
+						mContext, "com.android.settings", mExecutor,
+						new OutcomeReceiver<SettingsPreferenceServiceClient, Exception>() {
 							@Override
 							public void onError(@NonNull Exception error) {
 								OutcomeReceiver.super.onError(error);
 								throw new RuntimeException("READ_SYSTEM_PREFERENCE:binding failed");
 							}
+
 							@Override
 							public void onResult(SettingsPreferenceServiceClient settingsPreferenceServiceClient) {
 								bindingLatch.countDown();
 							}
 						});
 		try {
-			if(!bindingLatch.await(5, TimeUnit.SECONDS)){
+			if (!bindingLatch.await(5, TimeUnit.SECONDS)) {
 				throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Timeout");
 			}
 		} catch (InterruptedException e) {
 			throw new RuntimeException("READ_SYSTEM_PREFERENCE:Binding Failed");
 		}
 		client.setPreferenceValue(
-				new SetValueRequest.Builder("screen","pref",
+				new SetValueRequest.Builder("screen", "pref",
 						new SettingsPreferenceValue.Builder(SettingsPreferenceValue.TYPE_BOOLEAN).setBooleanValue(true).build()
 				).build(),
 				mExecutor,
-				new OutcomeReceiver<SetValueResult, Exception>(){
+				new OutcomeReceiver<SetValueResult, Exception>() {
 					@Override
 					public void onError(@NonNull Exception error) {
 						OutcomeReceiver.super.onError(error);
@@ -388,7 +401,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 					}
 				});
 		try {
-			if(!metadataLatch.await(10, TimeUnit.SECONDS)){
+			if (!metadataLatch.await(10, TimeUnit.SECONDS)) {
 				throw new RuntimeException("READ_SYSTEM_PREFERENCE:MetaData Timeout");
 			}
 		} catch (InterruptedException e) {
@@ -425,8 +438,8 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 //	}
 
 	@RequiresApi(35)
-	@PermissionTest(permission="ACCESS_FINE_POWER_MONITORS",sdkMin=36)
-	public void testAccessFinePowerMonitors(){
+	@PermissionTest(permission = "ACCESS_FINE_POWER_MONITORS", sdkMin = 36)
+	public void testAccessFinePowerMonitors() {
 		SystemHealthManager shm = systemService(SystemHealthManager.class);
 		final List<PowerMonitor>[] mPowerMonitorInfo = new List[1];
 		ConditionVariable done = new ConditionVariable();
@@ -438,7 +451,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			}
 		});
 		done.block();
-		if(!mPowerMonitorInfo[0].isEmpty()){
+		if (!mPowerMonitorInfo[0].isEmpty()) {
 			PowerMonitor consumerMonitor = null;
 			PowerMonitor measurementMonitor = null;
 			//PowerMonitor fineMonitor = null;
@@ -456,11 +469,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			if (measurementMonitor != null) {
 				selectedMonitors.add(measurementMonitor);
 			}
-			shm.getPowerMonitorReadings(selectedMonitors,null, new OutcomeReceiver<>(){
+			shm.getPowerMonitorReadings(selectedMonitors, null, new OutcomeReceiver<>() {
 				@Override
 				public void onError(@NonNull RuntimeException error) {
 					OutcomeReceiver.super.onError(error);
-					throw new RuntimeException("Error Reading:"+error.getMessage());
+					throw new RuntimeException("Error Reading:" + error.getMessage());
 				}
 
 				@Override
@@ -483,10 +496,10 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 //		logger.debug("The test for android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES is not implemented yet");
 //	}
 
-	@PermissionTest(permission="MANAGE_KEY_GESTURES",sdkMin=36)
-	public void testManageKeyGestures(){
+	@PermissionTest(permission = "MANAGE_KEY_GESTURES", sdkMin = 36)
+	public void testManageKeyGestures() {
 		//Need hidden prototype to test.
-		IKeyGestureEventListener listener=new IKeyGestureEventListener(){
+		IKeyGestureEventListener listener = new IKeyGestureEventListener() {
 
 			@Override
 			public IBinder asBinder() {
@@ -500,20 +513,21 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		};
 		//The test would be executed appropriately only once in a session.
 		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
-						"registerKeyGestureEventListener",
-						mExecutor,listener);
+				"registerKeyGestureEventListener",
+				mExecutor, listener);
 
 //		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
 //				"unregisterKeyGestureEventListener",
 //				mExecutor,listener);
 
 	}
-	@PermissionTest(permission="LISTEN_FOR_KEY_ACTIVITY",sdkMin=36,ignore=true)
-	public void testListenForKeyActivity(){
+
+	@PermissionTest(permission = "LISTEN_FOR_KEY_ACTIVITY", sdkMin = 36, ignore = true)
+	public void testListenForKeyActivity() {
 		//*** REASON FOR IGNORE ***
 		//*** This Permission is not managed by the system package manager ***
 
-		IKeyEventActivityListener listener=new IKeyEventActivityListener(){
+		IKeyEventActivityListener listener = new IKeyEventActivityListener() {
 			@Override
 			public IBinder asBinder() {
 				return getActivityToken();
@@ -526,12 +540,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		};
 		BinderTransaction.getInstance().invoke(Transacts.INPUT_SERVICE, Transacts.INPUT_DESCRIPTOR,
 				"registerKeyEventActivityListener",
-				mExecutor,listener);
+				mExecutor, listener);
 	}
 
 	@RequiresApi(31)
-	@PermissionTest(permission="BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS",sdkMin=36,ignore = true)
-	public void testBackupHealthConnectDataAndSettings(){
+	@PermissionTest(permission = "BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS", sdkMin = 36, ignore = true)
+	public void testBackupHealthConnectDataAndSettings() {
 		//*** REASON FOR IGNORE ***
 		//*** HealthConnect Service is not responding.
 
@@ -557,7 +571,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				Transacts.HEALTH_CONNECT_DESCRIPTOR,
 				"getChangesForBackup", "", callback);
 
-		if(!done.block(300)){
+		if (!done.block(300)) {
 			logger.debug("getChangesForBackup - timeout");
 		}
 
@@ -568,11 +582,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 //	public void testRestoreHealthConnectDataAndSettings(){
 //	}
 
-//	@PermissionTest(permission="CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT",sdkMin=36)
+	//	@PermissionTest(permission="CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT",sdkMin=36)
 //	public void testCaptureConsentlessBugreportDelegatedConsent(){
 //	}
-	@PermissionTest(permission="MANAGE_SECURE_LOCK_DEVICE",sdkMin=36,ignore = true)
-	public void testManageSecureLockDevice(){
+	@PermissionTest(permission = "MANAGE_SECURE_LOCK_DEVICE", sdkMin = 36, ignore = true)
+	public void testManageSecureLockDevice() {
 		//*** REASON FOR IGNORE ***
 		//*** This Permission is not managed by the system package manager ***
 
@@ -580,19 +594,21 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				Transacts.AUTHENTICATION_POLICY_SERVICE_DESCRIPTOR,
 				"enableSecureLockDevice", new EnableSecureLockDeviceParams("foo"));
 	}
-	@PermissionTest(permission="ENTER_TRADE_IN_MODE",sdkMin=36)
-	public void testEnterTradeInMode(){
+
+	@PermissionTest(permission = "ENTER_TRADE_IN_MODE", sdkMin = 36)
+	public void testEnterTradeInMode() {
 		BinderTransaction.getInstance().invoke(Transacts.TRADE_IN_MODE_SERVICE,
 				Transacts.TRADE_IN_MODE_DESCRIPTOR,
 				"start");
 	}
-//	@PermissionTest(permission="DYNAMIC_INSTRUMENTATION",sdkMin=36)
+
+	//	@PermissionTest(permission="DYNAMIC_INSTRUMENTATION",sdkMin=36)
 //	public void testDynamicInstrumentation(){
 //	}
 	@RequiresApi(33)
-	@PermissionTest(permission="RESOLVE_COMPONENT_FOR_UID",sdkMin=36)
-	public void testResolveComponentForUid(){
-		if(!checkPermissionGranted("android.permission.RESOLVE_COMPONENT_FOR_UID")){
+	@PermissionTest(permission = "RESOLVE_COMPONENT_FOR_UID", sdkMin = 36)
+	public void testResolveComponentForUid() {
+		if (!checkPermissionGranted("android.permission.RESOLVE_COMPONENT_FOR_UID")) {
 			throw new BypassTestException("RESOLVE_COMPONENT_FOR_UID was not detected by package manager." +
 					"So let us bypass it");
 		}
@@ -600,11 +616,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		//mPackageManager.checkPermission("android.manifest.permission.RESOLVE_COMPONENT_FOR_UID")
 		ReflectionUtil.invoke(mPackageManager,
 				"resolveContentProviderForUid", new Class[]{String.class,
-						PackageManager.ComponentInfoFlags.class,int.class},
+						PackageManager.ComponentInfoFlags.class, int.class},
 				"android.packageinstaller.multiusercontentprovider",
-						PackageManager.ComponentInfoFlags.of(0),-1);
+				PackageManager.ComponentInfoFlags.of(0), -1);
 	}
-	@PermissionTest(permission="RESERVED_FOR_TESTING_SIGNATURE",sdkMin=36)
+
+	@PermissionTest(permission = "RESERVED_FOR_TESTING_SIGNATURE", sdkMin = 36)
 	public void testReservedForTestingSignature() {
 		int r = mPackageManager.checkPermission(
 				"android.permission.RESERVED_FOR_TESTING_SIGNATURE",
@@ -619,11 +636,12 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			}
 		}
 	}
-//	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
+
+	//	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
 //	public void testSingleUserTisAccess(){
 //	}
-	@PermissionTest(permission="ACCESS_TEXT_CLASSIFIER_BY_TYPE",sdkMin=36)
-	public void testAccessTextClassifierByType(){
+	@PermissionTest(permission = "ACCESS_TEXT_CLASSIFIER_BY_TYPE", sdkMin = 36)
+	public void testAccessTextClassifierByType() {
 		//only get Classifier is blocking by this permission.
 		TextClassificationManager tcm = systemService(TextClassificationManager.class);
 		List<String> methods = ReflectionTool.Companion.checkDeclaredMethod(tcm, "get");
@@ -631,6 +649,29 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		ReflectionUtil.invoke(tcm, "getClassifier", new Class[]{int.class}, 0);
 	}
 
+
+	@PermissionTest(permission = "SATELLITE_COMMUNICATION", sdkMin = 36)
+	public void testSatelliteCommunication() {
+
+		BinderTransaction.getInstance().invoke(
+				Context.TELEPHONY_SERVICE,
+				Transacts.TELEPHONY_DESCRIPTOR,
+				"requestIsSatelliteEnabled",null,null);
+
+		//cb1,cb2);
+	}
+
+	@SuppressLint("PrivateApi")
+	@PermissionTest(permission="USE_ATTESTATION_VERIFICATION_SERVICE", sdkMin=36)
+	public void testUseAttestationVerificationService(){
+		// in VerificationToken token,in ParcelDuration maximumTokenAge,in AndroidFuture resultCallback
+		// Intended NPE will be raised
+
+		BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
+				Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
+				"verifyToken", null, null, null);
+
+	}
 }
 
 

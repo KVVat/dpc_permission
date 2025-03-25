@@ -486,7 +486,7 @@ public class SignatureTestModuleBinder extends SignaturePermissionTestModuleBase
         runBindRunnable("BIND_VISUAL_QUERY_DETECTION_SERVICE");
     }
 
-    @PermissionTest(permission="BIND_WEARABLE_SENSING_SERVICE", sdkMin=34)
+    @PermissionTest(permission="BIND_WEARABLE_SENSING_SERVICE", sdkMin=34,sdkMax = 35)
     public void testBindWearableSensingService(){
         runBindRunnable("BIND_WEARABLE_SENSING_SERVICE");
     }
@@ -496,7 +496,7 @@ public class SignatureTestModuleBinder extends SignaturePermissionTestModuleBase
         runBindRunnable("BIND_ON_DEVICE_INTELLIGENCE_SERVICE");
     }
 
-    @PermissionTest(permission="BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE", sdkMin=35)
+    @PermissionTest(permission="BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE", sdkMin=35,sdkMax = 35)
     public void testBindOnDeviceSandboxedInferenceService(){
         runBindRunnable("BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE");
     }

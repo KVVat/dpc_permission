@@ -374,7 +374,7 @@ public class SignatureTestModuleT extends SignaturePermissionTestModuleBase {
 
 
 	@SuppressLint("PrivateApi")
-	@PermissionTest(permission="USE_ATTESTATION_VERIFICATION_SERVICE", sdkMin=33)
+	@PermissionTest(permission="USE_ATTESTATION_VERIFICATION_SERVICE", sdkMin=33,sdkMax = 35)
 	public void testUseAttestationVerificationService(){
 		// in VerificationToken token,in ParcelDuration maximumTokenAge,in AndroidFuture resultCallback
 		// Intended NPE will be raised

@@ -35,8 +35,10 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -294,5 +296,14 @@ public class SpecificDependentTestModule extends SignaturePermissionTestModuleBa
         alarmManager.setExact(AlarmManager.RTC, System.currentTimeMillis() + 60 * 1000,
                 pendingIntent);
         alarmManager.cancel(pendingIntent);
+    }
+
+    @PermissionTest(permission="SATELLITE_COMMUNICATION", sdkMin=36)
+    public void testSatelliteCommunication(){
+        BinderTransaction.getInstance().invoke(
+                Context.TELEPHONY_SERVICE,
+                Transacts.TELEPHONY_DESCRIPTOR,
+                "requestIsSatelliteEnabled",0
+                ,new android.os.ResultReceiver(new Handler(Looper.getMainLooper())));
     }
 }

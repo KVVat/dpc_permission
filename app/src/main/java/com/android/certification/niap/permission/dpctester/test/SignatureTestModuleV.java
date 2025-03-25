@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -627,12 +628,18 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		//intent.putExtra(Intent.EXTRA_TITLE,"test-title");
 		//dintent.setAction("android.settings.APP_PERMISSIONS_SETTINGS");
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		ResolveInfo res = mPackageManager.
-				resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		ResolveInfo res = null;
+		try {
+			res = mPackageManager.
+					resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
-		if(res != null && res.activityInfo != null) {
-			mContext.startActivity(intent);
-		} else {
+			if(res != null && res.activityInfo != null) {
+				mContext.startActivity(intent);
+			} else {
+				throw new BypassTestException("Unable to resolve a Factory Reset Handler Activty");
+			}
+
+		} catch (ActivityNotFoundException ex){
 			throw new BypassTestException("Unable to resolve a Factory Reset Handler Activty");
 		}
 	}
