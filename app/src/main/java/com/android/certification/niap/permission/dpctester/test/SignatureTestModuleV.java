@@ -626,7 +626,7 @@ public class SignatureTestModuleV extends SignaturePermissionTestModuleBase {
 		Intent intent = new Intent(ACTION_PREPARE_FACTORY_RESET);
 		//intent.putExtra(Intent.EXTRA_INTENT,new Intent());
 		//intent.putExtra(Intent.EXTRA_TITLE,"test-title");
-		//dintent.setAction("android.settings.APP_PERMISSIONS_SETTINGS");
+		//intent.setAction("android.settings.APP_PERMISSIONS_SETTINGS");
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		ResolveInfo res = null;
 		try {

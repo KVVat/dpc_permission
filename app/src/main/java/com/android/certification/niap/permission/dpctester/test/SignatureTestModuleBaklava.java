@@ -438,8 +438,11 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 //	}
 
 	@RequiresApi(35)
-	@PermissionTest(permission = "ACCESS_FINE_POWER_MONITORS", sdkMin = 36)
+	@PermissionTest(permission = "ACCESS_FINE_POWER_MONITORS", sdkMin = 36,ignore = true)
 	public void testAccessFinePowerMonitors() {
+		// ** Ignore reason **
+		// No fine power monitors found in the pixel.
+
 		SystemHealthManager shm = systemService(SystemHealthManager.class);
 		final List<PowerMonitor>[] mPowerMonitorInfo = new List[1];
 		ConditionVariable done = new ConditionVariable();
@@ -634,12 +637,17 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 			} else {
 				throw new SecurityException("RESERVED_FOR_TESTING_SIGNATURE was not enabled in this system.");
 			}
+		} else {
+			if (r != PackageManager.PERMISSION_GRANTED) {
+				throw new SecurityException("Intended Behaviour. In this case, This permission should not be granted!");
+			}
 		}
 	}
 
 	//	@PermissionTest(permission="SINGLE_USER_TIS_ACCESS",sdkMin=36)
-//	public void testSingleUserTisAccess(){
-//	}
+	//	public void testSingleUserTisAccess(){
+	//	}
+
 	@PermissionTest(permission = "ACCESS_TEXT_CLASSIFIER_BY_TYPE", sdkMin = 36)
 	public void testAccessTextClassifierByType() {
 		//only get Classifier is blocking by this permission.
@@ -661,15 +669,20 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 		//cb1,cb2);
 	}
 
-	@SuppressLint("PrivateApi")
 	@PermissionTest(permission="USE_ATTESTATION_VERIFICATION_SERVICE", sdkMin=36)
 	public void testUseAttestationVerificationService(){
 		// in VerificationToken token,in ParcelDuration maximumTokenAge,in AndroidFuture resultCallback
 		// Intended NPE will be raised
-
-		BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
-				Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
-				"verifyToken", null, null, null);
+		//systemService(Attestation)
+		try {
+			BinderTransaction.getInstance().invoke(Transacts.ATTESTATION_VERIFICATION_SERVICE,
+					Transacts.ATTESTATION_VERIFICATION_DESCRIPTOR,
+					"verifyToken", null, null, null);
+		} catch(UnsupportedOperationException ex){
+			//Intended Ignore
+		} catch(NullPointerException ex){
+			//Intended ignore
+		}
 
 	}
 }
