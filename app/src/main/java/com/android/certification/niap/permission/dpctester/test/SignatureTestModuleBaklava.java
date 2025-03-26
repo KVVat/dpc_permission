@@ -453,7 +453,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 				done.open();
 			}
 		});
-		done.block();
+		done.block(5000);
 		if (!mPowerMonitorInfo[0].isEmpty()) {
 			PowerMonitor consumerMonitor = null;
 			PowerMonitor measurementMonitor = null;
@@ -485,7 +485,7 @@ public class SignatureTestModuleBaklava extends SignaturePermissionTestModuleBas
 					done.open();
 				}
 			});
-			done.block();
+			done.block(5000);
 		}
 	}
 
